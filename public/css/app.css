@@ -1,0 +1,6 @@
+.logo-custom-size {
+    width: 100px !important;   /* Aumenta o disminuye el tamaño aquí */
+    height: auto;
+    margin-top: 20px;          /* Centra verticalmente */
+    margin-bottom: 20px;
+}

@@ -1,0 +1,4 @@
+.logo-custom-size {
+    height: 80px !important; /* o prueba con 100px si aún lo ves pequeño */
+    width: auto !important;
+}

@@ -6,90 +6,95 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\VerifyEmailCustom;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'users';
+    protected $table = 'users'; // Mantén "users"
+    protected $primaryKey = 'id'; // sigue siendo id, eso está bien
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
-        'nombre',
-        'apellido_paterno',
-        'apellido_materno',
-        'correo',
-        'telefono',
-        'contraseña',
-        'rol',
-        'fecha_nacimiento',
-        'creado_en',
-        'actualizado_en',
+        'nombre', 'apellido_paterno', 'apellido_materno', 'correo',
+        'telefono', 'contraseña', 'rol', 'fecha_nacimiento',
+        'estado', 'correo_verificado_en', 'creado_en', 'actualizado_en',
     ];
 
     protected $hidden = [
-        'contraseña',
-        'remember_token',
+        'contraseña', 'token_recordar',
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
         'contraseña' => 'hashed',
+        'correo_verificado_en' => 'datetime',
+        'creado_en' => 'datetime',
+        'actualizado_en' => 'datetime',
+        'estado' => 'boolean',
     ];
 
+    // Relaciones
     public function reservas()
     {
-        return $this->hasMany(Reserva::class);
+        return $this->hasMany(Reserva::class, 'user_id', 'id');
     }
 
-    // Para que Laravel use "correo" en lugar de "email"
+    // Verificación de email
+    public function hasVerifiedEmail()
+    {
+        return ! is_null($this->correo_verificado_en);
+    }
+
+    public function markEmailAsVerified()
+    {
+        return $this->forceFill([
+            'correo_verificado_en' => now(),
+        ])->save();
+    }
+
+    // Autenticación: usa "correo" como identificador
     public function getAuthIdentifierName()
     {
         return 'correo';
     }
 
-    // Para notificaciones generales (ej: reset de contraseña)
-    public function routeNotificationForMail($notification)
-    {
-        return $this->correo;
-    }
-
-    // Para verificación de correo
-    public function getEmailForVerification()
-    {
-        return $this->correo;
-    }
-
-    // Para que Laravel use "contraseña" en lugar de "password"
     public function getAuthPassword()
     {
         return $this->contraseña;
     }
 
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailCustom);
+    }
+
+    public function routeNotificationForMail($notification)
+    {
+        return $this->correo;
+    }
+
+    public function getEmailForVerification()
+    {
+        return $this->correo;
+    }
+
+    // Accesor para el nombre
     public function getNameAttribute()
     {
         return $this->attributes['nombre'];
     }
 
-    /**
-     * Método can() personalizado para roles en AdminLTE.
-     */
+    // Roles
     public function can($ability, $arguments = [])
     {
-        if ($ability === 'is-admin') {
-            return $this->rol === 'admin';
-        }
-
-        if ($ability === 'is-cliente') {
-            return $this->rol === 'cliente';
-        }
-
-        if ($ability === 'is-empleado') {
-            return $this->rol === 'empleado';
-        }
-
+        if ($ability === 'is-admin') return $this->rol === 'admin';
+        if ($ability === 'is-cliente') return $this->rol === 'cliente';
+        if ($ability === 'is-empleado') return $this->rol === 'empleado';
         return false;
     }
 }

@@ -22,28 +22,28 @@ class VentaController extends Controller
     /**
      * Agregar producto al carrito
      */
-    public function agregar(Request $request, $id)
-    {
-        $producto = Producto::findOrFail($id);
+public function agregar(Request $request, $id)
+{
+    $producto = Producto::findOrFail($id);
+    $carrito = session()->get('carrito', []);
 
-        $carrito = session()->get('carrito', []);
-
-        if (isset($carrito[$id])) {
-            $carrito[$id]['cantidad']++;
-            $carrito[$id]['subtotal'] = $carrito[$id]['cantidad'] * $producto->precio;
-        } else {
-            $carrito[$id] = [
-                'nombre' => $producto->nombre,
-                'precio' => $producto->precio,
-                'cantidad' => 1,
-                'subtotal' => $producto->precio,
-            ];
-        }
-
-        session()->put('carrito', $carrito);
-
-        return redirect()->back()->with('success', 'Producto agregado al carrito.');
+    if (isset($carrito[$id])) {
+        $carrito[$id]['cantidad']++;
+    } else {
+        $carrito[$id] = [
+            'nombre' => $producto->nombre,
+            'precio' => $producto->precio,
+            'cantidad' => 1,
+        ];
     }
+
+    session()->put('carrito', $carrito);
+
+    return response()->json([
+        'cantidad_total' => array_sum(array_column($carrito, 'cantidad'))
+    ]);
+}
+
 
     /**
      * Eliminar producto del carrito
@@ -58,6 +58,44 @@ class VentaController extends Controller
 
         return back()->with('success', 'Producto eliminado del carrito.');
     }
+/**
+ * Aumentar cantidad de un producto en el carrito
+ */
+public function aumentar($id)
+{
+    $carrito = session()->get('carrito', []);
+
+    if (isset($carrito[$id])) {
+        $carrito[$id]['cantidad']++;
+        session()->put('carrito', $carrito);
+    }
+
+    return response()->json([
+        'status' => 'ok',
+        'cantidad_total' => array_sum(array_column($carrito, 'cantidad'))
+    ]);
+}
+
+/**
+ * Disminuir cantidad de un producto en el carrito
+ */
+public function disminuir($id)
+{
+    $carrito = session()->get('carrito', []);
+
+    if (isset($carrito[$id])) {
+        $carrito[$id]['cantidad']--;
+        if ($carrito[$id]['cantidad'] <= 0) {
+            unset($carrito[$id]);
+        }
+        session()->put('carrito', $carrito);
+    }
+
+    return response()->json([
+        'status' => 'ok',
+        'cantidad_total' => array_sum(array_column($carrito, 'cantidad'))
+    ]);
+}
 
     /**
      * Confirmar compra
@@ -110,4 +148,15 @@ public function confirmarCompra(Request $request)
         $venta = Venta::with('detalles.producto')->findOrFail($ventaId);
         return view('cliente.ventas.confirmar', compact('venta'));
     }
+public function modalCarrito() {
+    $carrito = session('carrito', []);
+    return view('cliente.partials.carrito_modal', compact('carrito'));
+}
+
+public function vaciar() {
+
+    session()->forget('carrito');
+    return response()->json(['status' => 'ok']);
+}
+
 }

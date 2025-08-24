@@ -8,68 +8,35 @@
     color: #fff !important;
   }
 
-  .card-custom {
-    background-color: #111;
-    border-radius: 12px;
+  .card-custom 
+  { 
+    background-color: #111; 
+    border-radius: 12px; 
   }
-
-  .hora-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+  .hora-grid 
+  { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); gap: 10px; 
   }
-
-  .hora-disponible, .hora-no-disponible {
-    height: 40px;
-    display: flex;
-    align-items: center;
+  .hora-disponible, 
+  .hora-no-disponible
+   {
+    height: 40px; 
+    display: flex; 
+    align-items: center; 
     justify-content: center;
-    font-weight: bold;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
+    font-weight: bold; 
+    border-radius: 6px; 
+    font-size: 14px; 
+    cursor: pointer; 
     user-select: none;
   }
-
-  .hora-disponible {
-    border: 2px solid #28a745;
-    color: #fff;
-    transition: background-color .2s;
-  }
-
-  .hora-disponible:hover,
-  .hora-disponible.selected {
-    background-color: #28a745;
-  }
-
-  .hora-no-disponible {
-    background-color: #330000;
-    border: 2px solid #ff0000;
-    color: #fff;
-    cursor: not-allowed;
-  }
-
-  .btn-confirmar {
-    background-color: #dc3545;
-    color: #fff;
-    padding: 10px 30px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-  }
-
-  .btn-elegir-dia {
-    border: 1px solid #dc3545;
-    color: #fff;
-    background-color: transparent;
-    border-radius: 5px;
-    padding: 6px 12px;
-  }
-
-  .modal-content {
-    background-color: #111;
-    color: #fff;
-  }
+  .hora-disponible { border: 2px solid #28a745; color: #fff; transition: background-color .2s; }
+  .hora-disponible:hover, .hora-disponible.selected { background-color: #28a745; }
+  .hora-no-disponible { background-color: #330000; border: 2px solid #ff0000; color: #fff; cursor: not-allowed; }
+  .btn-confirmar { background-color: #dc3545; color: #fff; padding: 10px 30px; font-size: 16px; border-radius: 8px; border: none; }
+  .btn-elegir-dia { border: 1px solid #dc3545; color: #fff; background-color: transparent; border-radius: 5px; padding: 6px 12px; }
+  .modal-content { background-color: #111; color: #fff; }
 </style>
 @endpush
 
@@ -85,15 +52,13 @@
 
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div><strong>Fecha seleccionada:</strong> <span id="fechaSeleccionada">{{ $fecha }}</span></div>
-        <button type="button" class="btn btn-elegir-dia" data-toggle="modal" data-target="#modalFecha">
+        <button type="button" class="btn btn-elegir-dia" data-bs-toggle="modal" data-bs-target="#modalFecha">
           Elegir Día
         </button>
       </div>
 
       @if($errors->has('hora'))
-      <div class="text-danger text-center mb-3">
-        {{ $errors->first('hora') }}
-      </div>
+      <div class="text-danger text-center mb-3">{{ $errors->first('hora') }}</div>
       @endif
 
       <div class="hora-grid mb-4">
@@ -121,7 +86,7 @@
       <div class="modal-content bg-dark text-white">
         <div class="modal-header border-0">
           <h5 class="modal-title">Seleccionar Fecha</h5>
-          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <input type="date" id="selectorFecha" class="form-control" min="{{ date('Y-m-d') }}" value="{{ $fecha }}">
@@ -137,39 +102,31 @@
 
 @push('js')
 <script>
-  function setFecha() {
-    const valor = document.getElementById('selectorFecha').value;
-    if (valor) {
-      const barberoId = {{ $barbero->id }};
-      window.location.href = `/cliente/reservar/${barberoId}?fecha=${valor}`;
-    } else {
-      alert("Selecciona una fecha válida.");
-    }
-  }
+function setFecha() {
+  const valor = document.getElementById('selectorFecha').value;
+  if(valor) {
+    const barberoId = {{ $barbero->id }};
+    window.location.href = `/cliente/reservar/${barberoId}?fecha=${valor}`;
+  } else alert("Selecciona una fecha válida.");
+}
 
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.hora-disponible').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.hora-disponible').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        btn.querySelector('input[type=radio]').checked = true;
-      });
-    });
-
-    document.getElementById('formReserva').addEventListener('submit', function(e) {
-      const selected = document.querySelector('input[name="hora"]:checked');
-      if (!selected) {
-        e.preventDefault();
-        alert("Por favor selecciona una hora disponible.");
-      }
-    });
-
-    document.querySelectorAll('.hora-no-disponible').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Esta hora ya ha sido reservada. Por favor, elige otra.');
-      });
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.hora-disponible').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.hora-disponible').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      btn.querySelector('input[type=radio]').checked = true;
     });
   });
+
+  document.getElementById('formReserva').addEventListener('submit', e => {
+    const selected = document.querySelector('input[name="hora"]:checked');
+    if(!selected) { e.preventDefault(); alert("Por favor selecciona una hora disponible."); }
+  });
+
+  document.querySelectorAll('.hora-no-disponible').forEach(btn => {
+    btn.addEventListener('click', () => { alert('Esta hora ya ha sido reservada. Por favor, elige otra.'); });
+  });
+});
 </script>
 @endpush

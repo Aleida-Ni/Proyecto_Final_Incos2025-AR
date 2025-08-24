@@ -63,12 +63,12 @@ return [
     |
     */
 
-'logo' => '<img src="/storage/imagenes/logoStars.png" style="height:100px; width: 100px; display:block; margin:auto;" alt="Logo BarbeShop">',
-'logo_img' => null,
-'logo_img_class' => '',
-'logo_img_xl' => null,
-'logo_img_xl_class' => '',
-'logo_img_alt' => '',
+    'logo' => '<img src="/storage/imagenes/logoStars.png" style="height:100px; width: 100px; display:block; margin:auto;" alt="Logo BarbeShop">',
+    'logo_img' => null,
+    'logo_img_class' => '',
+    'logo_img_xl' => null,
+    'logo_img_xl_class' => '',
+    'logo_img_alt' => '',
 
 
 
@@ -202,7 +202,7 @@ return [
     'classes_topnav_container' => 'container-fluid',
     'classes_topnav' => 'navbar-expand ',
     'classes_sidebar' => 'sidebar-dark-primary elevation-4',
-    'classes_topnav_nav' => 'mx-auto',             
+    'classes_topnav_nav' => 'mx-auto',
 
 
     /*
@@ -317,68 +317,68 @@ return [
             'topnav_right' => true,
         ],
 
-['header' => 'ADMINISTRADOR', 'can' => 'menu-admin'],
-[
-    'text' => 'Inicio',
-    'route'  => 'admin.dashboard',
-    'icon' => 'fas fa-home',
-    'can' => 'menu-admin',
-],
-[
-    'text' => 'Barberos',
-    'route'  => 'admin.barberos.index',
-    'icon' => 'fas fa-user-scissors',
-    'can' => 'menu-admin',
-],
-[
-    'text' => 'Productos',
-    'route'  => 'admin.productos.index',
-    'icon' => 'fas fa-boxes',
-    'can' => 'menu-admin',
-],
-[
-    'text' => 'Empleados',
-    'route'  => 'admin.empleados.index',
-    'icon' => '',
-    'can' => 'menu-admin',
-],
-[
-    'text' => 'Reservas',
-    'route'  => 'admin.reservas.index',
-    'icon' => 'fas fa-calendar-check',
-    'can' => 'menu-admin',
-],
+        ['header' => 'ADMINISTRADOR', 'can' => 'menu-admin'],
+        [
+            'text' => 'Inicio',
+            'route'  => 'admin.dashboard',
+            'icon' => 'fas fa-home',
+            'can' => 'menu-admin',
+        ],
+        [
+            'text' => 'Barberos',
+            'route'  => 'admin.barberos.index',
+            'icon' => 'fas fa-user-scissors',
+            'can' => 'menu-admin',
+        ],
+        [
+            'text' => 'Productos',
+            'route'  => 'admin.productos.index',
+            'icon' => 'fas fa-boxes',
+            'can' => 'menu-admin',
+        ],
+        [
+            'text' => 'Empleados',
+            'route'  => 'admin.empleados.index',
+            'icon' => '',
+            'can' => 'menu-admin',
+        ],
+        [
+            'text' => 'Reservas',
+            'route'  => 'admin.reservas.index',
+            'icon' => 'fas fa-calendar-check',
+            'can' => 'menu-admin',
+        ],
 
 
-// ===================== EMPLEADO =====================
-['header' => 'EMPLEADO', 'can' => 'menu-empleado'],
-[
-    'text' => 'Inicio',
-    'route'  => 'empleado.dashboard',
-    'icon' => 'fas fa-home',
-    'can' => 'menu-empleado',
-],
-[
-    'text' => 'Barberos',
-    'route'  => 'empleado.barberos.index',
-    'icon' => 'fas fa-user-scissors',
-    'can' => 'menu-empleado',
-],
-[
-    'text' => 'Productos',
-    'route'  => 'empleado.productos.index',
-    'icon' => 'fas fa-boxes',
-    'can' => 'menu-empleado',
-],
-[
-    'text' => 'Reservas',
-    'route'  => 'empleado.reservas.index',
-    'icon' => 'fas fa-calendar-check',
-    'can' => 'menu-empleado',
-],
+        // ===================== EMPLEADO =====================
+        ['header' => 'EMPLEADO', 'can' => 'menu-empleado'],
+        [
+            'text' => 'Inicio',
+            'route'  => 'empleado.dashboard',
+            'icon' => 'fas fa-home',
+            'can' => 'menu-empleado',
+        ],
+        [
+            'text' => 'Barberos',
+            'route'  => 'empleado.barberos.index',
+            'icon' => 'fas fa-user-scissors',
+            'can' => 'menu-empleado',
+        ],
+        [
+            'text' => 'Productos',
+            'route'  => 'empleado.productos.index',
+            'icon' => 'fas fa-boxes',
+            'can' => 'menu-empleado',
+        ],
+        [
+            'text' => 'Reservas',
+            'route'  => 'empleado.reservas.index',
+            'icon' => 'fas fa-calendar-check',
+            'can' => 'menu-empleado',
+        ],
 
 
-        
+
 
         // ===================== OPCIONES COMUNES =====================
         ['header' => 'AJUSTES DE CUENTA'],

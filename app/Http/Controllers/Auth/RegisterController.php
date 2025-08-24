@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 
 class RegisterController extends Controller
@@ -54,23 +53,26 @@ class RegisterController extends Controller
             'fecha_nacimiento' => $data['fecha_nacimiento'],
             'contraseña'       => Hash::make($data['contraseña']),
             'rol'              => 'cliente', // por defecto
+            'estado'           => 0,         // Por defecto inactivo
         ]);
     }
 
     /**
-     * Sobrescribimos register para disparar el evento Registered
-     * y que Laravel mande el correo de verificación.
+     * Sobrescribimos register para enviar nuestra notificación
+     * de verificación personalizada.
      */
     public function register(Request $request)
     {
+        // Validar datos
         $this->validator($request->all())->validate();
 
+        // Crear usuario
         $usuario = $this->create($request->all());
 
-        // 🚀 Aquí Laravel manda el correo de verificación automáticamente
-        event(new Registered($usuario));
+        // 🚀 Enviar correo de verificación personalizado
+        $usuario->sendEmailVerificationNotification();
 
-        // Ojo: No iniciamos sesión hasta que confirme el correo
+        // No iniciamos sesión hasta que confirme el correo
         return redirect($this->redirectPath())
             ->with('status', '¡Revisa tu correo para verificar tu cuenta antes de iniciar sesión!');
     }

@@ -14,7 +14,7 @@ class ReservaController extends Controller
         $barbero = Barbero::findOrFail($barberoId);
         $fecha = $request->input('fecha', now()->format('Y-m-d'));
 
-        // Generar horas de trabajo
+        // Generar horas de trabajo (esto lo podrías mover a config o al modelo)
         $horas = [
             '09:00' => true,
             '10:00' => true,
@@ -27,7 +27,7 @@ class ReservaController extends Controller
             '17:00' => true,
         ];
 
-        // Obtener horas reservadas para ese barbero y fecha
+        // Obtener horas ya reservadas
         $reservadas = Reserva::where('barbero_id', $barbero->id)
             ->where('fecha', $fecha)
             ->pluck('hora')
@@ -47,8 +47,8 @@ class ReservaController extends Controller
     {
         $request->validate([
             'barbero_id' => 'required|exists:barberos,id',
-            'fecha' => 'required|date',
-            'hora' => 'required'
+            'fecha'      => 'required|date|after_or_equal:today',
+            'hora'       => 'required|date_format:H:i',
         ]);
 
         $yaReservado = Reserva::where('barbero_id', $request->barbero_id)
@@ -57,34 +57,39 @@ class ReservaController extends Controller
             ->exists();
 
         if ($yaReservado) {
-            return back()->withErrors(['hora' => 'Esta hora ya ha sido reservada.']);
+            return back()->withErrors(['hora' => 'Esta hora ya ha sido reservada.'])->withInput();
         }
 
-        Reserva::create([
-            'barbero_id' => $request->barbero_id,
-            'user_id' => auth()->id(),
-            'fecha' => $request->fecha,
-            'hora' => $request->hora,
-        ]);
+Reserva::create([
+    'barbero_id' => $request->barbero_id,
+    'user_id'    => auth()->user()->id,  // ID entero real
+    'fecha'      => $request->fecha,
+    'hora'       => $request->hora,
+]);
 
-        return redirect()->route('cliente.barberos.index')->with('success', 'Reserva realizada con éxito.');
+
+        return redirect()
+            ->route('cliente.barberos.index')
+            ->with('success', 'Reserva realizada con éxito.');
     }
 
-    public function misReservas()
-    {
-        $reservas = Reserva::where('user_id', auth()->id())->latest()->get();
-        return view('cliente.reservas.index', compact('reservas'));
-    }
+public function misReservas()
+{
+    $reservas = Reserva::where('user_id', auth()->user()->id)
+        ->with('barbero')
+        ->latest()
+        ->get();
 
-    public function mostrarTicket($id)
-    {
-        $reserva = Reserva::where('user_id', auth()->id())->findOrFail($id);
-        return view('cliente.reservas.ticket', compact('reserva'));
-    }
+    return view('cliente.reservas.index', compact('reservas'));
+}
+
 
     public function ticket($id)
     {
-        $reserva = Reserva::with('barbero')->where('user_id', auth()->id())->findOrFail($id);
+        $reserva = Reserva::with('barbero')
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
+
         return view('cliente.reservas.ticket', compact('reserva'));
     }
 

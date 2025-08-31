@@ -14,7 +14,7 @@ class ReservaController extends Controller
         $barbero = Barbero::findOrFail($barberoId);
         $fecha = $request->input('fecha', now()->format('Y-m-d'));
 
-        // Generar horas de trabajo (esto lo podrías mover a config o al modelo)
+        // Generar horas de trabajo (puedes mover a config)
         $horas = [
             '09:00' => true,
             '10:00' => true,
@@ -34,7 +34,7 @@ class ReservaController extends Controller
             ->toArray();
 
         foreach ($reservadas as $horaOcupada) {
-            $horaOcupada = substr($horaOcupada, 0, 5); // asegura el formato HH:MM
+            $horaOcupada = substr($horaOcupada, 0, 5);
             if (isset($horas[$horaOcupada])) {
                 $horas[$horaOcupada] = false;
             }
@@ -60,29 +60,28 @@ class ReservaController extends Controller
             return back()->withErrors(['hora' => 'Esta hora ya ha sido reservada.'])->withInput();
         }
 
-Reserva::create([
-    'barbero_id' => $request->barbero_id,
-    'user_id'    => auth()->user()->id,  // ID entero real
-    'fecha'      => $request->fecha,
-    'hora'       => $request->hora,
-]);
+        Reserva::create([
+            'barbero_id' => $request->barbero_id,
+            'user_id'    => auth()->user()->id,
+            'fecha'      => $request->fecha,
+            'hora'       => $request->hora,
+        ]);
 
+return redirect()
+    ->route('cliente.barberos.index')
+    ->with('success', 'Reserva realizada con éxito.');
 
-        return redirect()
-            ->route('cliente.barberos.index')
-            ->with('success', 'Reserva realizada con éxito.');
     }
 
-public function misReservas()
-{
-    $reservas = Reserva::where('user_id', auth()->user()->id)
-        ->with('barbero')
-        ->latest()
-        ->get();
+    public function misReservas()
+    {
+        $reservas = Reserva::where('user_id', auth()->user()->id)
+            ->with('barbero')
+            ->latest()
+            ->get();
 
-    return view('cliente.reservas.index', compact('reservas'));
-}
-
+        return view('cliente.reservas.index', compact('reservas'));
+    }
 
     public function ticket($id)
     {

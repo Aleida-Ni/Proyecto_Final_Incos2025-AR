@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="container">
-<a href="{{ route('admin.empleados.create') }}" class="btn btn-primary mb-3">➕ Nuevo Empleado</a>
+        <a href="{{ route('admin.empleados.create') }}" class="btn btn-primary mb-3">➕ Nuevo Empleado</a>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -17,22 +17,33 @@
         <table class="table table-bordered table-striped">
             <thead class="bg-dark text-white">
                 <tr>
-                    <th>ID</th>
                     <th>Nombre</th>
-                    <th>Email</th>
+                    <th>Correo</th>
                     <th>Teléfono</th>
                     <th>Fecha Nacimiento</th>
+                    <th>Contraseña</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($empleados as $empleado)
                     <tr>
-                        <td>{{ $empleado->id }}</td>
-                        <td>{{ $empleado->name }}</td>
-                        <td>{{ $empleado->email }}</td>
+                        <td>{{ $empleado->nombre }} {{ $empleado->apellido_paterno }} {{ $empleado->apellido_materno }}</td>
+                        <td>{{ $empleado->correo }}</td>
                         <td>{{ $empleado->telefono }}</td>
                         <td>{{ $empleado->fecha_nacimiento }}</td>
+                        <td>
+                            <div class="input-group">
+                                <input type="password" id="password-{{ $empleado->id }}" 
+                                       value="{{ $empleado->contraseña }}" 
+                                       class="form-control" readonly>
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i id="toggle-{{ $empleado->id }}" class="fa fa-eye"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
                         <td>
                             <a href="{{ route('admin.empleados.edit', $empleado->id) }}" class="btn btn-warning btn-sm">✏ Editar</a>
 
@@ -52,4 +63,26 @@
             </tbody>
         </table>
     </div>
+@stop
+
+@section('js')
+<script>
+    // Mostrar / ocultar contraseña dinámicamente para cada fila
+    document.querySelectorAll('[id^="toggle-"]').forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const empleadoId = toggle.id.split('-')[1];
+            const input = document.getElementById(`password-${empleadoId}`);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.classList.remove('fa-eye');
+                toggle.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                toggle.classList.remove('fa-eye-slash');
+                toggle.classList.add('fa-eye');
+            }
+        });
+    });
+</script>
 @stop

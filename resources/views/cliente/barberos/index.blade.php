@@ -6,9 +6,10 @@
 <h1 class="text-center mb-4">Elige tu barbero</h1>
 
 <div class="d-flex justify-content-end mb-3">
-    <a href="{{ route('cliente.reservas') }}" class="btn btn-outline-primary">
+    <!-- Botón que abre el modal -->
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reservasModal">
         <i class="fas fa-ticket-alt"></i> Ver Mis Reservas
-    </a>
+    </button>
 </div>
 
 <div class="row">
@@ -30,9 +31,62 @@
     @endforeach
 </div>
 
-<style>
+<!-- Modal de Reservas -->
+<div class="modal fade" id="reservasModal" tabindex="-1" aria-labelledby="reservasModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reservasModalLabel">Mis Reservas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        @if($reservas->isEmpty())
+            <p class="text-center text-muted">No tienes reservas registradas.</p>
+        @else
+        <div class="table-responsive">
+          <table class="table table-hover text-center align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Barbero</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($reservas as $reserva)
+              @php
+                  $estado = '';
+                  $icono = '';
+                  if($reserva->fecha >= now()->toDateString()) {
+                      $estado = 'Pendiente';
+                      $icono = '🟢';
+                  } else {
+                      $estado = 'Asistida';
+                      $icono = '✅';
+                  }
+              @endphp
+              <tr>
+                <td>{{ $reserva->barbero->nombre }}</td>
+                <td>{{ $reserva->fecha }}</td>
+                <td>{{ $reserva->hora }}</td>
+                <td>{!! $icono !!} {{ $estado }}</td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+        @endif
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        body {
+<style>
+    body {
         background-color: #000000 !important;
     }
     .barbero-card {
@@ -43,29 +97,23 @@
         transition: 0.3s ease-in-out;
         text-align: center;
     }
-
-        h1{
-            color:white;
-            text-shadow: 0 0 10px #00cfff, 0 0 20px #0077cc;
-
-        }
-
+    h1 {
+        color:white;
+        text-shadow: 0 0 10px #00cfff, 0 0 20px #0077cc;
+    }
     .card-img-container {
         position: relative;
         overflow: hidden;
     }
-
     .card-img-container img {
         width: 100%;
         height: 280px;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
-
     .card-img-container:hover img {
         transform: scale(1.05);
     }
-
     .overlay {
         position: absolute;
         top: 0;
@@ -79,11 +127,9 @@
         opacity: 0;
         transition: opacity 0.3s ease;
     }
-
     .card-img-container:hover .overlay {
         opacity: 1;
     }
-
     .btn-reservar {
         background-color: #6c63ff;
         color: white;

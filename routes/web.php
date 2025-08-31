@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Admin\EmpleadoController;
 
+
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Empleado\DashboardController;
@@ -85,6 +86,11 @@ Route::middleware(['auth', 'role:admin|empleado'])
             Route::resource('empleados', EmpleadoController::class);
             Route::view('settings', 'admin.settings')->name('settings');
         });
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('empleados', EmpleadoController::class);
+});
+
     });
 
 // =============================

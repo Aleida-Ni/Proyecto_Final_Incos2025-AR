@@ -8,19 +8,27 @@
 
 @section('content')
     <div class="container">
-        <a href="{{ route('admin.empleados.index') }}" class="btn btn-secondary mb-3">⬅ Volver</a>
-
         <form action="{{ route('admin.empleados.store') }}" method="POST">
             @csrf
 
             <div class="form-group">
                 <label>Nombre</label>
-                <input type="text" name="name" class="form-control" required>
+                <input type="text" name="nombre" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label>Correo Electrónico</label>
-                <input type="email" name="email" class="form-control" required>
+                <label>Apellido Paterno</label>
+                <input type="text" name="apellido_paterno" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label>Apellido Materno</label>
+                <input type="text" name="apellido_materno" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label>Correo</label>
+                <input type="email" name="correo" class="form-control" required>
             </div>
 
             <div class="form-group">
@@ -35,10 +43,40 @@
 
             <div class="form-group">
                 <label>Contraseña</label>
-                <input type="password" name="password" class="form-control" required>
+                <div class="input-group">
+                    <input type="password" name="contraseña" id="contraseña" class="form-control" required>
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            <i id="toggleContraseña" class="fa fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-success">💾 Guardar</button>
+            <a href="{{ route('admin.empleados.index') }}" class="btn btn-secondary">↩ Volver</a>
         </form>
     </div>
+@stop
+
+@section('js')
+<script>
+    // Mostrar / ocultar contraseña
+    const togglePassword = (toggleId, inputId) => {
+        const toggle = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+        toggle.addEventListener('click', () => {
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.classList.remove('fa-eye');
+                toggle.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                toggle.classList.remove('fa-eye-slash');
+                toggle.classList.add('fa-eye');
+            }
+        });
+    }
+    togglePassword('toggleContraseña', 'contraseña');
+</script>
 @stop

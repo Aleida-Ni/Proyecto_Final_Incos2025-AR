@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Mail\EmpleadoPasswordMail;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+
 
 class EmpleadoController extends Controller
 {
@@ -19,32 +24,45 @@ class EmpleadoController extends Controller
         return view('admin.empleados.create');
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nombre'           => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'correo'           => 'required|email|max:255|unique:users,correo',
-            'telefono'         => 'nullable|string|max:20',
-            'fecha_nacimiento' => 'nullable|date',
-            'contraseña'       => 'required|string|min:6',
-        ]);
+public function store(Request $request)
+{
+    // Validar datos
+    $request->validate([
+        'nombre' => 'required',
+        'apellido_paterno' => 'required',
+        'apellido_materno' => 'required',
+        'correo' => 'required|email|unique:users,correo',
+    ]);
 
-        User::create([
-            'nombre'           => $request->nombre,
-            'apellido_paterno' => $request->apellido_paterno,
-            'apellido_materno' => $request->apellido_materno,
-            'correo'           => $request->correo,
-            'contraseña'       => bcrypt($request->contraseña),
-            'telefono'         => $request->telefono,
-            'fecha_nacimiento' => $request->fecha_nacimiento,
-            'rol'              => 'empleado',
-            'estado'           => true,
-        ]);
+    // Generar contraseña aleatoria
+    $password = Str::random(8);
 
-        return redirect()->route('admin.empleados.index')->with('success', 'Empleado registrado correctamente');
-    }
+    // Crear empleado
+    $empleado = new User();
+    $empleado->nombre = $request->nombre;
+    $empleado->apellido_paterno = $request->apellido_paterno;
+    $empleado->apellido_materno = $request->apellido_materno;
+    $empleado->correo = $request->correo;
+    $empleado->telefono = $request->telefono;
+    $empleado->fecha_nacimiento = $request->fecha_nacimiento;
+    $empleado->contrasenia = Hash::make($password); // ✅ ahora sí hasheada
+    $empleado->rol = 'empleado';
+
+    // Marcar como activo y correo verificado
+    $empleado->estado = 1;
+    $empleado->correo_verificado_en = now();
+
+    // Guardar en la base de datos
+    $empleado->save();
+
+    // Enviar correo con la contraseña en texto plano
+    Mail::to($empleado->correo)->send(new EmpleadoPasswordMail($empleado, $password));
+
+    return redirect()->route('admin.empleados.index')
+        ->with('success', 'Empleado registrado y contraseña enviada al correo.');
+}
+
+
 
     public function edit(string $id)
     {
@@ -63,7 +81,7 @@ class EmpleadoController extends Controller
             'correo'           => 'required|email|max:255|unique:users,correo,' . $empleado->id,
             'telefono'         => 'nullable|string|max:20',
             'fecha_nacimiento' => 'nullable|date',
-            'contraseña'       => 'nullable|string|min:6',
+            'contrasenia'       => 'nullable|string|min:6',
         ]);
 
         $empleado->nombre           = $request->nombre;
@@ -74,7 +92,7 @@ class EmpleadoController extends Controller
         $empleado->fecha_nacimiento = $request->fecha_nacimiento;
 
         if ($request->filled('contraseña')) {
-            $empleado->contraseña = bcrypt($request->contraseña);
+            $empleado->contrasenia = bcrypt($request->contrasenia);
         }
 
         $empleado->save();

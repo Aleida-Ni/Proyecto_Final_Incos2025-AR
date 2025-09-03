@@ -13,16 +13,15 @@ class LoginController extends Controller
     /**
      * Redirección después de login según rol.
      */
-    protected function authenticated($request, $user)
-    {
-        if ($user->rol === 'admin') {
-            return redirect('/admin');
-        } elseif ($user->rol === 'empleado') {
-            return redirect('/empleado');
-        }
-
-        return redirect('/home'); // cliente
+protected function authenticated(Request $request, $user)
+{
+    if ($user->rol === 'admin' || $user->rol === 'empleado') {
+        return redirect()->route('admin.dashboard');
+    } else {
+        return redirect()->route('cliente.home');
     }
+}
+
 
     /**
      * Usar "correo" en vez de "email" para login.
@@ -39,7 +38,7 @@ class LoginController extends Controller
     {
         $request->validate([
             $this->username() => 'required|string',
-            'contraseña' => 'required|string',
+            'contrasenia' => 'required|string',
         ]);
     }
 
@@ -61,7 +60,7 @@ class LoginController extends Controller
     {
         return [
             $this->username() => $request->get($this->username()),
-            'password' => $request->get('contraseña'),
+            'password' => $request->get('contrasenia'),
         ];
     }
 

@@ -14,7 +14,6 @@ class CheckRole
 public function handle(Request $request, Closure $next, string $roles): Response
 {
     if (auth()->check()) {
-        // Convertir "admin|empleado" a array y verificar si el rol del usuario está permitido
         $allowedRoles = explode('|', $roles);
         if (in_array(auth()->user()->rol, $allowedRoles)) {
             return $next($request);

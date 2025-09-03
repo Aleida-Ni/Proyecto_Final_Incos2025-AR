@@ -80,7 +80,7 @@
             </div>
 
             <div class="mb-3">
-                <x-adminlte-input name="contraseña" type="password" placeholder="******" required icon="fas fa-lock" />
+                <x-adminlte-input name="contrasenia" type="password" placeholder="******" required icon="fas fa-lock" />
             </div>
 
             <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Ingresar</button>

@@ -108,6 +108,8 @@ Route::middleware(['auth', 'role:empleado'])
         Route::resource('reservas', AdminReservaController::class);
     });
 
+
+
 // =============================
 // PANEL CLIENTE
 // =============================

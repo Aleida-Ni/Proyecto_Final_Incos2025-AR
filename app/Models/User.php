@@ -22,16 +22,17 @@ class User extends Authenticatable
 
     protected $fillable = [
         'nombre', 'apellido_paterno', 'apellido_materno', 'correo',
-        'telefono', 'contraseña', 'rol', 'fecha_nacimiento',
+        'telefono', 'contrasenia', 'rol', 'fecha_nacimiento',
         'estado', 'correo_verificado_en', 'creado_en', 'actualizado_en',
     ];
 
     protected $hidden = [
-        'contraseña', 'token_recordar',
+        'contrasenia', 
+        'token_recordar',
     ];
 
     protected $casts = [
-        'contraseña' => 'hashed',
+        'contrasenia' => 'hashed',
         'correo_verificado_en' => 'datetime',
         'creado_en' => 'datetime',
         'actualizado_en' => 'datetime',
@@ -63,10 +64,11 @@ class User extends Authenticatable
         return 'correo';
     }
 
-    public function getAuthPassword()
-    {
-        return $this->contraseña;
-    }
+public function getAuthPassword()
+{
+    return $this->contrasenia;
+}
+
 
     public function sendEmailVerificationNotification()
     {

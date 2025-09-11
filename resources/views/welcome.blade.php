@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Inicio - Barbería</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
-
     <style>
         body {
             margin: 0;
@@ -12,24 +11,25 @@
             background-color: #000000;
             font-family: 'Roboto', sans-serif;
             color: #ffffff;
-            text-align: center;
             min-height: 100vh;
+        }
+
+        /* Header fijo con login/registro */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
-        }
-
-        .container {
-            padding-top: 40px; /* menos espacio arriba */
-            flex-grow: 1;
-        }
-
-        .logo-container {
-            margin-bottom: 30px;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: #111111;
+            z-index: 1000;
         }
 
         .logo-container img {
-            max-width: 190px; /* más grande */
+            max-width: 190px;
             max-height: 160px;
             filter:
                 drop-shadow(0 0 8px #00aaff)
@@ -44,11 +44,35 @@
                 drop-shadow(0 0 40px #00e5ff);
         }
 
+        .nav-buttons a {
+            display: inline-block;
+            margin-left: 15px;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #00aaff, #004488);
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 25px;
+            transition: 0.3s;
+        }
+        .nav-buttons a:hover {
+            background: linear-gradient(135deg, #005f99, #002244);
+            transform: scale(1.05);
+        }
+
+        .container {
+            padding-top: 160px; /* deja espacio para header */
+            text-align: center;
+        }
+
         h1 {
             font-size: 2.5rem;
             margin-bottom: 20px;
         }
 
+        .buttons {
+            margin-bottom: 50px;
+        }
         .buttons a {
             display: inline-block;
             margin: 10px 15px;
@@ -73,6 +97,84 @@
                 0 0 25px rgba(0, 255, 255, 0.7);
         }
 
+        /* Sección de Servicios */
+        #servicios {
+        padding: 60px 20px;
+        background-color: #111111;
+        text-align: center;
+        }
+
+        #servicios h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #00aaff;
+        }
+
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #00aaff, #004488);
+            border-radius: 20px;
+            width: 180px;
+            padding: 30px 20px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 170, 255, 0.6), 0 0 15px rgba(0, 170, 255, 0.5);
+        }
+
+        .card img {
+            max-width: 60px;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.9), 0 0 25px rgba(0, 255, 255, 0.7);
+        }
+
+        .card:hover img {
+            transform: scale(1.1);
+        }
+
+
+        /* Testimonios */
+        #testimonios {
+            background-color: #000000;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        #testimonios h2 {
+            margin-bottom: 40px;
+            font-size: 2rem;
+        }
+        .testimonial-card {
+            background-color: #111111;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 20px;
+            width: 250px;
+            display: inline-block;
+            box-shadow: 0 0 15px rgba(0,170,255,0.6);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(0,255,255,0.7);
+        }
+
         footer {
             padding: 30px 40px;
             background-color: #111111;
@@ -80,7 +182,6 @@
             justify-content: flex-start; 
             gap: 30px;
         }
-
         footer a {
             color: #00aaff;
             text-decoration: none;
@@ -89,32 +190,143 @@
             display: flex;
             align-items: center;
         }
-
         footer a:hover {
             color: #00e5ff;
         }
-
-        /* SVG icons color fill */
         footer svg {
             fill: currentColor;
             width: 20px;
             height: 20px;
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cards, .testimonial-card {
+                flex-direction: column;
+                width: 90%;
+            }
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .nav-buttons {
+                margin-top: 10px;
+            }
+            
+        }
+
+        /* Slider Testimonios */
+        .testimonial-slider {
+            display: flex;
+            overflow: hidden;
+            width: 100%;
+            justify-content: center;
+            position: relative;
+            height: 150px; /* altura fija del slider */
+        }
+
+        .testimonial-card {
+            flex: 0 0 250px;
+            margin: 0 15px;
+            background-color: #111111;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,170,255,0.6);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        /* Animación automática con keyframes */
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(0); }
+            25% { transform: translateX(-270px); }
+            45% { transform: translateX(-270px); }
+            50% { transform: translateX(-540px); }
+            70% { transform: translateX(-540px); }
+            75% { transform: translateX(-810px); }
+            95% { transform: translateX(-810px); }
+            100% { transform: translateX(0); }
+        }
+
+        .testimonial-slider {
+            animation: slide 16s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .testimonial-slider {
+                height: auto;
+                flex-direction: column;
+            }
+            .testimonial-card {
+                flex: none;
+                width: 90%;
+                margin: 10px auto;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Header con login/registro -->
+    <header>
         <div class="logo-container">
             <img src="{{ asset('storage/imagenes/logoStars.png') }}" alt="Logo Barbería" />
         </div>
-
-        <h1>Bienvenido a nuestra Barbería</h1>
-
-        <div class="buttons">
+        <div class="nav-buttons">
             <a href="{{ route('login') }}">Iniciar Sesión</a>
             <a href="{{ route('register') }}">Registrarse</a>
         </div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="container">
+        <h1>Bienvenido a nuestra Barbería</h1>
+
+        <div class="buttons">
+            <a href="#servicios">Nuestros Servicios</a>
+            <a href="#testimonios">Testimonios</a>
+        </div>
     </div>
+    <!-- Sección de Servicios -->
+    <section id="servicios">
+        <h2>Nuestros Servicios</h2>
+        <div class="cards">
+            <div class="card">
+                <img src="imagenes/servicios/icono-corte.png" alt="Corte Clásico" />
+                <span>Corte Clásico</span>
+            </div>
+            <div class="card">
+                <img src="imagenes/servicios/icono-barba.png" alt="Barba & Bigote" />
+                <span>Barba & Bigote</span>
+            </div>
+            <div class="card">
+                <img src="imagenes/servicios/icono-peinado.png" alt="Peinados Modernos" />
+                <span>Peinados Modernos</span>
+            </div>
+            <div class="card">
+                <img src="imagenes/servicios/icono-color.png" alt="Color y Estilo" />
+                <span>Color y Estilo</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Sección de Testimonios con Slider -->
+    <section id="testimonios">
+        <h2>Lo que dicen nuestros clientes</h2>
+        <div class="testimonial-slider">
+            <div class="testimonial-card">"Excelente atención y cortes perfectos." - Rck Oz Melodian</div>
+            <div class="testimonial-card">"Siempre salgo satisfecho con mi barba." - Xana Lavey Princess</div>
+            <div class="testimonial-card">"El mejor lugar para un cambio de look." - Aleyda Rodriguez</div>
+            <div class="testimonial-card">"Ambiente agradable y profesionales." - Esteban Dido </div>
+        </div>
+    </section>
+
+    <!-- Footer original con redes sociales -->
 
     <footer>
         <a href="#" target="_blank" aria-label="Facebook" rel="noopener noreferrer">

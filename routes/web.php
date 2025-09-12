@@ -90,23 +90,15 @@ Route::middleware(['auth', 'role:empleado'])->prefix('empleado')->name('empleado
 
 
 // Panel empleado
+
 Route::middleware(['auth', 'role:empleado'])
     ->prefix('empleado')
     ->name('empleado.')
     ->group(function () {
-
-        // Dashboard del empleado
-        Route::get('/dashboard', [App\Http\Controllers\Empleado\DashboardController::class, 'index'])
-            ->name('dashboard');
-
-        // Barberos (mismos controladores que admin)
-        Route::resource('barberos', App\Http\Controllers\Admin\BarberoController::class);
-
-        // Productos
-        Route::resource('productos', App\Http\Controllers\Admin\ProductoController::class);
-
-        // Reservas
-        Route::resource('reservas', App\Http\Controllers\Admin\ReservaController::class);
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('barberos', AdminBarberoController::class);
+        Route::resource('productos', AdminProductoController::class);
+        Route::resource('reservas', AdminReservaController::class);
     });
 
 
@@ -116,34 +108,26 @@ Route::middleware(['auth', 'role:empleado'])
 ========================== */
 
 // Ruta principal del panel admin
-Route::middleware(['auth', 'role:admin|empleado'])->prefix('admin')->name('admin.')->group(function () {
 
-    // Dashboard
-    Route::get('/', function () {
-        $pendientes = \App\Models\Reserva::where('estado', 'pendiente')->count();
-        return view('admin.dashboard', compact('pendientes'));
-    })->name('dashboard');
+// PANEL ADMIN
 
-    // Productos
-    Route::resource('productos', AdminProductoController::class);
+Route::middleware(['auth', 'role:admin|empleado'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Barberos
-    Route::resource('barberos', AdminBarberoController::class);
+        Route::resource('productos', AdminProductoController::class);
+        Route::resource('barberos', AdminBarberoController::class);
+        Route::resource('reservas', AdminReservaController::class);
 
-    // Reservas
-    Route::get('reservas', [AdminReservaController::class, 'index'])->name('reservas.index');
-
-    Route::prefix('admin/config')->group(function () {
-        Route::resource('empleados', App\Http\Controllers\Admin\EmpleadoController::class);
-    // Configuración
-    Route::view('settings', 'admin.settings')->name('settings');
-
-
-
+        Route::prefix('config')->group(function () {
+            Route::resource('empleados', EmpleadoController::class);
+            Route::view('settings', 'admin.settings')->name('settings');
+        });
 });
 
-
-
+    
 
 /* =======================
    PANEL CLIENTE
@@ -157,12 +141,12 @@ Route::middleware(['auth', 'can:is-cliente'])->group(function () {
     })->name('cliente.home');
 
     Route::middleware(['auth'])->prefix('cliente')->name('cliente.')->group(function () {
-        Route::get('/inicio', [\App\Http\Controllers\Cliente\HomeController::class, 'inicio'])->name('inicio');
+        Route::get('/inicio', [ClienteHomeController::class, 'inicio'])->name('inicio');
     });
 
     // Acceso a funcionalidades del cliente
     Route::prefix('cliente')->name('cliente.')->group(function () {
-        Route::get('/inicio', [\App\Http\Controllers\Cliente\HomeController::class, 'inicio'])->name('inicio');
+        Route::get('/inicio', [ClienteHomeController::class, 'inicio'])->name('inicio');
 
     });
     Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
@@ -172,15 +156,15 @@ Route::middleware(['auth', 'can:is-cliente'])->group(function () {
 
 });
 Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    Route::get('/barberos', [App\Http\Controllers\Cliente\BarberoController::class, 'index'])->name('barberos.index');
+    Route::get('/barberos', [ClienteBarberoController::class, 'index'])->name('barberos.index');
     Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
     Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
     Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
 });
 
 Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    Route::post('/ventas', [App\Http\Controllers\Cliente\VentaController::class, 'store'])->name('ventas.store');
-    Route::get('/ventas/{venta}', [App\Http\Controllers\Cliente\VentaController::class, 'show'])->name('ventas.show');
+    Route::post('/ventas', [VentaController::class, 'store'])->name('ventas.store');
+    Route::get('/ventas/{venta}', [VentaController::class, 'show'])->name('ventas.show');
 });
 
 Route::prefix('venta')->name('venta.')->group(function () {
@@ -217,11 +201,9 @@ Route::post('/ventas/eliminar/{id}', [VentaController::class, 'eliminar'])->name
     
     // Productos
     Route::get('/productos', [ClienteProductoController::class, 'index'])->name('productos.index');
-Route::get('/cliente/productos', [\App\Http\Controllers\Cliente\ProductoController::class, 'index'])
+Route::get('/cliente/productos', [ClienteProductoController::class, 'index'])
     ->name('cliente.productos.index');
 
 });
 
-
-});
 

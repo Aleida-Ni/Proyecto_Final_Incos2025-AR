@@ -3,64 +3,108 @@
 @section('title', 'Reservas')
 
 @section('content')
-<h1 class="text-black text-center mb-4">Reservas realizadas</h1>
+<h1 class="neon-title text-center mb-4">Reservas realizadas</h1>
 
-<div class="table-container mx-auto">
-    <table class="table custom-table">
-        <thead>
-            <tr>
-                <th>Cliente</th>
-                <th>Barbero</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Creado</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($reservas as $reserva)
-            <tr>
-<td>
-    <button class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#clienteModal{{ $reserva->id }}">
-        {{ $reserva->cliente->name }}
-    </button>
+<div class="card shadow-sm neon-card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table neon-table table-hover table-bordered text-center align-middle">
+                <thead class="neon-thead">
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Barbero</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Creado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($reservas as $reserva)
+                    <tr>
+                        <td>
+                            <button class="btn btn-link p-0 neon-link" data-bs-toggle="modal" data-bs-target="#clienteModal{{ $reserva->id }}">
+                                {{ $reserva->cliente->name }}
+                            </button>
 
-    <!-- Modal -->
-    <div class="modal fade" id="clienteModal{{ $reserva->id }}" tabindex="-1" aria-labelledby="clienteModalLabel{{ $reserva->id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="clienteModalLabel{{ $reserva->id }}">Datos del Cliente</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <p><strong>Nombre:</strong> {{ $reserva->cliente->name }}</p>
-                    <p><strong>Email:</strong> {{ $reserva->cliente->email }}</p>
-                    <p><strong>Teléfono:</strong> {{ $reserva->cliente->telefono ?? 'No registrado' }}</p>
-                </div>
-            </div>
+                            <!-- Modal -->
+                            <div class="modal fade" id="clienteModal{{ $reserva->id }}" tabindex="-1" aria-labelledby="clienteModalLabel{{ $reserva->id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content bg-dark text-white">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="clienteModalLabel{{ $reserva->id }}">Datos del Cliente</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Nombre:</strong> {{ $reserva->cliente->name }}</p>
+                                            <p><strong>Email:</strong> {{ $reserva->cliente->email }}</p>
+                                            <p><strong>Teléfono:</strong> {{ $reserva->cliente->telefono ?? 'No registrado' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ $reserva->barbero->nombre }}</td>
+                        <td>{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}</td>
+                        <td>{{ $reserva->hora }}</td>
+                        <td>{{ \Carbon\Carbon::parse($reserva->created_at)->format('d/m/Y H:i') }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
-</td>
-                <td>{{ $reserva->barbero->nombre }}</td>
-                <td>{{ $reserva->fecha }}</td>
-                <td>{{ $reserva->hora }}</td>
-<td>{{ $reserva->creado_en ? \Carbon\Carbon::parse($reserva->creado_en)->format('d/m/Y H:i') : 'Sin fecha' }}</td>
-
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
 </div>
 @endsection
 
 @section('css')
 <style>
-    /* Título negro */
-    h1.text-black {
-        color: black !important;
+    /* Título neón */
+    .neon-title {
+        color: #39ff14;
+        text-shadow:
+            0 0 5px #39ff14,
+            0 0 10px #39ff14,
+            0 0 20px #39ff14,
+            0 0 40px #0fa,
+            0 0 80px #0fa,
+            0 0 90px #0fa,
+            0 0 100px #0fa;
+        font-weight: 700;
+    }
+
+    /* Tabla neón */
+    .neon-table {
+        border: 2px solid #39ff14;
+    }
+
+    .neon-thead th {
+        background-color: #0c0c0c;
+        color: #39ff14;
+        border-bottom: 2px solid #39ff14;
+    }
+
+    .neon-table td, .neon-table th {
+        border: 1px solid #39ff14;
+    }
+
+    .neon-card {
+        border: 2px solid #39ff14;
+        box-shadow: 0 0 20px #39ff14;
+    }
+
+    .neon-link {
+        color: #39ff14 !important;
+        text-shadow: 0 0 5px #39ff14;
+        text-decoration: none !important;
+    }
+
+    .neon-link:hover {
+        color: #0fa !important;
+        text-shadow: 0 0 10px #0fa;
     }
 </style>
 @endsection
+
 @push('js')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @endpush

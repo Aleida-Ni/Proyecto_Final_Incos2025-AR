@@ -70,7 +70,7 @@
             </a>
         </div>
 
-        <h2 class="mb-4 text-center">Acceso</h2>
+        <h2 class="mb-4 text-center">Iniciar Sesión</h2>
 
         <form action="{{ route('login') }}" method="post">
             @csrf
@@ -99,7 +99,7 @@
     * { outline: none !important; }
     body.login-page {
         margin: 0; padding: 0;
-        background: url("{{ asset('storage/imagenes/loginfondo2.jpg') }}") no-repeat center center fixed;
+        background: url("{{ asset('imagenes/servicios/login-background.png') }}") no-repeat center center fixed;
         background-size: cover;
     }
     .login-wrapper {

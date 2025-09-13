@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<img src="/storage/imagenes/logoStars.png" style="height:100px; width: 100px; display:block; margin:auto;" alt="Logo BarbeShop">',
+    'logo' => '',
     'logo_img' => null,
     'logo_img_class' => '',
     'logo_img_xl' => null,

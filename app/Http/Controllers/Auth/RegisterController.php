@@ -61,21 +61,24 @@ class RegisterController extends Controller
      * Sobrescribimos register para enviar nuestra notificación
      * de verificación personalizada.
      */
-    public function register(Request $request)
-    {
-        // Validar datos
-        $this->validator($request->all())->validate();
+public function register(Request $request)
+{
+    // Validar datos
+    $this->validator($request->all())->validate();
 
-        // Crear usuario
-        $usuario = $this->create($request->all());
+    // Crear usuario
+    $usuario = $this->create($request->all());
 
-        // 🚀 Enviar correo de verificación personalizado
-        $usuario->sendEmailVerificationNotification();
+    // 🚀 Enviar correo de verificación personalizado
+    $usuario->sendEmailVerificationNotification();
 
-        // No iniciamos sesión hasta que confirme el correo
-        return redirect($this->redirectPath())
-            ->with('status', '¡Revisa tu correo para verificar tu cuenta antes de iniciar sesión!');
-    }
+    // ✅ Iniciar sesión automáticamente
+    $this->guard()->login($usuario);
+
+    // Redirigir según rol (o a verificación de correo)
+    return redirect()->route('home')->with('status', '¡Revisa tu correo para verificar tu cuenta!');
+}
+
 
     /**
      * Para que el login use "correo" en lugar de "email".

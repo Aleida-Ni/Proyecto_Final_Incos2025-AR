@@ -14,7 +14,7 @@ class ReservaController extends Controller
 public function index()
 {
     $reservas = Reserva::with(['cliente', 'barbero'])
-        ->orderBy('creado_en', 'desc') // 👈 usa tu columna personalizada
+        ->orderBy('created_at', 'desc') // 👈 usa tu columna personalizada
         ->get();
 
     return view('admin.reservas.index', compact('reservas'));

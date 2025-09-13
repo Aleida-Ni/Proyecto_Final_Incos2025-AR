@@ -8,92 +8,95 @@
 <div class="register-wrapper">
     <div class="register-glass">
 
-        <!-- LOGO -->
-        <div class="logo-container mb-3">
-            <img src="{{ asset('storage/imagenes/logoStars.png') }}" alt="Logo" class="register-logo">
-        </div>
-
-        <!-- Íconos redes sociales -->
-        <div class="social-icons mb-4">
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-tiktok"></i></a>
-        </div>
-
-        <h2 class="mb-4 text-center">Registro</h2>
-
-        <form action="{{ route('register') }}" method="post" autocomplete="off">
-            @csrf
-
-            <div class="mb-3">
-                <x-adminlte-input name="nombre" type="text" placeholder="Tu nombre" required autofocus icon="fas fa-user" />
+            <!-- Íconos redes sociales -->
+            <div class="social-icons mb-4">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-tiktok"></i></a>
             </div>
 
-            <div class="mb-3 row">
-                <div class="col">
-                    <x-adminlte-input name="apellido_paterno" type="text" placeholder="Apellido paterno" required icon="fas fa-user" />
-                </div>
-                <div class="col">
-                    <x-adminlte-input name="apellido_materno" type="text" placeholder="Apellido materno" required icon="fas fa-user" />
-                </div>
-            </div>
+            <h2 class="mb-4 text-center">Registro</h2>
 
-            <div class="mb-3 row">
-                <div class="col">
-                    <x-adminlte-input name="correo" type="email" placeholder="correo@ejemplo.com" required icon="fas fa-envelope" />
-                </div>
-                <div class="col">
-                    <x-adminlte-input name="telefono" type="tel" placeholder="Ej: 76543210" required icon="fas fa-phone" />
-                </div>
-            </div>
+            <form action="{{ route('register') }}" method="post" autocomplete="off" id="registerForm">
+                @csrf
 
-            <div class="mb-3">
-                <x-adminlte-input name="fecha_nacimiento" type="date" required icon="fas fa-calendar-alt" />
-            </div>
+                <div class="mb-3">
+                    <x-adminlte-input name="nombre" type="text" placeholder="Tu nombre" 
+                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" 
+                        title="Solo se permiten letras y espacios" 
+                        required autofocus icon="fas fa-user" />
+                </div>
+
+                <div class="mb-3 row">
+                    <div class="col">
+                        <x-adminlte-input name="apellido_paterno" type="text" placeholder="Apellido paterno" 
+                            pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" 
+                            title="Solo se permiten letras y espacios" 
+                            required icon="fas fa-user" />
+                    </div>
+                    <div class="col">
+                        <x-adminlte-input name="apellido_materno" type="text" placeholder="Apellido materno" 
+                            pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+" 
+                            title="Solo se permiten letras y espacios" 
+                            required icon="fas fa-user" />
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <div class="col">
+                        <x-adminlte-input name="correo" type="email" placeholder="correo@ejemplo.com" required icon="fas fa-envelope" />
+                    </div>
+                    <div class="col">
+                        <x-adminlte-input name="telefono" type="tel" placeholder="Ej: 76543210" 
+                            pattern="[0-9]{8,10}" 
+                            title="Debe contener entre 8 y 10 dígitos numéricos" 
+                            required icon="fas fa-phone" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <x-adminlte-input name="fecha_nacimiento" type="date" required icon="fas fa-calendar-alt" />
+                </div>
 
             <div class="mb-3 row">
                 <div class="col position-relative">
-                    <x-adminlte-input id="contraseña" name="contrasenia" type="password" placeholder="*******" required icon="fas fa-lock" />
+                    <x-adminlte-input id="contraseña" name="contraseña" type="password" placeholder="*******" required icon="fas fa-lock" />
                     <span class="password-toggle"><i class="fas fa-eye" id="toggleContraseña"></i></span>
                 </div>
                 <div class="col position-relative">
-                    <x-adminlte-input id="contrasenia_confirmation" name="contrasenia_confirmation" type="password" placeholder="*******" required icon="fas fa-lock" />
+                    <x-adminlte-input id="contraseña_confirmation" name="contraseña_confirmation" type="password" placeholder="*******" required icon="fas fa-lock" />
                     <span class="password-toggle"><i class="fas fa-eye" id="toggleContraseñaConfirm"></i></span>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Registrarse</button>
-        </form>
+                <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Registrarse</button>
+            </form>
 
-        <div class="text-center">
-            <a href="{{ route('login') }}">¿Ya tienes una cuenta? Inicia sesión</a>
+            <div class="text-center">
+                <a href="{{ route('login') }}">¿Ya tienes una cuenta? Inicia sesión</a>
+            </div>
+
         </div>
-
     </div>
-</div>
+
 @endsection
+
 
 @push('css')
 <style>
-html, body, .auth-page {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background: url("{{ asset('storage/imagenes/loginfondo2.jpg') }}") no-repeat center center fixed;
-    background-size: cover;
-    font-family: 'Nunito', sans-serif;
-}
-
-/* FORZAR ancho del login-box */
-.login-box {
-    width: 600px !important; /* igual que max-width de register-glass */
-    max-width: 90%; /* responsive */
-    margin: auto;
-}
-
-/* Anula fondo blanco predeterminado */
-.login-box .card,
-.login-box .card-body,
+    /* Aseguramos que todo el contenedor de AuthPage tenga tu fondo */
+    html, body, .auth-page {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: url("{{ asset('storage/imagenes/loginfondo2.jpg') }}") no-repeat center center fixed !important;
+        background-size: cover !important;
+        font-family: 'Nunito', sans-serif;
+    }
+        /* Anula el fondo blanco que viene por defecto */
+.login-box, 
+.login-box .card, 
+.login-box .card-body, 
 .login-box .card-header {
     background: transparent !important;
     box-shadow: none !important;
@@ -110,19 +113,19 @@ html, body, .auth-page {
     padding: 3rem 1rem;
 }
 
-.register-glass {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white;
-    text-align: center;
-}
+    .register-glass {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        text-align: center;
+    }
 
 .register-glass h2 {
     font-weight: bold;
@@ -205,24 +208,24 @@ a:hover { color: #38bdf8; }
 
 @push('js')
 <script>
-// Mostrar / ocultar contraseña
-const togglePassword = (toggleId, inputId) => {
-    const toggle = document.getElementById(toggleId);
-    const input = document.getElementById(inputId);
-    toggle.addEventListener('click', () => {
-        if (input.type === 'password') {
-            input.type = 'text';
-            toggle.classList.remove('fa-eye');
-            toggle.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            toggle.classList.remove('fa-eye-slash');
-            toggle.classList.add('fa-eye');
-        }
-    });
-}
+    // Mostrar / ocultar contraseña
+    const togglePassword = (toggleId, inputId) => {
+        const toggle = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+        toggle.addEventListener('click', () => {
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.classList.remove('fa-eye');
+                toggle.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                toggle.classList.remove('fa-eye-slash');
+                toggle.classList.add('fa-eye');
+            }
+        });
+    }
 
-togglePassword('toggleContraseña', 'contraseña');
-togglePassword('toggleContraseñaConfirm', 'contrasenia_confirmation');
+    togglePassword('toggleContraseña', 'contraseña');
+    togglePassword('toggleContraseñaConfirm', 'contraseña_confirmation');
 </script>
 @endpush

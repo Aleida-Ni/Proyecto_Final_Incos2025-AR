@@ -53,11 +53,7 @@ class RegisterController extends Controller
             'fecha_nacimiento' => $data['fecha_nacimiento'],
             'contrasenia'       => Hash::make($data['contrasenia']),
             'rol'              => 'cliente', // por defecto
-<<<<<<< HEAD
             'estado'           => 0,         // Por defecto inactivo
-=======
-            'estado' => 0
->>>>>>> Aporte_RckOz
         ]);
     }
 

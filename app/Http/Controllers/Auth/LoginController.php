@@ -48,13 +48,10 @@ protected function authenticated(Request $request, $user)
     protected function credentials(Request $request)
     {
         return [
-<<<<<<< HEAD
             $this->username() => $request->get($this->username()),
             'password' => $request->get('contrasenia'),
-=======
             'correo'   => $request->correo,
             'password' => $request->contrasenia, // 👈 siempre "password"
->>>>>>> Aporte_RckOz
         ];
     }
 

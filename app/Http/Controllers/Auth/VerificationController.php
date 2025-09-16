@@ -9,13 +9,23 @@ use App\Models\User;
 
 class VerificationController extends Controller
 {
-<<<<<<< HEAD
     /**
-     * Muestra aviso de verificación.
+     * Muestra aviso de verificación según rol.
      */
     public function notice()
     {
-        return view('auth.verify'); // crea esta vista para decir "Revisa tu correo"
+        $user = auth()->user();
+
+        if ($user->rol === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->rol === 'empleado') {
+            return redirect()->route('empleado.dashboard');
+        }
+
+        // Solo clientes ven esta vista
+        return view('auth.verify-email');
     }
 
     /**
@@ -23,47 +33,21 @@ class VerificationController extends Controller
      */
     public function verify(Request $request, $id, $hash)
     {
-=======
-    /**
-     * Muestra aviso de verificación.
-     */
-public function notice()
-{
-    $user = auth()->user();
-
-    if ($user->rol === 'admin') {
-        return redirect()->route('admin.dashboard');
-    }
-
-    if ($user->rol === 'empleado') {
-        return redirect()->route('empleado.dashboard');
-    }
-
-    return view('auth.verify-email'); // solo clientes
-}
-
-
-    /**
-     * Verifica el correo cuando el usuario da clic en el enlace.
-     */
-    public function verify(Request $request, $id, $hash)
-    {
->>>>>>> Aporte_RckOz
         $usuario = User::findOrFail($id);
 
-        // Verificamos que el hash sea válido
+        // Validar hash
         if (! hash_equals(sha1($usuario->getEmailForVerification()), $hash)) {
             return redirect('/login')->with('error', 'Enlace de verificación inválido.');
         }
 
-        // Si ya está verificado, redirige
+        // Si ya está verificado
         if ($usuario->correo_verificado_en) {
             return redirect('/login')->with('status', 'Tu correo ya fue verificado.');
         }
 
-        // Marca el correo como verificado
+        // Marca el correo como verificado y activa usuario
         $usuario->correo_verificado_en = now();
-        $usuario->estado = 1; // activa al usuario
+        $usuario->estado = 1;
         $usuario->save();
 
         event(new Verified($usuario));
@@ -71,10 +55,9 @@ public function notice()
         return redirect('/login')->with('status', '¡Correo verificado correctamente! Ya puedes iniciar sesión.');
     }
 
-    public function show()
-    {
-        return view('auth.verify');
-    }
+    /**
+     * Reenviar enlace de verificación.
+     */
     public function send(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {

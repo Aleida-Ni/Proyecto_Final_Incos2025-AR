@@ -2,10 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Barbero;
-use App\Models\Reserva;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
-// Controladores Cliente
+// Models / Controllers
+use App\Models\Barbero;
 use App\Http\Controllers\Cliente\HomeController as ClienteHomeController;
 use App\Http\Controllers\Cliente\BarberoController as ClienteBarberoController;
 use App\Http\Controllers\Cliente\ProductoController as ClienteProductoController;
@@ -18,8 +19,6 @@ use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Admin\EmpleadoController;
 
-
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Empleado\DashboardController;
 
@@ -40,6 +39,29 @@ Route::get('/email/verify', [VerificationController::class, 'notice'])
     ->middleware('auth')
     ->name('verification.notice');
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Página pública
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Auth (una sola vez) con email verification activado
+Auth::routes(['verify' => true]);
+
+/*
+|--------------------------------------------------------------------------
+| Email verification routes (NOTICE + VERIFY + RESEND)
+|--------------------------------------------------------------------------
+*/
+Route::get('/email/verify', function () {
+    return view('auth.verify-email'); // crea esta vista si no existe
+})->middleware('auth')->name('verification.notice');
+
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $user = $request->user();
 
@@ -49,6 +71,10 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
         $user->save();
     }
 
+    $user->estado = 1; // si quieres activar estado al verificar
+    $user->save();
+
+    // Redirigir según rol
     if ($user->rol === 'admin') {
         return redirect()->route('admin');
     } elseif ($user->rol === 'empleado') {
@@ -62,9 +88,11 @@ Route::post('/email/verification-notification', [VerificationController::class, 
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
 
-// =============================
-// PANEL ADMIN
-// =============================
+/*
+|--------------------------------------------------------------------------
+| PANEL ADMIN
+|--------------------------------------------------------------------------
+*/
 Route::get('/admin', [DashboardController::class, 'index'])
     ->middleware(['auth', 'estado', 'role:admin'])
     ->name('admin');
@@ -92,35 +120,20 @@ Route::middleware(['auth', 'role:admin|empleado'])
         });
     });
 
-// =============================
-// PANEL EMPLEADO
-// =============================
-
-
-Route::middleware(['auth', 'role:empleado'])
+/*
+|--------------------------------------------------------------------------
+| PANEL EMPLEADO
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'estado', 'role:empleado'])
     ->prefix('empleado')
     ->name('empleado.')
     ->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    });
-
-Route::middleware(['auth', 'role:empleado'])->prefix('empleado')->name('empleado.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-});
-
-
-
-// Panel empleado
-Route::middleware(['auth', 'role:empleado'])
-    ->prefix('empleado')
-    ->name('empleado.')
-    ->group(function () {
-
         // Dashboard del empleado
         Route::get('/dashboard', [App\Http\Controllers\Empleado\DashboardController::class, 'index'])
             ->name('dashboard');
 
-        // Barberos (mismos controladores que admin)
+        // Barberos
         Route::resource('barberos', App\Http\Controllers\Admin\BarberoController::class);
 
         // Productos
@@ -130,13 +143,9 @@ Route::middleware(['auth', 'role:empleado'])
         Route::resource('reservas', App\Http\Controllers\Admin\ReservaController::class);
     });
 
-
-
 /* =======================
-   PANEL ADMIN
+   PANEL ADMIN DUPLICADO (lo mantuve, solo corregido)
 ========================== */
-
-// Ruta principal del panel admin
 Route::middleware(['auth', 'role:admin|empleado'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard
@@ -156,22 +165,18 @@ Route::middleware(['auth', 'role:admin|empleado'])->prefix('admin')->name('admin
 
     Route::prefix('admin/config')->group(function () {
         Route::resource('empleados', App\Http\Controllers\Admin\EmpleadoController::class);
-    // Configuración
-    Route::view('settings', 'admin.settings')->name('settings');
-
-
-
+        Route::view('settings', 'admin.settings')->name('settings');
+    });
 });
 
-
-
-
-/* =======================
+/*
+==========================
    PANEL CLIENTE
-========================== */
+==========================
+*/
 Route::middleware(['auth', 'can:is-cliente'])->group(function () {
 
-    // Dashboard del cliente con lista de barberos
+    // Dashboard cliente
     Route::get('/home', function () {
         $barberos = Barbero::all();
         return view('cliente.home', compact('barberos'));
@@ -181,63 +186,50 @@ Route::middleware(['auth', 'can:is-cliente'])->group(function () {
         Route::get('/inicio', [\App\Http\Controllers\Cliente\HomeController::class, 'inicio'])->name('inicio');
     });
 
-    // Acceso a funcionalidades del cliente
-    Route::prefix('cliente')->name('cliente.')->group(function () {
-        Route::get('/inicio', [\App\Http\Controllers\Cliente\HomeController::class, 'inicio'])->name('inicio');
-
-    });
     Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    Route::get('/barberos', [ClienteBarberoController::class, 'index'])->name('barberos.index');
+        Route::get('/barberos', [ClienteBarberoController::class, 'index'])->name('barberos.index');
+    });
 
+    Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
+        Route::get('/barberos', [App\Http\Controllers\Cliente\BarberoController::class, 'index'])->name('barberos.index');
+        Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
+        Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
+        Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
+    });
 
-});
-Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    Route::get('/barberos', [App\Http\Controllers\Cliente\BarberoController::class, 'index'])->name('barberos.index');
-    Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
-    Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
-    Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
-});
+    Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
+        Route::post('/ventas', [App\Http\Controllers\Cliente\VentaController::class, 'store'])->name('ventas.store');
+        Route::get('/ventas/{venta}', [App\Http\Controllers\Cliente\VentaController::class, 'show'])->name('ventas.show');
+    });
 
-Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-    Route::post('/ventas', [App\Http\Controllers\Cliente\VentaController::class, 'store'])->name('ventas.store');
-    Route::get('/ventas/{venta}', [App\Http\Controllers\Cliente\VentaController::class, 'show'])->name('ventas.show');
-});
+    Route::prefix('venta')->name('venta.')->group(function () {
+        Route::post('/agregar', [VentaController::class, 'agregar'])->name('agregar');
+        Route::get('/contenido', [VentaController::class, 'contenido'])->name('contenido');
+        Route::post('/actualizar', [VentaController::class, 'actualizar'])->name('actualizar');
+        Route::post('/quitar', [VentaController::class, 'quitar'])->name('quitar');
+        Route::get('/', [VentaController::class, 'mostrar'])->name('mostrar');
+    });
 
-Route::prefix('venta')->name('venta.')->group(function () {
-    Route::post('/agregar', [VentaController::class, 'agregar'])->name('agregar');
-    Route::get('/contenido', [VentaController::class, 'contenido'])->name('contenido'); // retorna JSON para badge/modal
-    Route::post('/actualizar', [VentaController::class, 'actualizar'])->name('actualizar');
-    Route::post('/quitar', [VentaController::class, 'quitar'])->name('quitar');
-    Route::get('/', [VentaController::class, 'mostrar'])->name('mostrar'); // vista completa opcional
-});
+    Route::prefix('cliente')->name('cliente.')->group(function () {
+        Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
+        Route::post('/ventas/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
+        Route::post('/ventas/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
+    });
 
-Route::prefix('cliente')->name('cliente.')->group(function () {
-    Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
-    Route::post('/ventas/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
-    Route::post('/ventas/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
-});
+    Route::post('/venta/confirmar', [VentaController::class, 'confirmarCompra'])->name('venta.confirmar');
 
-Route::post('/venta/confirmar', [VentaController::class, 'confirmarCompra'])->name('venta.confirmar');
+    Route::post('/cliente/ventas/confirmar', [VentaController::class, 'confirmarCompra'])
+        ->middleware(['auth', 'can:is-cliente'])
+        ->name('cliente.ventas.confirmar');
 
-Route::post('/cliente/ventas/confirmar', [VentaController::class, 'confirmarCompra'])
-    ->middleware(['auth', 'can:is-cliente'])
-    ->name('cliente.ventas.confirmar');
+    // Carrito
+    Route::post('/carrito/{id}/aumentar', [App\Http\Controllers\Cliente\VentaController::class, 'aumentar'])
+        ->name('cliente.ventas.aumentar');
+    Route::post('/carrito/{id}/disminuir', [App\Http\Controllers\Cliente\VentaController::class, 'disminuir'])
+        ->name('cliente.ventas.disminuir');
 
-        // Carrito
-        Route::post('/carrito/{id}/aumentar', [App\Http\Controllers\Cliente\VentaController::class, 'aumentar'])
-            ->name('cliente.ventas.aumentar');
-        Route::post('/carrito/{id}/disminuir', [App\Http\Controllers\Cliente\VentaController::class, 'disminuir'])
-            ->name('cliente.ventas.disminuir');
-
-    
-    
     // Productos
     Route::get('/productos', [ClienteProductoController::class, 'index'])->name('productos.index');
-Route::get('/cliente/productos', [\App\Http\Controllers\Cliente\ProductoController::class, 'index'])
-    ->name('cliente.productos.index');
-
+    Route::get('/cliente/productos', [\App\Http\Controllers\Cliente\ProductoController::class, 'index'])
+        ->name('cliente.productos.index');
 });
-
-
-});
-

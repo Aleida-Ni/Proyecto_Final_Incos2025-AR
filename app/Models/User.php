@@ -12,8 +12,8 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'users'; // Mantén "users"
-    protected $primaryKey = 'id'; // sigue siendo id, eso está bien
+    protected $table = 'users';
+    protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
 
@@ -21,25 +21,34 @@ class User extends Authenticatable
     const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
-        'nombre', 'apellido_paterno', 'apellido_materno', 'correo',
-        'telefono', 'contrasenia', 'rol', 'fecha_nacimiento',
-        'estado', 'correo_verificado_en', 'creado_en', 'actualizado_en',
+        'nombre',
+        'apellido_paterno',
+        'apellido_materno',
+        'correo',
+        'telefono',
+        'contrasenia',
+        'rol',
+        'fecha_nacimiento',
+        'estado',
+        'correo_verificado_en',
+        'creado_en',
+        'actualizado_en',
     ];
 
     protected $hidden = [
-        'contrasenia', 
-        'token_recordar',
+        'contrasenia',
+        'remember_token',
     ];
 
     protected $casts = [
-        'contrasenia' => 'hashed',
-        'correo_verificado_en' => 'datetime',
-        'creado_en' => 'datetime',
-        'actualizado_en' => 'datetime',
-        'estado' => 'boolean',
+        'contrasenia'           => 'hashed',
+        'correo_verificado_en'  => 'datetime',
+        'creado_en'             => 'datetime',
+        'actualizado_en'        => 'datetime',
+        'estado'                => 'boolean',
     ];
 
-    // Relaciones
+    // Relación con reservas
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'user_id', 'id');
@@ -48,7 +57,7 @@ class User extends Authenticatable
     // Verificación de email
     public function hasVerifiedEmail()
     {
-        return ! is_null($this->correo_verificado_en);
+        return !is_null($this->correo_verificado_en);
     }
 
     public function markEmailAsVerified()
@@ -64,11 +73,10 @@ class User extends Authenticatable
         return 'correo';
     }
 
-public function getAuthPassword()
-{
-    return $this->contrasenia;
-}
-
+    public function getAuthPassword()
+    {
+        return $this->contrasenia;
+    }
 
     public function sendEmailVerificationNotification()
     {

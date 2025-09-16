@@ -9,6 +9,7 @@ use App\Models\User;
 
 class VerificationController extends Controller
 {
+<<<<<<< HEAD
     /**
      * Muestra aviso de verificación.
      */
@@ -22,6 +23,32 @@ class VerificationController extends Controller
      */
     public function verify(Request $request, $id, $hash)
     {
+=======
+    /**
+     * Muestra aviso de verificación.
+     */
+public function notice()
+{
+    $user = auth()->user();
+
+    if ($user->rol === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if ($user->rol === 'empleado') {
+        return redirect()->route('empleado.dashboard');
+    }
+
+    return view('auth.verify-email'); // solo clientes
+}
+
+
+    /**
+     * Verifica el correo cuando el usuario da clic en el enlace.
+     */
+    public function verify(Request $request, $id, $hash)
+    {
+>>>>>>> Aporte_RckOz
         $usuario = User::findOrFail($id);
 
         // Verificamos que el hash sea válido

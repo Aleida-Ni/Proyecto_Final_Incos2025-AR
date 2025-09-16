@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('telefono')->nullable();
             $table->date('fecha_nacimiento')->nullable();
             $table->timestamp('correo_verificado_en')->nullable();
-            $table->string('contraseña');
+            $table->string('contrasenia');
             $table->rememberToken();
             $table->timestamps();
         });

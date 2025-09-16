@@ -22,14 +22,9 @@
                 <x-adminlte-input name="correo" type="email" placeholder="usuario@correo.com" required autofocus icon="fas fa-user" />
             </div>
 
-            <div class="mb-3">
-                <x-adminlte-input name="contrasenia" id="contrasenia" type="password" placeholder="******" required>
-                    <x-slot name="appendSlot">
-                        <div class="input-group-text">
-                            <i id="toggleContrasenia" class="fas fa-eye" style="cursor: pointer"></i>
-                        </div>
-                    </x-slot>
-                </x-adminlte-input>
+            <div class="mb-3 position-relative">
+                <x-adminlte-input id="contrasenia" name="contrasenia" type="password" placeholder="******" required icon="fas fa-lock" />
+                <span class="password-toggle"><i class="fas fa-eye" id="toggleContrasenia"></i></span>
             </div>
 
             <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Ingresar</button>
@@ -62,16 +57,23 @@
         height: auto;
     }
 
+    /* Ícono ojo */
+    .position-relative { position: relative; }
+    .password-toggle {
+        position: absolute;
+        top: 38px;
+        right: 12px;
+        cursor: pointer;
+        color: #bbb;
+        font-size: 1.1rem;
+        transition: 0.3s;
+    }
+    .password-toggle:hover { color: white; }
+
     .login-box, 
     .login-box .card, 
     .login-box .card-body, 
     .login-box .card-header {
-        background: transparent !important;
-        box-shadow: none !important;
-        border: none !important;
-    }
-
-    .login-box, .card, .auth-box {
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
@@ -92,21 +94,10 @@
         transform: translateY(-80px);
     }
 
-    /* LOGO */
-    .logo-container {
-        display: flex;
-        justify-content: center;
-    }
-    .login-logo {
-        max-width: 120px;
-        height: auto;
-        margin-bottom: 10px;
-    }
+    .logo-container { display: flex; justify-content: center; }
+    .login-logo { max-width: 120px; height: auto; margin-bottom: 10px; }
 
-    .login-glass h2 {
-        font-weight: bold;
-        color: #0a0a0aff;
-    }
+    .login-glass h2 { font-weight: bold; color: #0a0a0aff; }
 
     .custom-btn {
         background: linear-gradient(135deg, #3b82f6, #06b6d4);
@@ -121,57 +112,31 @@
     .custom-btn:hover {
         background: linear-gradient(135deg, #2563eb, #0891b2);
     }
+
     a { color: #93c5fd; font-size: 0.9rem; }
     a:hover { color: #38bdf8; }
-    .input-group-text {
-        background: rgba(255,255,255,0.15);
-        border: none;
-        color: white;
-    }
+
+    .input-group-text,
     .form-control {
         background: rgba(255,255,255,0.15);
         border: none;
         color: white;
-    }
-
-    .social-icons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-    }
-    .social-icons a {
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255,255,255,0.2);
-        border-radius: 50%;
-        font-size: 18px;
-        color: white;
-        transition: 0.3s ease;
-    }
-    .social-icons a:hover {
-        background: rgba(255,255,255,0.4);
-        transform: scale(1.1);
     }
 </style>
 @endpush
 
 @push('js')
 <script>
-    // Mostrar / ocultar contraseña
-    document.getElementById("toggleContrasenia").addEventListener("click", function() {
-        const input = document.getElementById("contrasenia");
-        if (input.type === "password") {
-            input.type = "text";
-            this.classList.remove("fa-eye");
-            this.classList.add("fa-eye-slash");
-        } else {
-            input.type = "password";
-            this.classList.remove("fa-eye-slash");
-            this.classList.add("fa-eye");
-        }
-    });
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("contrasenia");
+    const toggle = document.getElementById("toggleContrasenia");
+    if(input && toggle){
+        toggle.addEventListener("click", () => {
+            input.type = input.type === "password" ? "text" : "password";
+            toggle.classList.toggle("fa-eye");
+            toggle.classList.toggle("fa-eye-slash");
+        });
+    }
+});
 </script>
 @endpush

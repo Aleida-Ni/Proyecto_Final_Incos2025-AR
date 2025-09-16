@@ -5,101 +5,115 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Mail\EmpleadoPasswordMail;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-
+use App\Mail\EmpleadoCreadoMail;
 
 class EmpleadoController extends Controller
 {
+    /**
+     * Mostrar lista de empleados
+     */
     public function index()
     {
-        $empleados = User::where('rol', 'empleado')->get(); 
+        $empleados = User::where('rol', 'empleado')->get();
         return view('admin.empleados.index', compact('empleados'));
     }
 
+    /**
+     * Mostrar formulario de creación
+     */
     public function create()
     {
         return view('admin.empleados.create');
     }
 
-public function store(Request $request)
-{
-    // Validar datos
-    $request->validate([
-        'nombre' => 'required',
-        'apellido_paterno' => 'required',
-        'apellido_materno' => 'required',
-        'correo' => 'required|email|unique:users,correo',
-    ]);
+    /**
+     * Guardar un nuevo empleado
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre'            => 'required|string|max:255',
+            'apellido_paterno'  => 'required|string|max:255',
+            'apellido_materno'  => 'required|string|max:255',
+            'correo'            => 'required|string|email|max:255|unique:users,correo',
+            'telefono'          => 'nullable|string|max:20',
+            'fecha_nacimiento'  => 'nullable|date',
+        ]);
 
-    // Generar contraseña aleatoria
-    $password = Str::random(8);
+        // Generar contraseña aleatoria
+        $contraseniaGenerada = Str::random(10);
 
-    // Crear empleado
-    $empleado = new User();
-    $empleado->nombre = $request->nombre;
-    $empleado->apellido_paterno = $request->apellido_paterno;
-    $empleado->apellido_materno = $request->apellido_materno;
-    $empleado->correo = $request->correo;
-    $empleado->telefono = $request->telefono;
-    $empleado->fecha_nacimiento = $request->fecha_nacimiento;
-    $empleado->contrasenia = Hash::make($password); // ✅ ahora sí hasheada
-    $empleado->rol = 'empleado';
+        // Crear empleado
+        $empleado = User::create([
+            'nombre'            => $request->nombre,
+            'apellido_paterno'  => $request->apellido_paterno,
+            'apellido_materno'  => $request->apellido_materno,
+            'correo'            => $request->correo,
+            'contrasenia'       => Hash::make($contraseniaGenerada),
+            'telefono'          => $request->telefono,
+            'fecha_nacimiento'  => $request->fecha_nacimiento,
+            'rol'               => 'empleado',
+            'estado'            => 1,
+            'correo_verificado_en' => now(),
+        ]);
 
-    // Marcar como activo y correo verificado
-    $empleado->estado = 1;
-    $empleado->correo_verificado_en = now();
+        // Enviar correo con la contraseña generada
+        Mail::to($empleado->correo)->send(new EmpleadoCreadoMail($empleado, $contraseniaGenerada));
 
-    // Guardar en la base de datos
-    $empleado->save();
+        return redirect()->route('admin.empleados.index')
+            ->with('success', 'Empleado registrado correctamente. La contraseña fue enviada por correo.');
+    }
 
-    // Enviar correo con la contraseña en texto plano
-    Mail::to($empleado->correo)->send(new EmpleadoPasswordMail($empleado, $password));
-
-    return redirect()->route('admin.empleados.index')
-        ->with('success', 'Empleado registrado y contraseña enviada al correo.');
-}
-
-
-
+    /**
+     * Mostrar formulario de edición
+     */
     public function edit(string $id)
     {
         $empleado = User::findOrFail($id);
         return view('admin.empleados.edit', compact('empleado'));
     }
 
+    /**
+     * Actualizar un empleado
+     */
     public function update(Request $request, string $id)
     {
         $empleado = User::findOrFail($id);
 
         $request->validate([
-            'nombre'           => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'correo'           => 'required|email|max:255|unique:users,correo,' . $empleado->id,
-            'telefono'         => 'nullable|string|max:20',
-            'fecha_nacimiento' => 'nullable|date',
+            'nombre'            => 'required|string|max:255',
+            'apellido_paterno'  => 'required|string|max:255',
+            'apellido_materno'  => 'required|string|max:255',
+            'correo'            => 'required|string|email|max:255|unique:users,correo,' . $empleado->id,
+            'telefono'          => 'nullable|string|max:20',
+            'fecha_nacimiento'  => 'nullable|date',
             'contrasenia'       => 'nullable|string|min:6',
         ]);
 
-        $empleado->nombre           = $request->nombre;
-        $empleado->apellido_paterno = $request->apellido_paterno;
-        $empleado->apellido_materno = $request->apellido_materno;
-        $empleado->correo           = $request->correo;
-        $empleado->telefono         = $request->telefono;
-        $empleado->fecha_nacimiento = $request->fecha_nacimiento;
+        $empleado->update([
+            'nombre'            => $request->nombre,
+            'apellido_paterno'  => $request->apellido_paterno,
+            'apellido_materno'  => $request->apellido_materno,
+            'correo'            => $request->correo,
+            'telefono'          => $request->telefono,
+            'fecha_nacimiento'  => $request->fecha_nacimiento,
+        ]);
 
-        if ($request->filled('contraseña')) {
-            $empleado->contrasenia = bcrypt($request->contrasenia);
+        if ($request->filled('contrasenia')) {
+            $empleado->update([
+                'contrasenia' => Hash::make($request->contrasenia),
+            ]);
         }
-
-        $empleado->save();
 
         return redirect()->route('admin.empleados.index')->with('success', 'Empleado actualizado correctamente');
     }
 
+    /**
+     * Eliminar empleado
+     */
     public function destroy(string $id)
     {
         $empleado = User::findOrFail($id);

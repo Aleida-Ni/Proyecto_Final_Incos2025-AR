@@ -6,9 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -22,23 +21,25 @@ class User extends Authenticatable implements MustVerifyEmail
         'apellido_materno',
         'correo',
         'telefono',
-        'contraseña',
+        'contrasenia',
         'rol',
         'fecha_nacimiento',
+        'estado',
         'creado_en',
         'actualizado_en',
     ];
 
     protected $hidden = [
-        'contraseña',
+        'contrasenia',
         'remember_token',
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'contraseña' => 'hashed',
+        'correo_verificado_en' => 'datetime',
+        'contrasenia' => 'hashed',
     ];
 
+    // Relación
     public function reservas()
     {
         return $this->hasMany(Reserva::class);
@@ -50,22 +51,22 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'correo';
     }
 
-    // Para notificaciones generales (ej: reset de contraseña)
+    // Para notificaciones generales
     public function routeNotificationForMail($notification)
     {
         return $this->correo;
     }
 
-    // Para verificación de correo
+    // Para verificación de correo (solo clientes)
     public function getEmailForVerification()
     {
         return $this->correo;
     }
 
-    // Para que Laravel use "contraseña" en lugar de "password"
+    // 👇 Aquí está la clave para usar "contrasenia"
     public function getAuthPassword()
     {
-        return $this->contraseña;
+        return $this->contrasenia;
     }
 
     public function getNameAttribute()

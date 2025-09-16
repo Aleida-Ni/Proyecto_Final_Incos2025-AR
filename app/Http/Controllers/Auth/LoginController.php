@@ -33,35 +33,24 @@ class LoginController extends Controller
     }
 
     /**
-     * Modificar validación de login para usar "contraseña".
+     * Validar login con "contrasenia".
      */
     protected function validateLogin(Request $request)
     {
         $request->validate([
             $this->username() => 'required|string',
-            'contraseña' => 'required|string',
+            'contrasenia' => 'required|string',
         ]);
     }
 
     /**
-     * Modificar intento de login para usar "contraseña".
-     */
-    protected function attemptLogin(Request $request)
-    {
-        return $this->guard()->attempt(
-            $this->credentials($request),
-            $request->filled('remember')
-        );
-    }
-
-    /**
-     * Cambiar credenciales para usar "contraseña".
+     * Usar credenciales traduciendo "contrasenia" a "password".
      */
     protected function credentials(Request $request)
     {
         return [
-            $this->username() => $request->get($this->username()),
-            'password' => $request->get('contraseña'),
+            'correo'   => $request->correo,
+            'password' => $request->contrasenia, // 👈 siempre "password"
         ];
     }
 
@@ -73,6 +62,4 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
     }
-
-
 }

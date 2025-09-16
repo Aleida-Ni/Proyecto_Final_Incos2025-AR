@@ -11,17 +11,20 @@ class CheckRole
     /**
      * Handle an incoming request.
      */
-public function handle(Request $request, Closure $next, string $roles): Response
+public function handle(Request $request, Closure $next)
 {
     if (auth()->check()) {
-        // Convertir "admin|empleado" a array y verificar si el rol del usuario está permitido
-        $allowedRoles = explode('|', $roles);
-        if (in_array(auth()->user()->rol, $allowedRoles)) {
-            return $next($request);
+        $user = auth()->user();
+
+        // Si es cliente, debe tener estado = 1
+        if ($user->rol === 'cliente' && $user->estado != 1) {
+            abort(403, 'Debes verificar tu cuenta primero.');
         }
     }
 
-    abort(403, 'Acceso no autorizado');
+    return $next($request);
 }
+
+
 
 }

@@ -79,8 +79,9 @@
                 <x-adminlte-input name="correo" type="email" placeholder="usuario@correo.com" required autofocus icon="fas fa-user" />
             </div>
 
-            <div class="mb-3">
-                <x-adminlte-input name="contraseña" type="password" placeholder="******" required icon="fas fa-lock" />
+            <div class="mb-3 position-relative">
+                <x-adminlte-input id="contraseña" name="contrasenia" type="password" placeholder="******" required icon="fas fa-lock" />
+                <span class="password-toggle"><i class="fas fa-eye" id="toggleContrasenia"></i></span>
             </div>
 
             <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Ingresar</button>
@@ -108,6 +109,19 @@
         align-items: center;
         height: 100vh;
     }
+/* Ícono ojo */
+.position-relative { position: relative; }
+.password-toggle {
+    position: absolute;
+    top: 38px;
+    right: 12px;
+    cursor: pointer;
+    color: #bbb;
+    font-size: 1.1rem;
+    transition: 0.3s;
+}
+.password-toggle:hover { color: white; }
+
 
     /* Anula el fondo blanco que viene por defecto */
 .login-box, 
@@ -194,4 +208,22 @@
         transform: scale(1.1);
     }
 </style>
+@endpush
+@push('js')
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const togglePassword = (inputId, toggleId) => {
+        const input = document.getElementById(inputId);
+        const toggle = document.getElementById(toggleId);
+        if(input && toggle){
+            toggle.addEventListener("click", () => {
+                input.type = input.type === "password" ? "text" : "password";
+                toggle.classList.toggle("fa-eye");
+                toggle.classList.toggle("fa-eye-slash");
+            });
+        }
+    };
+    togglePassword("contrasenia", "toggleContrasenia");
+});
+</script>
 @endpush

@@ -2,96 +2,116 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Barbero;
-use App\Models\Reserva;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
-// Controladores Cliente
+// Models / Controllers
+use App\Models\Barbero;
 use App\Http\Controllers\Cliente\HomeController as ClienteHomeController;
 use App\Http\Controllers\Cliente\BarberoController as ClienteBarberoController;
 use App\Http\Controllers\Cliente\ProductoController as ClienteProductoController;
 use App\Http\Controllers\Cliente\ReservaController as ClienteReservaController;
 use App\Http\Controllers\Cliente\VentaController;
 
-
-// Controladores Admin
 use App\Http\Controllers\Admin\BarberoController as AdminBarberoController;
 use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
-use App\Http\Controllers\Admin\ReservaController;
-use App\Http\Controllers\Admin\ProductoController;
 use App\Http\Controllers\Admin\EmpleadoController;
 
-use Illuminate\Support\Facades\Mail;
-
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Empleado\DashboardController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
 
+// Página pública
+Route::get('/', function () {
+    return view('welcome');
+});
 
-
+// Auth (una sola vez) con email verification activado
 Auth::routes(['verify' => true]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('home');
-
-
-
-
-
-// Mostrar aviso de verificación
+/*
+|--------------------------------------------------------------------------
+| Email verification routes (NOTICE + VERIFY + RESEND)
+| - usamos closure para la "notice" para evitar dependencia a un controller que no exista
+|--------------------------------------------------------------------------
+*/
 Route::get('/email/verify', function () {
-    return view('auth.verify-email');
+    return view('auth.verify-email'); // crea esta vista si no existe
 })->middleware('auth')->name('verification.notice');
 
-// Procesar el enlace del correo
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
-    return redirect('/home'); // Cliente
+    $user = $request->user();
+
+    if (!$user->correo_verificado_en) {
+        $user->correo_verificado_en = now();
+        $user->estado = 1; // si quieres activar estado al verificar
+        $user->save();
+    }
+
+    // Redirigir según rol (admin/empleado no requieren verificación pero si vienen por el link...)
+    if ($user->rol === 'admin') {
+        return redirect()->route('admin');
+    } elseif ($user->rol === 'empleado') {
+        return redirect()->route('empleado.dashboard');
+    } else {
+        return redirect()->route('cliente.home')->with('status', '¡Correo verificado correctamente!');
+    }
+
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
-// Reenviar correo de verificación
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Se ha enviado un nuevo enlace de verificación a tu correo.');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
+/*
+|--------------------------------------------------------------------------
+| PANEL ADMIN
+|--------------------------------------------------------------------------
+| - /admin (route name 'admin') accesible por admin|empleado
+| - Rutas bajo /admin/... con middleware role:admin|empleado
+| - Recursos de configuración (empleados) protegidos solo para admin
+|--------------------------------------------------------------------------
+*/
 
+// Ruta principal /admin (nombre 'admin' — útil para redirects existentes)
+Route::get('/admin', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'estado', 'role:admin|empleado'])
+    ->name('admin');
 
-// Página de bienvenida
-Route::get('/', function () {
-    return view('welcome');
-});
-
-// Rutas de autenticación
-Auth::routes();
-
-Auth::routes(['verify' => true]);
-
-
-
-Route::middleware(['auth', 'role:empleado'])
-    ->prefix('empleado')
-    ->name('empleado.')
+// Grupo de rutas /admin/*
+Route::middleware(['auth', 'role:admin|empleado'])
+    ->prefix('admin')
+    ->name('admin.')
     ->group(function () {
+        // Panel principal
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Rutas de recursos
+        Route::resource('barberos', AdminBarberoController::class);
+        Route::resource('productos', AdminProductoController::class);
+        Route::resource('reservas', AdminReservaController::class);
+
+        // Configuración
+        Route::prefix('config')->group(function () {
+            Route::resource('empleados', EmpleadoController::class);
+            Route::view('settings', 'admin.settings')->name('settings');
+        });
     });
 
-Route::middleware(['auth', 'role:empleado'])->prefix('empleado')->name('empleado.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-});
 
-
-
-// Panel empleado
-
-Route::middleware(['auth', 'role:empleado'])
+/*
+|--------------------------------------------------------------------------
+| PANEL EMPLEADO
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'estado', 'role:empleado'])
     ->prefix('empleado')
     ->name('empleado.')
     ->group(function () {
@@ -102,33 +122,7 @@ Route::middleware(['auth', 'role:empleado'])
     });
 
 
-
-/* =======================
-   PANEL ADMIN
-========================== */
-
-// Ruta principal del panel admin
-
-// PANEL ADMIN
-
-Route::middleware(['auth', 'role:admin|empleado'])
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-
-        Route::resource('productos', AdminProductoController::class);
-        Route::resource('barberos', AdminBarberoController::class);
-        Route::resource('reservas', AdminReservaController::class);
-
-        Route::prefix('config')->group(function () {
-            Route::resource('empleados', EmpleadoController::class);
-            Route::view('settings', 'admin.settings')->name('settings');
-        });
-});
-
-    
-
+/*
 /* =======================
    PANEL CLIENTE
 ========================== */
@@ -205,5 +199,3 @@ Route::get('/cliente/productos', [ClienteProductoController::class, 'index'])
     ->name('cliente.productos.index');
 
 });
-
-

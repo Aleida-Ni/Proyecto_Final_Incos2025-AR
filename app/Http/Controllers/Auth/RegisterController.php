@@ -30,13 +30,13 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'nombre'            => ['required', 'string', 'max:255'],
-            'apellido_paterno'  => ['required', 'string', 'max:255'],
-            'apellido_materno'  => ['required', 'string', 'max:255'],
+            'nombre' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
+            'apellido_paterno' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
+            'apellido_materno' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
             'correo'            => ['required', 'string', 'email', 'max:255', 'unique:users,correo'],
             'telefono'          => ['required', 'string', 'min:7', 'max:15'],
             'fecha_nacimiento'  => ['required', 'date'],
-            'contraseña'        => ['required', 'string', 'min:8', 'confirmed'],
+            'contrasenia'        => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
 
@@ -52,8 +52,9 @@ class RegisterController extends Controller
             'correo'           => $data['correo'],
             'telefono'         => $data['telefono'],
             'fecha_nacimiento' => $data['fecha_nacimiento'],
-            'contraseña'       => Hash::make($data['contraseña']),
+            'contrasenia'       => Hash::make($data['contrasenia']),
             'rol'              => 'cliente', // por defecto
+            'estado' => 0
         ]);
     }
 

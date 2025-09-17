@@ -7,13 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Mail; // 👈 Faltaba esto
 use App\Mail\EmpleadoCreadoMail;
 
 class EmpleadoController extends Controller
 {
     /**
-     * Mostrar lista de empleados
+     * Mostrar la lista de empleados.
      */
     public function index()
     {
@@ -22,7 +22,7 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Mostrar formulario de creación
+     * Mostrar el formulario de creación.
      */
     public function create()
     {
@@ -30,7 +30,7 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Guardar un nuevo empleado
+     * Guardar un nuevo empleado.
      */
     public function store(Request $request)
     {
@@ -43,10 +43,10 @@ class EmpleadoController extends Controller
             'fecha_nacimiento'  => 'nullable|date',
         ]);
 
-        // Generar contraseña aleatoria
+        // 🔑 Generar contraseña aleatoria
         $contraseniaGenerada = Str::random(10);
 
-        // Crear empleado
+        // Crear el empleado
         $empleado = User::create([
             'nombre'            => $request->nombre,
             'apellido_paterno'  => $request->apellido_paterno,
@@ -56,11 +56,10 @@ class EmpleadoController extends Controller
             'telefono'          => $request->telefono,
             'fecha_nacimiento'  => $request->fecha_nacimiento,
             'rol'               => 'empleado',
-            'estado'            => 1,
-            'correo_verificado_en' => now(),
+            'estado'            => 1, // activo por defecto
         ]);
 
-        // Enviar correo con la contraseña generada
+        // 📧 Enviar el correo con la contraseña generada
         Mail::to($empleado->correo)->send(new EmpleadoCreadoMail($empleado, $contraseniaGenerada));
 
         return redirect()->route('admin.empleados.index')
@@ -68,7 +67,7 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Mostrar formulario de edición
+     * Mostrar el formulario de edición.
      */
     public function edit(string $id)
     {
@@ -77,7 +76,7 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Actualizar un empleado
+     * Actualizar un empleado.
      */
     public function update(Request $request, string $id)
     {
@@ -90,7 +89,6 @@ class EmpleadoController extends Controller
             'correo'            => 'required|string|email|max:255|unique:users,correo,' . $empleado->id,
             'telefono'          => 'nullable|string|max:20',
             'fecha_nacimiento'  => 'nullable|date',
-            'contrasenia'       => 'nullable|string|min:6',
         ]);
 
         $empleado->update([
@@ -102,17 +100,11 @@ class EmpleadoController extends Controller
             'fecha_nacimiento'  => $request->fecha_nacimiento,
         ]);
 
-        if ($request->filled('contrasenia')) {
-            $empleado->update([
-                'contrasenia' => Hash::make($request->contrasenia),
-            ]);
-        }
-
         return redirect()->route('admin.empleados.index')->with('success', 'Empleado actualizado correctamente');
     }
 
     /**
-     * Eliminar empleado
+     * Eliminar un empleado.
      */
     public function destroy(string $id)
     {

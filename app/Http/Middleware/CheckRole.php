@@ -9,25 +9,22 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckRole
 {
     /**
-     * Manejar la solicitud entrante.
+     * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next, ...$roles): Response
-    {
-        if (auth()->check()) {
-            $user = auth()->user();
+public function handle(Request $request, Closure $next)
+{
+    if (auth()->check()) {
+        $user = auth()->user();
 
-            // Si el rol del usuario está en la lista permitida
-            if (in_array($user->rol, $roles)) {
-                // Si es cliente, debe tener estado = 1
-                if ($user->rol === 'cliente' && $user->estado != 1) {
-                    abort(403, 'Debes verificar tu cuenta primero.');
-                }
-                return $next($request);
-            }
-
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+        // Si es cliente, debe tener estado = 1
+        if ($user->rol === 'cliente' && $user->estado != 1) {
+            abort(403, 'Debes verificar tu cuenta primero.');
         }
-
-        return redirect()->route('login');
     }
+
+    return $next($request);
+}
+
+
+
 }

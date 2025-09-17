@@ -16,10 +16,11 @@
     <div class="dropdown-categorias d-inline-block">
         <a href="#" class="btn btn-link categorias-trigger">Categorías ▾</a>
         <div class="categorias-menu">
-            <a href="{{ route('productos.index') }}">Todas</a>
-            <a href="{{ route('productos.index', ['categoria' => 'CERAS Y GELES']) }}">Ceras y Geles</a>
-            <a href="{{ route('productos.index', ['categoria' => 'CUIDADOS DE BARBA']) }}">Cuidados de Barba</a>
-            <a href="{{ route('productos.index', ['categoria' => 'CAPAS PERSONALIZADAS']) }}">Capas Personalizadas</a>
+<a href="{{ route('cliente.productos.index') }}">Todas</a>
+<a href="{{ route('cliente.productos.index', ['categoria' => 'CERAS Y GELES']) }}">Ceras y Geles</a>
+<a href="{{ route('cliente.productos.index', ['categoria' => 'CUIDADOS DE BARBA']) }}">Cuidados de Barba</a>
+<a href="{{ route('cliente.productos.index', ['categoria' => 'CAPAS PERSONALIZADAS']) }}">Capas Personalizadas</a>
+
         </div>
     </div>
 </div>

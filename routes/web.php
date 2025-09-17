@@ -13,31 +13,14 @@ use App\Http\Controllers\Cliente\ProductoController as ClienteProductoController
 use App\Http\Controllers\Cliente\ReservaController as ClienteReservaController;
 use App\Http\Controllers\Cliente\VentaController;
 
-// Controladores Admin
 use App\Http\Controllers\Admin\BarberoController as AdminBarberoController;
 use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Admin\EmpleadoController;
+use App\Http\Controllers\Admin\ProductoController;
 
-use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Empleado\DashboardController;
-
-// =============================
-// RUTAS DE AUTENTICACIÓN
-// =============================
-Auth::routes(['verify' => true]);
-
-// Página de bienvenida
-Route::get('/', function () {
-    return view('welcome');
-});
-
-// =============================
-// VERIFICACIÓN DE CORREO
-// =============================
-Route::get('/email/verify', [VerificationController::class, 'notice'])
-    ->middleware('auth')
-    ->name('verification.notice');
+use App\Http\Controllers\Empleado\ProductoController as EmpleadoProductoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +39,7 @@ Auth::routes(['verify' => true]);
 /*
 |--------------------------------------------------------------------------
 | Email verification routes (NOTICE + VERIFY + RESEND)
+| - usamos closure para la "notice" para evitar dependencia a un controller que no exista
 |--------------------------------------------------------------------------
 */
 Route::get('/email/verify', function () {
@@ -67,14 +51,11 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     if (!$user->correo_verificado_en) {
         $user->correo_verificado_en = now();
-        $user->estado = 1;
+        $user->estado = 1; // si quieres activar estado al verificar
         $user->save();
     }
 
-    $user->estado = 1; // si quieres activar estado al verificar
-    $user->save();
-
-    // Redirigir según rol
+    // Redirigir según rol (admin/empleado no requieren verificación pero si vienen por el link...)
     if ($user->rol === 'admin') {
         return redirect()->route('admin');
     } elseif ($user->rol === 'empleado') {
@@ -84,41 +65,48 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     }
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
-Route::post('/email/verification-notification', [VerificationController::class, 'send'])
-    ->middleware(['auth', 'throttle:6,1'])
-    ->name('verification.send');
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Se ha enviado un nuevo enlace de verificación a tu correo.');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 
 /*
 |--------------------------------------------------------------------------
 | PANEL ADMIN
 |--------------------------------------------------------------------------
+| - /admin (route name 'admin') accesible por admin|empleado
+| - Rutas bajo /admin/... con middleware role:admin|empleado
+| - Recursos de configuración (empleados) protegidos solo para admin
+|--------------------------------------------------------------------------
 */
+
+// Ruta principal /admin (nombre 'admin' — útil para redirects existentes)
 Route::get('/admin', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'estado', 'role:admin'])
+    ->middleware(['auth', 'estado', 'role:admin|empleado'])
     ->name('admin');
 
+// Grupo de rutas /admin/*
 Route::middleware(['auth', 'role:admin|empleado'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', function () {
-            $pendientes = \App\Models\Reserva::where('estado', 'pendiente')->count();
-            return view('admin.dashboard', compact('pendientes'));
-        })->name('dashboard');
+        // Panel principal
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::resource('productos', AdminProductoController::class);
+        // Rutas de recursos principales
         Route::resource('barberos', AdminBarberoController::class);
-        Route::get('reservas', [AdminReservaController::class, 'index'])->name('reservas.index');
+        Route::resource('productos', ProductoController::class);   // 👈 ya no en "config"
+        Route::resource('reservas', AdminReservaController::class);
 
+        // Configuración
         Route::prefix('config')->group(function () {
             Route::resource('empleados', EmpleadoController::class);
             Route::view('settings', 'admin.settings')->name('settings');
         });
-
-        Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
-            Route::resource('empleados', EmpleadoController::class);
-        });
     });
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -129,107 +117,63 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
     ->prefix('empleado')
     ->name('empleado.')
     ->group(function () {
-        // Dashboard del empleado
-        Route::get('/dashboard', [App\Http\Controllers\Empleado\DashboardController::class, 'index'])
-            ->name('dashboard');
-
-        // Barberos
-        Route::resource('barberos', App\Http\Controllers\Admin\BarberoController::class);
-
-        // Productos
-        Route::resource('productos', App\Http\Controllers\Admin\ProductoController::class);
-
-        // Reservas
-        Route::resource('reservas', App\Http\Controllers\Admin\ReservaController::class);
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('barberos', AdminBarberoController::class);
+        Route::resource('productos', AdminProductoController::class);
+        Route::resource('reservas', AdminReservaController::class);
     });
 
 /* =======================
-   PANEL ADMIN DUPLICADO (lo mantuve, solo corregido)
+   PANEL CLIENTE (Limpio y consistente)
+   Todas las rutas del cliente están bajo:
+   - prefix: /cliente
+   - name:  cliente.*
+   - middleware: auth + can:is-cliente
 ========================== */
-Route::middleware(['auth', 'role:admin|empleado'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'can:is-cliente'])
+    ->prefix('cliente')
+    ->name('cliente.')
+    ->group(function () {
 
-    // Dashboard
-    Route::get('/', function () {
-        $pendientes = \App\Models\Reserva::where('estado', 'pendiente')->count();
-        return view('admin.dashboard', compact('pendientes'));
-    })->name('dashboard');
+        // Dashboard / home del cliente (usa route('cliente.home'))
+        Route::get('/home', function () {
+            $barberos = Barbero::all();
+            return view('cliente.home', compact('barberos'));
+        })->name('home');
 
-    // Productos
-    Route::resource('productos', AdminProductoController::class);
+        // Página de inicio (controlador)
+        Route::get('/inicio', [ClienteHomeController::class, 'inicio'])->name('inicio');
 
-    // Barberos
-    Route::resource('barberos', AdminBarberoController::class);
-
-    // Reservas
-    Route::get('reservas', [AdminReservaController::class, 'index'])->name('reservas.index');
-
-    Route::prefix('admin/config')->group(function () {
-        Route::resource('empleados', App\Http\Controllers\Admin\EmpleadoController::class);
-        Route::view('settings', 'admin.settings')->name('settings');
-    });
-});
-
-/*
-==========================
-   PANEL CLIENTE
-==========================
-*/
-Route::middleware(['auth', 'can:is-cliente'])->group(function () {
-
-    // Dashboard cliente
-    Route::get('/home', function () {
-        $barberos = Barbero::all();
-        return view('cliente.home', compact('barberos'));
-    })->name('cliente.home');
-
-    Route::middleware(['auth'])->prefix('cliente')->name('cliente.')->group(function () {
-        Route::get('/inicio', [\App\Http\Controllers\Cliente\HomeController::class, 'inicio'])->name('inicio');
-    });
-
-    Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
+        // Barberos / Reservas
         Route::get('/barberos', [ClienteBarberoController::class, 'index'])->name('barberos.index');
-    });
-
-    Route::middleware(['auth', 'can:is-cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-        Route::get('/barberos', [App\Http\Controllers\Cliente\BarberoController::class, 'index'])->name('barberos.index');
         Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
         Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
         Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
-    });
 
-    Route::middleware(['auth', 'role:cliente'])->prefix('cliente')->name('cliente.')->group(function () {
-        Route::post('/ventas', [App\Http\Controllers\Cliente\VentaController::class, 'store'])->name('ventas.store');
-        Route::get('/ventas/{venta}', [App\Http\Controllers\Cliente\VentaController::class, 'show'])->name('ventas.show');
-    });
+        // Productos (lista pública para clientes)
+        Route::get('/productos', [ClienteProductoController::class, 'index'])->name('productos.index');
 
-    Route::prefix('venta')->name('venta.')->group(function () {
-        Route::post('/agregar', [VentaController::class, 'agregar'])->name('agregar');
-        Route::get('/contenido', [VentaController::class, 'contenido'])->name('contenido');
-        Route::post('/actualizar', [VentaController::class, 'actualizar'])->name('actualizar');
-        Route::post('/quitar', [VentaController::class, 'quitar'])->name('quitar');
-        Route::get('/', [VentaController::class, 'mostrar'])->name('mostrar');
-    });
+        /*
+         * Ventas / Carrito
+         * NOMBRES CONSISTENTES: cliente.ventas.*
+         */
+        // Modal / fragmento del carrito (AJAX)
+        Route::get('/ventas/carrito', [VentaController::class, 'modalCarrito'])->name('ventas.carrito');
 
-    Route::prefix('cliente')->name('cliente.')->group(function () {
+        // Ver carrito completo
         Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
+
+        // Acciones del carrito (agregar/eliminar/aumentar/disminuir/vaciar/confirmar)
         Route::post('/ventas/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
         Route::post('/ventas/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
-    });
+        Route::post('/ventas/aumentar/{producto}', [VentaController::class, 'aumentar'])->name('ventas.aumentar');
+        Route::post('/ventas/disminuir/{producto}', [VentaController::class, 'disminuir'])->name('ventas.disminuir');
+        Route::post('/ventas/vaciar', [VentaController::class, 'vaciar'])->name('ventas.vaciar');
 
-    Route::post('/venta/confirmar', [VentaController::class, 'confirmarCompra'])->name('venta.confirmar');
+        // Confirmar compra (guarda la venta)
+        Route::post('/ventas/confirmar', [VentaController::class, 'confirmarCompra'])->name('ventas.confirmar');
 
-    Route::post('/cliente/ventas/confirmar', [VentaController::class, 'confirmarCompra'])
-        ->middleware(['auth', 'can:is-cliente'])
-        ->name('cliente.ventas.confirmar');
-
-    // Carrito
-    Route::post('/carrito/{id}/aumentar', [App\Http\Controllers\Cliente\VentaController::class, 'aumentar'])
-        ->name('cliente.ventas.aumentar');
-    Route::post('/carrito/{id}/disminuir', [App\Http\Controllers\Cliente\VentaController::class, 'disminuir'])
-        ->name('cliente.ventas.disminuir');
-
-    // Productos
-    Route::get('/productos', [ClienteProductoController::class, 'index'])->name('productos.index');
-    Route::get('/cliente/productos', [\App\Http\Controllers\Cliente\ProductoController::class, 'index'])
-        ->name('cliente.productos.index');
+        // (Opcional) Detalle/éxito de compra
+        Route::get('/ventas/exito/{venta}', [VentaController::class, 'exito'])->name('ventas.exito');
 });
+

@@ -7,39 +7,51 @@ use Illuminate\Http\Request;
 use App\Models\Producto;
 use App\Models\Categoria;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class ProductoController extends Controller
 {
-public function index(Request $request)
-{
-    // Traer todas las categorías
-    $categorias = Categoria::all();
+    public function index(Request $request)
+    {
+        $categorias = Categoria::all();
 
-    // Filtrar productos por categoría si viene en la request
-    $query = Producto::with('categoria');
+        $query = Producto::with('categoria');
 
-    if ($request->filled('categoria_id')) {
-        $query->where('categoria_id', $request->categoria_id);
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+
+        $productos = $query->get();
+
+        return view('admin.productos.index', [
+            'productos' => $productos,
+            'categorias' => $categorias,
+        ]);
     }
-
-    $productos = $query->get();
-
-    return view('admin.productos.index', [
-        'productos' => $productos,
-        'categorias' => $categorias, // ← FALTABA ESTO
-    ]);
-}
-
-
 
     public function create()
     {
         $categorias = Categoria::all();
+
+        // Si no hay categorías en BD, creamos 3 por defecto (evita fallo en 'exists' durante store)
+        if ($categorias->isEmpty()) {
+            $defaults = [
+                ['nombre' => 'CERAS Y GELES'],
+                ['nombre' => 'CUIDADOS DE BARBA'],
+                ['nombre' => 'CAPAS PERSONALIZADAS'],
+            ];
+            foreach ($defaults as $d) {
+                Categoria::firstOrCreate(['nombre' => $d['nombre']]);
+            }
+            $categorias = Categoria::all();
+        }
+
         return view('admin.productos.create', compact('categorias'));
     }
 
     public function store(Request $request)
     {
+        // Validación
         $data = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
@@ -49,13 +61,19 @@ public function index(Request $request)
             'imagen' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+        try {
+            if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
+                $data['imagen'] = $request->file('imagen')->store('productos', 'public');
+            }
+
+            Producto::create($data);
+
+            return redirect()->route('admin.productos.index')->with('success', 'Producto creado exitosamente.');
+        } catch (\Throwable $e) {
+            // Log para debugging y volver con error (no perder el request)
+            Log::error('Error al crear producto: '.$e->getMessage());
+            return back()->withInput()->withErrors(['error' => 'Ocurrió un error al guardar el producto. Revisa los logs.']);
         }
-
-        Producto::create($data);
-
-        return redirect()->route('admin.productos.index')->with('success', 'Producto creado exitosamente.');
     }
 
     public function edit($id)
@@ -78,9 +96,9 @@ public function index(Request $request)
             'imagen' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('imagen')) {
+        if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
             if ($producto->imagen) {
-                Storage::delete('public/' . $producto->imagen);
+                Storage::disk('public')->delete($producto->imagen);
             }
             $data['imagen'] = $request->file('imagen')->store('productos', 'public');
         }
@@ -93,7 +111,7 @@ public function index(Request $request)
     public function destroy(Producto $producto)
     {
         if ($producto->imagen) {
-            Storage::delete('public/' . $producto->imagen);
+            Storage::disk('public')->delete($producto->imagen);
         }
         $producto->delete();
         return redirect()->route('admin.productos.index')->with('success', 'Producto eliminado.');

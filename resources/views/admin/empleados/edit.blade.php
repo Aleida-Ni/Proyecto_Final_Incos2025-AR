@@ -42,19 +42,6 @@
                 <input type="date" name="fecha_nacimiento" value="{{ $empleado->fecha_nacimiento }}" class="form-control">
             </div>
 
-            <div class="form-group">
-                <label>Nueva Contraseña (opcional)</label>
-                <div class="input-group">
-                    <input type="password" name="contraseña" id="contraseñaEdit" class="form-control">
-                    <div class="input-group-append">
-                        <span class="input-group-text">
-                            <i id="toggleContraseñaEdit" class="fa fa-eye"></i>
-                        </span>
-                    </div>
-                </div>
-                <small class="text-muted">Déjalo vacío si no deseas cambiar la contraseña</small>
-            </div>
-
             <button type="submit" class="btn btn-primary">💾 Actualizar</button>
             <a href="{{ route('admin.empleados.index') }}" class="btn btn-secondary">↩ Volver</a>
         </form>

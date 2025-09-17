@@ -7,21 +7,16 @@
 @stop
 
 @section('content')
-    <div class="container">
-        <a href="{{ route('admin.empleados.index') }}" class="btn btn-secondary mb-3">⬅ Volver</a>
+<div class="container mt-4">
+    <a href="{{ route('admin.empleados.index') }}" 
+       class="btn btn-secondary mb-4 px-4"
+       style="border-radius: 25px; font-weight:700; box-shadow: 0 4px 10px rgba(100,100,100,0.5);">
+       ⬅ Volver
+    </a>
 
-        <form action="{{ route('admin.empleados.store') }}" method="POST">
-            @csrf
+    <form action="{{ route('admin.empleados.store') }}" method="POST" class="p-4" style="background-color: #111; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,170,255,0.3);">
+        @csrf
 
-            <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" name="name" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label>Correo Electrónico</label>
-                <input type="email" name="email" class="form-control" required>
-            </div>
         <div class="form-group mb-3">
             <label class="text-white">Nombre</label>
             <input type="text" name="nombre" class="form-control border-secondary bg-dark text-white" placeholder="Ingrese el nombre" required>
@@ -47,19 +42,10 @@
             <input type="text" name="telefono" class="form-control border-secondary bg-dark text-white" placeholder="Ingrese su teléfono">
         </div>
 
-            <div class="form-group">
-                <label>Fecha de Nacimiento</label>
-                <input type="date" name="fecha_nacimiento" class="form-control">
-            </div>
-
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-
-            <button type="submit" class="btn btn-success">💾 Guardar</button>
-        </form>
-    </div>
+        <div class="form-group mb-3">
+            <label class="text-white">Fecha de Nacimiento</label>
+            <input type="date" name="fecha_nacimiento" class="form-control border-secondary bg-dark text-white">
+        </div>
 
         <p class="text-white">La contraseña será generada automáticamente y enviada al correo del empleado.</p>
 

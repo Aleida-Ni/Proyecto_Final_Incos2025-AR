@@ -7,27 +7,33 @@ use App\Models\Barbero;
 use App\Models\Reserva;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 
 class ReservaController extends Controller
 {
-public function index()
-{
-    $reservas = Reserva::with(['cliente', 'barbero'])
-        ->orderBy('created_at', 'desc') // 👈 usa tu columna personalizada
-        ->get();
+    /**
+     * Listar todas las reservas
+     */
+    public function index()
+    {
+        $reservas = Reserva::with(['cliente', 'barbero'])
+            ->orderBy('fecha', 'desc')
+            ->orderBy('hora', 'asc')
+            ->get();
 
-    return view('admin.reservas.index', compact('reservas'));
-}
+        return view('admin.reservas.index', compact('reservas'));
+    }
 
-
+    /**
+     * Crear reserva para un barbero
+     */
     public function create($barberoId, Request $request)
     {
         $barbero = Barbero::findOrFail($barberoId);
         $fecha = $request->get('fecha', date('Y-m-d'));
+
         $inicio = Carbon::createFromTime(9, 30);
         $fin = Carbon::createFromTime(19, 30);
-        $intervalo = 60;
+        $intervalo = 60; // minutos
 
         $horas = [];
 
@@ -36,6 +42,7 @@ public function index()
             $inicio->addMinutes($intervalo);
         }
 
+        // Buscar horas ocupadas
         $ocupadas = Reserva::where('barbero_id', $barberoId)
             ->where('fecha', $fecha)
             ->pluck('hora')
@@ -52,6 +59,9 @@ public function index()
         return view('cliente.reservas.create', compact('barbero', 'fecha', 'horasDisponibles'));
     }
 
+    /**
+     * Guardar una nueva reserva
+     */
     public function store(Request $r)
     {
         $r->validate([
@@ -79,8 +89,29 @@ public function index()
             'estado' => 'pendiente',
         ]);
 
-        return redirect()->route('cliente.barberos')
-            ->with('success', 'Reserva confirmada con éxito');
+        return redirect()->route('admin.reservas.index')
+            ->with('success', 'Reserva creada con éxito');
     }
 
+    /**
+     * Marcar reserva como realizada
+     */
+    public function marcarRealizada(Reserva $reserva)
+    {
+        $reserva->update(['estado' => 'realizada']);
+
+        return redirect()->route('admin.reservas.index')
+            ->with('success', 'Reserva marcada como realizada.');
+    }
+
+    /**
+     * Marcar reserva como cancelada
+     */
+    public function marcarCancelada(Reserva $reserva)
+    {
+        $reserva->update(['estado' => 'cancelada']);
+
+        return redirect()->route('admin.reservas.index')
+            ->with('success', 'Reserva cancelada.');
+    }
 }

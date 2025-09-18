@@ -15,18 +15,21 @@
                         <th>Barbero</th>
                         <th>Fecha</th>
                         <th>Hora</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                         <th>Creado</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($reservas as $reserva)
                     <tr>
+                        <!-- Cliente con modal -->
                         <td>
                             <button class="btn btn-link p-0 neon-link" data-bs-toggle="modal" data-bs-target="#clienteModal{{ $reserva->id }}">
                                 {{ $reserva->cliente->name }}
                             </button>
 
-                            <!-- Modal -->
+                            <!-- Modal cliente -->
                             <div class="modal fade" id="clienteModal{{ $reserva->id }}" tabindex="-1" aria-labelledby="clienteModalLabel{{ $reserva->id }}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content bg-dark text-white">
@@ -43,9 +46,44 @@
                                 </div>
                             </div>
                         </td>
+
+                        <!-- Barbero -->
                         <td>{{ $reserva->barbero->nombre }}</td>
+
+                        <!-- Fecha y Hora -->
                         <td>{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}</td>
                         <td>{{ $reserva->hora }}</td>
+
+                        <!-- Estado -->
+                        <td>
+                            <span class="badge 
+                                @if($reserva->estado === 'pendiente') bg-warning 
+                                @elseif($reserva->estado === 'realizada') bg-success 
+                                @else bg-danger @endif">
+                                {{ ucfirst($reserva->estado) }}
+                            </span>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td>
+                            @if($reserva->estado === 'pendiente')
+                                <form action="{{ route('admin.reservas.realizada', $reserva) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-success btn-sm">✅ Realizada</button>
+                                </form>
+
+                                <form action="{{ route('admin.reservas.cancelada', $reserva) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-danger btn-sm">❌ Cancelar</button>
+                                </form>
+                            @else
+                                <em>No disponible</em>
+                            @endif
+                        </td>
+
+                        <!-- Creado en -->
                         <td>{{ \Carbon\Carbon::parse($reserva->created_at)->format('d/m/Y H:i') }}</td>
                     </tr>
                     @endforeach

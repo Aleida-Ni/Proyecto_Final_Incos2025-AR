@@ -104,6 +104,11 @@ Route::middleware(['auth', 'role:admin|empleado'])
             Route::resource('empleados', EmpleadoController::class);
             Route::view('settings', 'admin.settings')->name('settings');
         });
+        Route::prefix('reservas')->name('reservas.')->group(function () {
+            Route::patch('/{reserva}/realizada', [App\Http\Controllers\Admin\ReservaController::class, 'marcarRealizada'])->name('realizada');
+            Route::patch('/{reserva}/cancelada', [App\Http\Controllers\Admin\ReservaController::class, 'marcarCancelada'])->name('cancelada');
+        });
+
     });
 
 

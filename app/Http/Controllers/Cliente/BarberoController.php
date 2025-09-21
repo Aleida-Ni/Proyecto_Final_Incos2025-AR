@@ -16,7 +16,7 @@ public function index()
     $barberos = Barbero::all();
 
     // Obtener reservas del cliente actual
-    $reservas = Reserva::where('user_id', auth()->id())
+    $reservas = Reserva::where('usuario_id', auth()->id())
         ->with('barbero')
         ->latest()
         ->get();

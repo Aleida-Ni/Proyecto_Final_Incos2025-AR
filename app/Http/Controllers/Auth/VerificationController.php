@@ -10,26 +10,26 @@ use App\Models\User;
 class VerificationController extends Controller
 {
     /**
-     * Muestra aviso de verificación según rol.
+     * Mostrar aviso de verificación.
      */
     public function notice()
     {
         $user = auth()->user();
 
         if ($user->rol === 'admin') {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin');
         }
 
         if ($user->rol === 'empleado') {
             return redirect()->route('empleado.dashboard');
         }
 
-        // Solo clientes ven esta vista
-        return view('auth.verify-email');
+        // Solo clientes ven la vista de verificación
+        return view('auth.verify');
     }
 
     /**
-     * Verifica el correo cuando el usuario da clic en el enlace.
+     * Verificar el correo cuando el usuario da clic en el enlace.
      */
     public function verify(Request $request, $id, $hash)
     {
@@ -40,19 +40,26 @@ class VerificationController extends Controller
             return redirect('/login')->with('error', 'Enlace de verificación inválido.');
         }
 
-        // Si ya está verificado
+        // Ya verificado
         if ($usuario->correo_verificado_en) {
             return redirect('/login')->with('status', 'Tu correo ya fue verificado.');
         }
 
-        // Marca el correo como verificado y activa usuario
+        // Marcar como verificado
         $usuario->correo_verificado_en = now();
         $usuario->estado = 1;
         $usuario->save();
 
         event(new Verified($usuario));
 
-        return redirect('/login')->with('status', '¡Correo verificado correctamente! Ya puedes iniciar sesión.');
+        // Redirigir según rol
+        if ($usuario->rol === 'admin') {
+            return redirect()->route('admin');
+        } elseif ($usuario->rol === 'empleado') {
+            return redirect()->route('empleado.dashboard');
+        } else {
+            return redirect()->route('cliente.home')->with('status', '¡Correo verificado correctamente!');
+        }
     }
 
     /**

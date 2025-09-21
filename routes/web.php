@@ -16,6 +16,7 @@ use App\Http\Controllers\Cliente\VentaController;
 use App\Http\Controllers\Admin\BarberoController as AdminBarberoController;
 use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
+use App\Http\Controllers\Admin\ReporteController as ReporteController;
 use App\Http\Controllers\Admin\EmpleadoController;
 use App\Http\Controllers\Admin\ProductoController;
 
@@ -43,7 +44,7 @@ Auth::routes(['verify' => true]);
 |--------------------------------------------------------------------------
 */
 Route::get('/email/verify', function () {
-    return view('auth.verify-email'); // crea esta vista si no existe
+    return view('auth.verify'); // crea esta vista si no existe
 })->middleware('auth')->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
@@ -108,7 +109,10 @@ Route::middleware(['auth', 'role:admin|empleado'])
             Route::patch('/{reserva}/realizada', [App\Http\Controllers\Admin\ReservaController::class, 'marcarRealizada'])->name('realizada');
             Route::patch('/{reserva}/cancelada', [App\Http\Controllers\Admin\ReservaController::class, 'marcarCancelada'])->name('cancelada');
         });
-
+        Route::prefix('reportes')->name('reportes.')->group(function () {
+            Route::get('/reservas', [ReporteController::class, 'reservas'])->name('reservas');
+            Route::get('/ventas',   [ReporteController::class, 'ventas'])->name('ventas');
+        });
     });
 
 
@@ -135,12 +139,11 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
    - name:  cliente.*
    - middleware: auth + can:is-cliente
 ========================== */
-Route::middleware(['auth', 'can:is-cliente'])
+Route::middleware(['auth', 'verified', 'estado','can:is-cliente'])
     ->prefix('cliente')
     ->name('cliente.')
     ->group(function () {
 
-        // Dashboard / home del cliente (usa route('cliente.home'))
         Route::get('/home', function () {
             $barberos = Barbero::all();
             return view('cliente.home', compact('barberos'));
@@ -180,5 +183,4 @@ Route::middleware(['auth', 'can:is-cliente'])
 
         // (Opcional) Detalle/éxito de compra
         Route::get('/ventas/exito/{venta}', [VentaController::class, 'exito'])->name('ventas.exito');
-});
-
+    });

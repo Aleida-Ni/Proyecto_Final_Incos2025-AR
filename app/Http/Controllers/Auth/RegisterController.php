@@ -72,11 +72,9 @@ public function register(Request $request)
     // 🚀 Enviar correo de verificación personalizado
     $usuario->sendEmailVerificationNotification();
 
-    // ✅ Iniciar sesión automáticamente
-    $this->guard()->login($usuario);
 
     // Redirigir según rol (o a verificación de correo)
-    return redirect()->route('home')->with('status', '¡Revisa tu correo para verificar tu cuenta!');
+    return redirect()->route('verify')->with('status', '¡Revisa tu correo para verificar tu cuenta!');
 }
 
 

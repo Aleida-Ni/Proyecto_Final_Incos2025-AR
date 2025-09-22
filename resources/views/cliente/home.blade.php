@@ -7,37 +7,39 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
 
 <style>
-    /* === Hero === */
     body {
         background-color: #000;
     }
 
+    /* === Hero === */
     .custom-hero {
-        background-image: url("{{ asset('storage/imagenes/fondocli.jpg') }}");
+        background-image: url("{{ asset('imagenes/homeCliente/fondoCliente1.jpg') }}");
         background-size: cover;
         background-position: center;
-        height: 300px;
+        height: 350px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         padding: 30px 0;
+        text-align: center;
     }
 
     .custom-hero h1 {
         font-size: 3rem;
         font-weight: 700;
-        color: #000000ff;
-        text-shadow: 0 0 10px #00cfff, 0 0 20px #0077cc;
+        color: #fff;
+        text-shadow: 0 0 10px #000;
         margin-bottom: 10px;
     }
 
     .custom-hero p {
         font-size: 1.2rem;
-        color: #000;
-        backdrop-filter: blur(10px);
+        color: #f1f1f1;
+        background: rgba(0,0,0,0.4);
         padding: 10px 20px;
         border-radius: 6px;
+        display: inline-block;
     }
 
     .custom-hero .btn-blue {
@@ -49,6 +51,7 @@
         box-shadow: 0 0 10px #007bff, 0 0 20px #3399ff;
         text-decoration: none;
         transition: all .3s;
+        margin-top: 15px;
     }
 
     .custom-hero .btn-blue:hover {
@@ -87,7 +90,7 @@
         transition: transform .45s cubic-bezier(.22, .9, .33, 1);
     }
 
-    /* 👇 Aumentamos el tamaño del slide activo */
+    /* Efecto zoom en el slide activo */
     .swiper-slide-active .slide-img {
         transform: scale(1.12);
     }
@@ -141,20 +144,21 @@
     }
 
     @keyframes twinkle {
-        0% {
-            opacity: .2;
-            transform: translateY(0) scale(1);
-        }
+        0% { opacity: .2; transform: translateY(0) scale(1); }
+        50% { opacity: .95; transform: translateY(-2px) scale(1.02); }
+        100% { opacity: .2; transform: translateY(0) scale(1); }
+    }
 
-        50% {
-            opacity: .95;
-            transform: translateY(-2px) scale(1.02);
-        }
-
-        100% {
-            opacity: .2;
-            transform: translateY(0) scale(1);
-        }
+    /* Tarjetas rápidas */
+    .option-card {
+        border-radius: 15px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        padding: 25px 20px;
+    }
+    .option-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
 
     /* responsive */
@@ -164,17 +168,40 @@
             --slide-height: 240px;
         }
     }
-
     @media (max-width: 576px) {
         :root {
             --slide-width: 260px;
             --slide-height: 180px;
         }
     }
+      /* Tarjetas de productos */
+    .product-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .product-card img {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    .product-card:hover img {
+        transform: scale(1.05);
+    }
+    .product-card .card-body {
+        background-color: #111;
+        color: #fff;
+    }
 </style>
 @endpush
 
 @section('content')
+
+<!-- HERO -->
 <div class="custom-hero">
     <div class="hero-content text-center">
         <h1>Transforma tu Estilo</h1>
@@ -183,11 +210,74 @@
     </div>
 </div>
 
+<!-- PRODUCTOS DESTACADOS -->
+<div class="container my-5">
+    <h2 class="text-center text-white mb-4">Productos Destacados</h2>
 
-    <div class="swiper-pagination"></div>
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-button-next"></div>
+    <div class="row justify-content-center">
+        <!-- Tarjeta 1 -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card product-card h-100 shadow-sm">
+                <img src="{{ asset('imagenes/homeCliente/productoLogin1.jpeg') }}" class="card-img-top" alt="Producto 1">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Producto 1</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 2 -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card product-card h-100 shadow-sm">
+                <img src="{{ asset('imagenes/homeCliente/productoLogin2.jpeg') }}" class="card-img-top" alt="Producto 2">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Producto 2</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta 3 -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card product-card h-100 shadow-sm">
+                <img src="{{ asset('imagenes/homeCliente/productoLogin3.jpeg') }}" class="card-img-top" alt="Producto 3">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Producto 3</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÓN VER TODO -->
+    <div class="text-center mt-4">
+        <a href="{{ route('cliente.productos.index') }}" class="btn btn-outline-light px-4 py-2">
+            VER TODO
+        </a>
+    </div>
 </div>
+
+<!-- TARJETAS RÁPIDAS -->
+<div class="container my-5">
+    <div class="row text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow option-card">
+                <i class="fas fa-calendar-check fa-2x my-3 text-primary"></i>
+                <h5>Mis Reservas</h5>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow option-card">
+                <i class="fas fa-boxes fa-2x my-3 text-success"></i>
+                <h5>Productos</h5>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow option-card">
+                <i class="fas fa-user fa-2x my-3 text-info"></i>
+                <h5>Mi Perfil</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('js')

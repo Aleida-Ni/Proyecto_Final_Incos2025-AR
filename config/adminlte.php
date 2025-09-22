@@ -342,26 +342,26 @@ return [
             'icon' => '',
             'can' => 'menu-admin',
         ],
-// dentro del array 'menu' en config/adminlte.php
-[
-    'text' => 'Reportes',
-    'icon' => 'fas fa-chart-line',
-    'can'  => 'menu-admin',
-    'submenu' => [
+        // dentro del array 'menu' en config/adminlte.php
         [
-            'text'  => 'Reservas',
-            'route' => 'admin.reportes.reservas',
-            'icon'  => 'fas fa-calendar-check',
-            'can'   => 'menu-admin',
+            'text' => 'Reportes',
+            'icon' => 'fas fa-chart-line',
+            'can'  => 'menu-admin',
+            'submenu' => [
+                [
+                    'text'  => 'Reservas',
+                    'route' => 'admin.reportes.reservas',
+                    'icon'  => 'fas fa-calendar-check',
+                    'can'   => 'menu-admin',
+                ],
+                [
+                    'text'  => 'Ventas',
+                    'route' => 'admin.reportes.ventas',
+                    'icon'  => 'fas fa-cash-register',
+                    'can'   => 'menu-admin',
+                ],
+            ],
         ],
-        [
-            'text'  => 'Ventas',
-            'route' => 'admin.reportes.ventas',
-            'icon'  => 'fas fa-cash-register',
-            'can'   => 'menu-admin',
-        ],
-    ],
-],
 
 
 
@@ -385,26 +385,26 @@ return [
             'icon' => 'fas fa-boxes',
             'can' => 'menu-empleado',
         ],
-// dentro del array 'menu' en config/adminlte.php
-[
-    'text' => 'Reportes',
-    'icon' => 'fas fa-chart-line',
-    'can'  => 'menu-admin',
-    'submenu' => [
+        // dentro del array 'menu' en config/adminlte.php
         [
-            'text'  => 'Reservas',
-            'route' => 'admin.reportes.reservas',
-            'icon'  => 'fas fa-calendar-check',
-            'can'   => 'menu-admin',
+            'text' => 'Reportes',
+            'icon' => 'fas fa-chart-line',
+            'can'  => 'menu-empleado',
+            'submenu' => [
+                [
+                    'text'  => 'Reservas',
+                    'route' => 'admin.reportes.reservas',
+                    'icon'  => 'fas fa-calendar-check',
+                    'can'   => 'menu-empleado',
+                ],
+                [
+                    'text'  => 'Ventas',
+                    'route' => 'admin.reportes.ventas',
+                    'icon'  => 'fas fa-cash-register',
+                    'can'   => 'menu-empleado',
+                ],
+            ],
         ],
-        [
-            'text'  => 'Ventas',
-            'route' => 'admin.reportes.ventas',
-            'icon'  => 'fas fa-cash-register',
-            'can'   => 'menu-admin',
-        ],
-    ],
-],
 
 
 

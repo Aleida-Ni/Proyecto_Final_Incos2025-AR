@@ -62,7 +62,7 @@ class ReservaController extends Controller
 
         Reserva::create([
             'barbero_id' => $request->barbero_id,
-            'user_id'    => auth()->user()->id,
+            'usuario_id'    => auth()->user()->id,
             'fecha'      => $request->fecha,
             'hora'       => $request->hora,
         ]);
@@ -75,7 +75,7 @@ return redirect()
 
     public function misReservas()
     {
-        $reservas = Reserva::where('user_id', auth()->user()->id)
+        $reservas = Reserva::where('usuario_id', auth()->user()->id)
             ->with('barbero')
             ->latest()
             ->get();
@@ -86,7 +86,7 @@ return redirect()
     public function ticket($id)
     {
         $reserva = Reserva::with('barbero')
-            ->where('user_id', auth()->id())
+            ->where('usuario_id', auth()->id())
             ->findOrFail($id);
 
         return view('cliente.reservas.ticket', compact('reserva'));

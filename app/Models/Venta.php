@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Venta extends Model
 {
+        const CREATED_AT = 'creado_en';
+    const UPDATED_AT = 'actualizado_en';
     protected $fillable = ['cliente_id', 'empleado_id', 'codigo', 'total'];
 
     // app/Models/Venta.php

@@ -12,7 +12,7 @@ class Reserva extends Model
     protected $table = 'reservas';
 
     protected $fillable = [
-        'user_id',
+        'usuario_id',
         'barbero_id',
         'fecha',
         'hora',

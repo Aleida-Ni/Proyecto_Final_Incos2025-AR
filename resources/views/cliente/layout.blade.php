@@ -84,9 +84,9 @@
                 <!-- MENÚ -->
                 <div class="collapse navbar-collapse show" id="navbarCollapse">
                     <ul class="navbar-nav mx-auto">
-                        <li class="nav-item"><a href="{{ route('cliente.inicio') }}" class="nav-link">Inicio</a></li>
-                        <li class="nav-item"><a href="{{ route('cliente.barberos.index') }}" class="nav-link">Barberos</a></li>
-                        <li class="nav-item"><a href="{{ route('cliente.productos.index') }}" class="nav-link">Productos</a></li>
+                        <li class="nav-item"><a href="{{ route('cliente.inicio') }}" class="nav-link">INICIO</a></li>
+                        <li class="nav-item"><a href="{{ route('cliente.barberos.index') }}" class="nav-link">BARBEROS</a></li>
+                        <li class="nav-item"><a href="{{ route('cliente.productos.index') }}" class="nav-link">TIENDA</a></li>
 
                         @auth
                         <li class="nav-item dropdown">
@@ -125,9 +125,9 @@
 
                 <!-- LINKS -->
                 <div class="footer-links mb-3">
-                    <a href="{{ route('cliente.inicio') }}">Inicio</a>
-                    <a href="{{ route('cliente.barberos.index') }}">Barberos</a>
-                    <a href="{{ route('cliente.productos.index') }}">Productos</a>
+                    <a href="{{ route('cliente.inicio') }}">INICIO</a>
+                    <a href="{{ route('cliente.barberos.index') }}">BARBEROS</a>
+                    <a href="{{ route('cliente.productos.index') }}">TIENDA</a>
                 </div>
 
                 <!-- REDES -->

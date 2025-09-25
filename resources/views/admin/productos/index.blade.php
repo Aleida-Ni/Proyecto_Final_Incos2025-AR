@@ -2,22 +2,30 @@
 
 @section('title', 'Lista de Productos')
 
-@section('css')
-<link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-@endsection
-
 @section('content')
-<div class="content-wrapper"> {{-- AdminLTE wrapper correcto --}}
-    <div class="container mt-4 table-container">
-        <h1 class="text-center text-dark title-shadow mb-4">
-            Lista de Productos
-        </h1>
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+
+<div class="container mt-4">
+    <!-- Cabecera -->
+    <h1 class="text-center bg-white text-dark py-3 mb-0">
+        Lista de Productos
+    </h1>
+
+    <!-- Contenedor gris -->
+    <div class="report-container">
+
+        <!-- Encabezados de categorías -->
+        <div class="text-center mb-3">
+            @foreach ($categorias as $categoria)
+                <span class="categoria-label">{{ strtoupper($categoria->nombre) }}</span>
+            @endforeach
+        </div>
 
         <!-- Filtro por categoría -->
         <form method="GET" action="{{ route('admin.productos.index') }}" class="mb-4">
             <div class="row justify-content-center">
                 <div class="col-md-4">
-                    <select name="categoria_id" class="form-control border-black shadow-sm" onchange="this.form.submit()">
+                    <select name="categoria_id" class="form-control filter-input" onchange="this.form.submit()">
                         <option value="">-- Ver todas las categorías --</option>
                         @foreach ($categorias as $categoria)
                             <option value="{{ $categoria->id }}" 
@@ -28,59 +36,27 @@
                     </select>
                 </div>
                 <div class="col-md-2 text-center">
-                    <a href="{{ route('admin.productos.index') }}" class="btn btn-custom w-100">🔄 Reset</a>
+                    <a href="{{ route('admin.productos.index') }}" class="btn btn-reset w-100">🔄 Reset</a>
                 </div>
             </div>
         </form>
 
         <!-- Botón agregar producto -->
         <div class="text-right mb-3">
-            <a href="{{ route('admin.productos.create') }}" class="btn btn-custom">Agregar Producto</a>
+            <a href="{{ route('admin.productos.create') }}" class="btn btn-add">Agregar Producto</a>
         </div>
 
-        <!-- Tabla de productos -->
+        <!-- Mostrar productos -->
         @if(request('categoria_id'))
-            <table class="table custom-table shadow-lg">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Imagen</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($productos as $producto)
-                        <tr>
-                            <td>{{ $producto->nombre }}</td>
-                            <td>{{ $producto->categoria ? $producto->categoria->nombre : 'Sin categoría' }}</td>
-                            <td>{{ $producto->precio }} Bs</td>
-                            <td>{{ $producto->stock }}</td>
-                            <td>
-                                @if($producto->imagen)
-                                    <img src="{{ asset('storage/' . $producto->imagen) }}" class="product-img">
-                                @else
-                                    <span class="text-muted">Sin imagen</span>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('admin.productos.edit', $producto->id) }}" class="btn-editar">✏ Editar</a>
-                                <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn-eliminar" 
-                                            onclick="return confirm('¿Seguro que deseas eliminar este producto?')">🗑 Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            @foreach ($categorias as $categoria)
-                <h3 class="mt-5 text-dark border-bottom pb-2">{{ $categoria->nombre }}</h3>
-                <table class="table custom-table shadow-sm">
+            <!-- Solo una categoría -->
+            @php
+                $categoria = $categorias->firstWhere('id', request('categoria_id'));
+                $productosCat = $productos->where('categoria_id', $categoria->id);
+            @endphp
+
+            <h3 class="text-light border-bottom pb-2">{{ strtoupper($categoria->nombre) }}</h3>
+            <div class="table-responsive">
+                <table class="table report-table">
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -91,7 +67,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($productos->where('categoria_id', $categoria->id) as $producto)
+                        @forelse ($productosCat as $producto)
                             <tr>
                                 <td>{{ $producto->nombre }}</td>
                                 <td>{{ $producto->precio }} Bs</td>
@@ -107,131 +83,162 @@
                                     <a href="{{ route('admin.productos.edit', $producto->id) }}" class="btn-editar">Editar</a>
                                     <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn-eliminar"
+                                        <button type="submit" class="btn-eliminar" 
                                                 onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
                                     </form>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr><td colspan="5" class="text-center">Sin registro de productos</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
+            </div>
+
+        @else
+            <!-- Todas las categorías -->
+            @foreach ($categorias as $categoria)
+                <h3 class="text-light border-bottom pb-2">{{ strtoupper($categoria->nombre) }}</h3>
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($productos->where('categoria_id', $categoria->id) as $producto)
+                                <tr>
+                                    <td>{{ $producto->nombre }}</td>
+                                    <td>{{ $producto->precio }} Bs</td>
+                                    <td>{{ $producto->stock }}</td>
+                                    <td>
+                                        @if($producto->imagen)
+                                            <img src="{{ asset('storage/' . $producto->imagen) }}" class="product-img">
+                                        @else
+                                            <span class="text-muted">Sin imagen</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('admin.productos.edit', $producto->id) }}" class="btn-editar">Editar</a>
+                                        <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn-eliminar" 
+                                                    onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5" class="text-center">Sin registro de productos</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             @endforeach
         @endif
     </div>
 </div>
 @stop
+
 @push('css')
 <style>
-/* ==================== CONTENEDOR ==================== */
-.table-container {
-    background-color: #e5e5e5; /* plomo claro */
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    position: relative; /* importante */
+.report-container {
+    background: #6e6b6bff;
+    padding: 25px;
+    border: 1px solid #fff;
+    border-top: none;
+    max-width: 1100px;
+    margin: 0 auto;
+    color: #fff;
 }
 
-/* ==================== TABLAS ==================== */
-.custom-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: #f0f0f0; /* plomo */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.custom-table thead {
-    background-color: #c0c0c0; /* encabezado más oscuro */
-    color: #111;
+.categoria-label {
+    display: inline-block;
+    background: #fff;
+    color: #000;
     font-weight: bold;
+    padding: 5px 12px;
+    margin: 3px;
+    border: 1px solid #000;
 }
 
-.custom-table th, .custom-table td {
+.filter-input {
+    background: #6e6b6bff;
+    color: #fff;
+    border: 1px solid #fff;
+}
+
+.filter-input option {
+    background: #6e6b6bff;
+    color: #fff;
+}
+
+.btn-reset, .btn-add {
+    border: 1px solid #fff;
+    border-radius: 0;
+    padding: 8px 15px;
+    font-weight: bold;
+    color: #fff;
+    transition: 0.3s;
+}
+
+.btn-reset {
+    background: #4a5568;
+}
+.btn-reset:hover { background: #2d3748; }
+
+.btn-add {
+    background: #3b3c3dff;
+}
+.btn-add:hover { background: #2b6cb0; }
+
+.report-table {
+    width: 100%;
+    background: #6e6b6bff;
+    border: 1px solid #fff;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.report-table thead {
+    background: #6e6b6bff;
+}
+
+.report-table th, .report-table td {
     padding: 12px 15px;
     text-align: center;
     vertical-align: middle;
-    color: #222;
+    border: 1px solid #fff;
 }
 
-/* Hover fila */
-.custom-table tbody tr:hover {
-    background-color: #d0d0d0; /* plomo medio */
-    transform: scale(1.02);
-    transition: all 0.3s ease;
-}
-
-/* ==================== IMAGEN ==================== */
 .product-img {
     width: 60px;
     height: 60px;
-    border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #fff;
+    border-radius: 50%; /* circulares */
+    transition: all 0.3s ease;
 }
-
 .product-img:hover {
     transform: scale(1.2);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    border-radius: 0; /* cuadradas al pasar mouse */
 }
 
-/* ==================== BOTONES ==================== */
-.btn-editar {
+/* ======== BOTONES ACCIONES ======== */
+.btn-editar, .btn-eliminar {
     background: none;
     border: none;
-    color: #111; /* negro */
-    text-shadow: 1px 1px 2px #aaa; /* destello plomo */
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
 }
-
-.btn-editar:hover {
-    color: #000;
-    text-shadow: 2px 2px 6px #999;
-    transform: scale(1.1);
-}
-
-.btn-eliminar {
-    background: none;
-    border: none;
-    color: #e53e3e; /* rojo */
-    text-shadow: 1px 1px 2px #c53030; /* destello rojo */
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-eliminar:hover {
-    color: #c53030;
-    text-shadow: 2px 2px 6px #a80000;
-    transform: scale(1.1);
-}
-
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 768px) {
-    .custom-table th, .custom-table td {
-        padding: 8px 10px;
-        font-size: 0.9rem;
-    }
-    
-    .btn-editar, .btn-eliminar {
-        font-size: 0.85rem;
-    }
-
-    .product-img {
-        width: 50px;
-        height: 50px;
-    }
-}
-
-/* ==================== EVITAR SUPERPOSICIÓN ==================== */
-.content-wrapper {
-    position: relative;
-    z-index: 0; /* debajo de sidebar y navbar */
-}
-
+.btn-editar { color: #63b3ed; }
+.btn-editar:hover { color: #4299e1; }
+.btn-eliminar { color: #f56565; }
+.btn-eliminar:hover { color: #c53030; }
 </style>
 @endpush

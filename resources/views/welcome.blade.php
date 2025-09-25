@@ -53,7 +53,7 @@
             padding: 10px 25px;
             background: linear-gradient(135deg, #444444, #222222);
             /* plomo */
-            color: #ffffff;
+            color: #090909ff;
             text-decoration: none;
             font-weight: 700;
             border-radius: 25px;
@@ -94,29 +94,24 @@
             margin-bottom: 50px;
         }
 
-        .buttons a {
-            display: inline-block;
-            margin: 10px 15px;
-            padding: 14px 40px;
-            background: linear-gradient(135deg, #444444, #222222);
-            /* plomo */
-            color: #ffffff;
-            text-decoration: none;
-            font-weight: 700;
-            border-radius: 25px;
-            box-shadow: 0 4px 10px rgba(68, 68, 68, 0.3);
+.buttons a {
+    margin: 10px 15px;
+    padding: 0;                      /* sin relleno para que parezca enlace */
+    background: none !important;     /* sin fondo */
+    border: none !important;         /* sin bordes */
+    color: #191818ff;                /* color del texto */
+    text-decoration: underline;      /* subrayado */
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease;     /* efecto suave al pasar el mouse */
+}
 
-            transition: background 0.3s ease, box-shadow 0.3s ease;
-            font-size: 1.1rem;
-            letter-spacing: 0.05em;
-        }
+/* Hover efecto */
+.buttons a:hover {
+    color: #8d95ebff;   /* cambia a un color llamativo al pasar el mouse */
+}
 
-        .buttons a:hover {
-            background: linear-gradient(135deg, #001933, #003366);
-            /* azul super oscuro */
-            box-shadow: 0 6px 20px rgba(0, 25, 51, 0.4);
-
-        }
 
         /* Sección de Servicios */
         #servicios {

@@ -13,10 +13,13 @@ class RegisterController extends Controller
 {
     use RegistersUsers;
 
-    /**
-     * Después del registro, redirige a la página de verificación.
-     */
+
     protected $redirectTo = '/email/verify';
+
+    protected function redirectTo()
+{
+    return route('verification.notice');
+}
 
     public function __construct()
     {
@@ -52,8 +55,8 @@ class RegisterController extends Controller
             'telefono'         => $data['telefono'],
             'fecha_nacimiento' => $data['fecha_nacimiento'],
             'contrasenia'       => Hash::make($data['contrasenia']),
-            'rol'              => 'cliente', // por defecto
-            'estado'           => 0,         // Por defecto inactivo
+            'rol'              => 'cliente', 
+            'estado'           => 0,         
         ]);
     }
 
@@ -63,18 +66,16 @@ class RegisterController extends Controller
      */
 public function register(Request $request)
 {
-    // Validar datos
     $this->validator($request->all())->validate();
 
-    // Crear usuario
     $usuario = $this->create($request->all());
 
-    // 🚀 Enviar correo de verificación personalizado
     $usuario->sendEmailVerificationNotification();
 
+    $this->guard()->login($usuario);
 
-    // Redirigir según rol (o a verificación de correo)
-    return redirect()->route('verify')->with('status', '¡Revisa tu correo para verificar tu cuenta!');
+    return $this->registered($request, $usuario)
+        ?: redirect($this->redirectPath());
 }
 
 

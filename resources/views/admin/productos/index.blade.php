@@ -2,118 +2,74 @@
 
 @section('title', 'Lista de Productos')
 
+@section('css')
+<link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
+
 @section('content')
-<div class="container mt-4">
-    <h1 class="text-center mb-4 text-primary" style="text-shadow: 0 0 5px #00aaff, 0 0 10px #00ccff;">
-        📦 Lista de Productos
-    </h1>
+<div class="content-wrapper"> {{-- AdminLTE wrapper correcto --}}
+    <div class="container mt-4 table-container">
+        <h1 class="text-center text-dark title-shadow mb-4">
+            Lista de Productos
+        </h1>
 
-    <!-- Filtro por categoría -->
-    <form method="GET" action="{{ route('admin.productos.index') }}" class="mb-4">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <select name="categoria_id" class="form-control border-info shadow-sm" onchange="this.form.submit()">
-                    <option value="">-- Ver todas las categorías --</option>
-                    @foreach ($categorias as $categoria)
-                        <option value="{{ $categoria->id }}" 
-                            {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
-                            {{ $categoria->nombre }}
-                        </option>
-                    @endforeach
-                </select>
+        <!-- Filtro por categoría -->
+        <form method="GET" action="{{ route('admin.productos.index') }}" class="mb-4">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <select name="categoria_id" class="form-control border-black shadow-sm" onchange="this.form.submit()">
+                        <option value="">-- Ver todas las categorías --</option>
+                        @foreach ($categorias as $categoria)
+                            <option value="{{ $categoria->id }}" 
+                                {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                {{ $categoria->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 text-center">
+                    <a href="{{ route('admin.productos.index') }}" class="btn btn-custom w-100">🔄 Reset</a>
+                </div>
             </div>
-            <div class="col-md-2 text-center">
-                <a href="{{ route('admin.productos.index') }}" class="btn btn-secondary w-100">🔄 Reset</a>
-            </div>
+        </form>
+
+        <!-- Botón agregar producto -->
+        <div class="text-right mb-3">
+            <a href="{{ route('admin.productos.create') }}" class="btn btn-custom">Agregar Producto</a>
         </div>
-    </form>
 
-    <!-- Botón agregar producto -->
-    <div class="text-right mb-3">
-        <a href="{{ route('admin.productos.create') }}" class="btn btn-success px-4" 
-           style="border-radius: 25px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,255,170,0.4);">
-            ➕ Agregar Producto
-        </a>
-    </div>
-
-    <!-- Mostrar productos -->
-    @if(request('categoria_id'))
-        {{-- Vista filtrada --}}
-        <table class="table custom-table shadow-lg">
-            <thead class="bg-dark text-white text-center">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Categoría</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Imagen</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="text-center align-middle">
-                @foreach ($productos as $producto)
-                    <tr>
-                        <td>{{ $producto->nombre }}</td>
-                        <td>{{ $producto->categoria ? $producto->categoria->nombre : 'Sin categoría' }}</td>
-                        <td><span class="badge bg-success">{{ $producto->precio }} Bs</span></td>
-                        <td><span class="badge bg-info">{{ $producto->stock }}</span></td>
-                        <td>
-                            @if($producto->imagen)
-                                <img src="{{ asset('storage/' . $producto->imagen) }}" width="80" class="rounded shadow">
-                            @else
-                                <span class="text-muted">Sin imagen</span>
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.productos.edit', $producto->id) }}" 
-                               class="btn btn-warning btn-sm">✏ Editar</a>
-                            <form action="{{ route('admin.productos.destroy', $producto->id) }}" 
-                                  method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm" 
-                                        onclick="return confirm('¿Seguro que deseas eliminar este producto?')">🗑 Eliminar</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @else
-        {{-- Vista agrupada por categoría --}}
-        @foreach ($categorias as $categoria)
-            <h3 class="mt-5 text-dark border-bottom pb-2">
-                📂 {{ $categoria->nombre }}
-            </h3>
-            <table class="table custom-table shadow-sm">
-                <thead class="bg-primary text-white text-center">
+        <!-- Tabla de productos -->
+        @if(request('categoria_id'))
+            <table class="table custom-table shadow-lg">
+                <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Categoría</th>
                         <th>Precio</th>
                         <th>Stock</th>
                         <th>Imagen</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="text-center align-middle">
-                    @foreach ($productos->where('categoria_id', $categoria->id) as $producto)
+                <tbody>
+                    @foreach ($productos as $producto)
                         <tr>
                             <td>{{ $producto->nombre }}</td>
-                            <td><span class="badge bg-success">{{ $producto->precio }} Bs</span></td>
-                            <td><span class="badge bg-info">{{ $producto->stock }}</span></td>
+                            <td>{{ $producto->categoria ? $producto->categoria->nombre : 'Sin categoría' }}</td>
+                            <td>{{ $producto->precio }} Bs</td>
+                            <td>{{ $producto->stock }}</td>
                             <td>
                                 @if($producto->imagen)
-                                    <img src="{{ asset('storage/' . $producto->imagen) }}" width="80" class="rounded shadow">
+                                    <img src="{{ asset('storage/' . $producto->imagen) }}" class="product-img">
                                 @else
                                     <span class="text-muted">Sin imagen</span>
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('admin.productos.edit', $producto->id) }}" 
-                                   class="btn btn-warning btn-sm">✏ Editar</a>
-                                <form action="{{ route('admin.productos.destroy', $producto->id) }}" 
-                                      method="POST" class="d-inline">
+                                <a href="{{ route('admin.productos.edit', $producto->id) }}" class="btn-editar">✏ Editar</a>
+                                <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-danger btn-sm" 
+                                    <button type="submit" class="btn-eliminar" 
                                             onclick="return confirm('¿Seguro que deseas eliminar este producto?')">🗑 Eliminar</button>
                                 </form>
                             </td>
@@ -121,49 +77,161 @@
                     @endforeach
                 </tbody>
             </table>
-        @endforeach
-    @endif
+        @else
+            @foreach ($categorias as $categoria)
+                <h3 class="mt-5 text-dark border-bottom pb-2">{{ $categoria->nombre }}</h3>
+                <table class="table custom-table shadow-sm">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Imagen</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($productos->where('categoria_id', $categoria->id) as $producto)
+                            <tr>
+                                <td>{{ $producto->nombre }}</td>
+                                <td>{{ $producto->precio }} Bs</td>
+                                <td>{{ $producto->stock }}</td>
+                                <td>
+                                    @if($producto->imagen)
+                                        <img src="{{ asset('storage/' . $producto->imagen) }}" class="product-img">
+                                    @else
+                                        <span class="text-muted">Sin imagen</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.productos.edit', $producto->id) }}" class="btn-editar">Editar</a>
+                                    <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn-eliminar"
+                                                onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endforeach
+        @endif
+    </div>
 </div>
-
-{{-- Estilos personalizados --}}
+@stop
+@push('css')
 <style>
-    .custom-table {
-        border-radius: 12px;
-        overflow: hidden;
+/* ==================== CONTENEDOR ==================== */
+.table-container {
+    background-color: #e5e5e5; /* plomo claro */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    position: relative; /* importante */
+}
+
+/* ==================== TABLAS ==================== */
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f0f0f0; /* plomo */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.custom-table thead {
+    background-color: #c0c0c0; /* encabezado más oscuro */
+    color: #111;
+    font-weight: bold;
+}
+
+.custom-table th, .custom-table td {
+    padding: 12px 15px;
+    text-align: center;
+    vertical-align: middle;
+    color: #222;
+}
+
+/* Hover fila */
+.custom-table tbody tr:hover {
+    background-color: #d0d0d0; /* plomo medio */
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+/* ==================== IMAGEN ==================== */
+.product-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-img:hover {
+    transform: scale(1.2);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* ==================== BOTONES ==================== */
+.btn-editar {
+    background: none;
+    border: none;
+    color: #111; /* negro */
+    text-shadow: 1px 1px 2px #aaa; /* destello plomo */
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-editar:hover {
+    color: #000;
+    text-shadow: 2px 2px 6px #999;
+    transform: scale(1.1);
+}
+
+.btn-eliminar {
+    background: none;
+    border: none;
+    color: #e53e3e; /* rojo */
+    text-shadow: 1px 1px 2px #c53030; /* destello rojo */
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-eliminar:hover {
+    color: #c53030;
+    text-shadow: 2px 2px 6px #a80000;
+    transform: scale(1.1);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .custom-table th, .custom-table td {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-editar, .btn-eliminar {
+        font-size: 0.85rem;
     }
 
-    .custom-table thead {
-        font-size: 1rem;
-        letter-spacing: 1px;
+    .product-img {
+        width: 50px;
+        height: 50px;
     }
+}
 
-    .custom-table tbody tr:hover {
-        background: rgba(0, 170, 255, 0.1);
-        transition: 0.3s;
-    }
+/* ==================== EVITAR SUPERPOSICIÓN ==================== */
+.content-wrapper {
+    position: relative;
+    z-index: 0; /* debajo de sidebar y navbar */
+}
 
-    .btn-editar {
-        background: #ffc107;
-        color: #111;
-        font-weight: bold;
-        border-radius: 20px;
-    }
-
-    .btn-eliminar {
-        background: #dc3545;
-        color: #fff;
-        font-weight: bold;
-        border-radius: 20px;
-    }
-
-    .btn-editar:hover {
-        background: #e0a800;
-        transform: scale(1.05);
-    }
-
-    .btn-eliminar:hover {
-        background: #c82333;
-        transform: scale(1.05);
-    }
 </style>
-@endsection
+@endpush

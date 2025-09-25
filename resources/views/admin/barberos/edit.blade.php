@@ -1,7 +1,9 @@
 @extends('adminlte::page')
 
 @section('title', 'Editar Barbero')
-
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
 @section('content')
     <h1 class="text-dark">Editar Barbero</h1>
     <form action="{{ route('admin.barberos.update', $barbero->id) }}" method="POST" enctype="multipart/form-data">

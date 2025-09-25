@@ -1,5 +1,7 @@
 @extends('adminlte::page')
-
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
 @section('content')
     <h1>Agregar Producto</h1>
     <form action="{{ route('admin.productos.store') }}" method="POST" enctype="multipart/form-data">

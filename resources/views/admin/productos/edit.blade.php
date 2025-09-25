@@ -1,4 +1,7 @@
 @extends('adminlte::page')
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
 @section('content')
 <h1>Editar Producto</h1>
 <form action="{{ route('admin.productos.update', $producto->id) }}" method="POST" enctype="multipart/form-data">

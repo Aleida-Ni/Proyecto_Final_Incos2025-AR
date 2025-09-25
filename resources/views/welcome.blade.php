@@ -44,7 +44,10 @@
 
         }
 
+        
         .nav-buttons a {
+            background: none !important;
+            border: none !important;
             display: inline-block;
             margin-left: 15px;
             padding: 10px 25px;

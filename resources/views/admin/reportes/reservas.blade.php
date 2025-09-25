@@ -1,7 +1,9 @@
 @extends('adminlte::page')
 
 @section('title', 'Reportes - Reservas')
-
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
 @section('content_header')
     <h1>Reporte de Reservas</h1>
 @stop

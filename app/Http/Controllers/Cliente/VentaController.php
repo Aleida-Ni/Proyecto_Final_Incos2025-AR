@@ -7,6 +7,8 @@ use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class VentaController extends Controller
 {
@@ -106,39 +108,60 @@ public function confirmarCompra(Request $request)
     $carrito = session('carrito', []);
 
     if (empty($carrito)) {
-        return redirect()->route('cliente.ventas.index')->with('error', 'El carrito está vacío.');
+        return redirect()->route('cliente.ventas.index')
+            ->with('error', 'El carrito está vacío.');
     }
 
     $total = 0;
 
-    // Crear la venta
-    $venta = Venta::create([
-        'cliente_id' => $user->id,
-        'empleado_id' => null, // puede ser null porque ya lo hicimos nullable
-        'codigo' => 'PED-' . strtoupper(uniqid()),
-        'total' => 0,
-    ]);
-
-    // Agregar productos a detalles_venta
-    foreach ($carrito as $id => $item) {
-        $subtotal = $item['precio'] * $item['cantidad'];
-        $total += $subtotal;
-
-        $venta->detalles()->create([
-            'producto_id' => $id,
-            'cantidad' => $item['cantidad'],
-            'precio' => $item['precio'], // precio unitario
-            'subtotal' => $subtotal, // puedes agregar esta columna en detalles_venta
+    DB::beginTransaction();
+    try {
+        // Crear la venta
+        $venta = Venta::create([
+            'cliente_id' => $user->id,
+            'empleado_id' => null,
+            'codigo' => 'PED-' . strtoupper(uniqid()),
+            'total' => 0,
         ]);
+
+        foreach ($carrito as $id => $item) {
+            $producto = Producto::findOrFail($id);
+
+            // Verificar stock
+            if ($producto->stock < $item['cantidad']) {
+                throw new \Exception("No hay suficiente stock de {$producto->nombre}");
+            }
+
+            $subtotal = $item['precio'] * $item['cantidad'];
+            $total += $subtotal;
+
+            // Crear detalle
+            $venta->detalles()->create([
+                'producto_id' => $id,
+                'cantidad' => $item['cantidad'],
+                'precio' => $item['precio'],
+                'subtotal' => $subtotal,
+            ]);
+
+            // Descontar stock
+            $producto->stock -= $item['cantidad'];
+            $producto->save();
+        }
+
+        // Actualizar total
+        $venta->update(['total' => $total]);
+
+        DB::commit();
+
+        session()->forget('carrito');
+
+        return view('cliente.ventas.confirmar', compact('venta'));
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->route('cliente.ventas.index')
+            ->with('error', $e->getMessage());
     }
-
-    $venta->update(['total' => $total]);
-
-    session()->forget('carrito');
-
-    return view('cliente.ventas.confirmar', compact('venta'));
 }
-
 
     /**
      * Página de detalle de venta (opcional)

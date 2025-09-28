@@ -85,7 +85,7 @@
                 <div class="collapse navbar-collapse show" id="navbarCollapse">
                     <ul class="navbar-nav mx-auto">
                         <li class="nav-item"><a href="{{ route('cliente.inicio') }}" class="nav-link">INICIO</a></li>
-                        <li class="nav-item"><a href="{{ route('cliente.barberos.index') }}" class="nav-link">BARBEROS</a></li>
+                        <li class="nav-item"><a href="{{ route('cliente.barberos.index') }}" class="nav-link">RESERVA TU CITA</a></li>
                         <li class="nav-item"><a href="{{ route('cliente.productos.index') }}" class="nav-link">TIENDA</a></li>
 
                         @auth
@@ -138,7 +138,7 @@
                 </div>
 
                 <!-- COPYRIGHT -->
-                <small>&copy; {{ date('Y') }} Barbería. Todos los derechos reservados.</small>
+                <small>&copy; {{ date('Y') }} Barbe Shop. Todos los derechos reservados.</small>
             </div>
         </footer>
     </div>

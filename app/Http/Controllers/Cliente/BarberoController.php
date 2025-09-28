@@ -11,18 +11,23 @@ use App\Models\Reserva;
 class BarberoController extends Controller
 {
 
-public function index()
+public function index(Request $request)
 {
-    $barberos = Barbero::all();
+    $query = Barbero::query();
 
-    // Obtener reservas del cliente actual
-    $reservas = Reserva::where('usuario_id', auth()->id())
-        ->with('barbero')
-        ->latest()
-        ->get();
+    if ($request->filled('fecha') && $request->filled('hora')) {
+        // Aquí iría tu lógica para filtrar barberos disponibles en esa fecha y hora
+        $query->whereDoesntHave('reservas', function ($q) use ($request) {
+            $q->where('fecha', $request->fecha)
+              ->where('hora', $request->hora);
+        });
+    }
 
-    return view('cliente.barberos.index', compact('barberos', 'reservas'));
+    $barberos = $query->get();
+
+    return view('cliente.barberos.index', compact('barberos'));
 }
+
 
     public function create() 
     {

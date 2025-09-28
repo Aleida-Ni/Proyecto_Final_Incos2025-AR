@@ -254,30 +254,6 @@
     </div>
 </div>
 
-<!-- TARJETAS RÁPIDAS -->
-<div class="container my-5">
-    <div class="row text-center">
-        <div class="col-md-4 mb-3">
-            <div class="card shadow option-card">
-                <i class="fas fa-calendar-check fa-2x my-3 text-primary"></i>
-                <h5>Mis Reservas</h5>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card shadow option-card">
-                <i class="fas fa-boxes fa-2x my-3 text-success"></i>
-                <h5>Productos</h5>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card shadow option-card">
-                <i class="fas fa-user fa-2x my-3 text-info"></i>
-                <h5>Mi Perfil</h5>
-            </div>
-        </div>
-    </div>
-</div>
-
 @endsection
 
 @push('js')

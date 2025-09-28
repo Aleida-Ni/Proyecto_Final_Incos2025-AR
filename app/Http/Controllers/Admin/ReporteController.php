@@ -8,6 +8,7 @@ use App\Models\Reserva;
 use App\Models\Venta;
 use Carbon\Carbon;
 
+
 class ReporteController extends Controller
 {
     public function __construct()
@@ -19,53 +20,105 @@ class ReporteController extends Controller
     /**
      * Reporte de reservas: filtro por fecha desde/hasta y estado.
      */
-    public function reservas(Request $request)
-    {
-        $from = $request->input('from');
-        $to   = $request->input('to');
-        $estado = $request->input('estado');
+public function reservas(Request $request)
+{
+    $query = Reserva::query();
 
-        $query = Reserva::with(['cliente', 'barbero']);
-
-        if ($from) {
-            $query->where('fecha', '>=', $from);
+    // Filtro rápido
+    if ($request->filled('periodo')) {
+        switch ($request->periodo) {
+            case '7':
+                $query->where('fecha', '>=', Carbon::now()->subDays(7));
+                break;
+            case '15':
+                $query->where('fecha', '>=', Carbon::now()->subDays(15));
+                break;
+            case '30':
+                $query->where('fecha', '>=', Carbon::now()->subDays(30));
+                break;
+            case 'mes':
+                $query->whereMonth('fecha', Carbon::now()->month)
+                      ->whereYear('fecha', Carbon::now()->year);
+                break;
+            case 'mes_pasado':
+                $query->whereMonth('fecha', Carbon::now()->subMonth()->month)
+                      ->whereYear('fecha', Carbon::now()->subMonth()->year);
+                break;
         }
-        if ($to) {
-            $query->where('fecha', '<=', $to);
-        }
-        if ($estado) {
-            $query->where('estado', $estado);
-        }
-
-        // Ordenamos por fecha/hora
-        $reservas = $query->orderBy('fecha', 'desc')->orderBy('hora', 'asc')->get();
-
-        return view('admin.reportes.reservas', compact('reservas','from','to','estado'));
     }
+
+    // Filtro personalizado
+    if ($request->filled('from')) {
+        $query->where('fecha', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $query->where('fecha', '<=', $request->to);
+    }
+
+    // Estado
+    if ($request->filled('estado')) {
+        $query->where('estado', $request->estado);
+    }
+
+    $reservas = $query->latest()->get();
+
+    return view('admin.reportes.reservas', compact('reservas'))
+        ->with([
+            'from' => $request->from,
+            'to' => $request->to,
+            'estado' => $request->estado,
+        ]);
+}
 
     /**
      * Reporte de ventas: filtro por fecha desde/hasta (y opcionalmente por cliente).
      */
-    public function ventas(Request $request)
-    {
-        $from = $request->input('from');
-        $to   = $request->input('to');
-        $cliente = $request->input('cliente');
+public function ventas(Request $request)
+{
+    $query = Venta::with(['cliente', 'detalles.producto']);
 
-        $query = Venta::with(['cliente', 'detalles.producto']); // adapta relaciones si tus modelos son distintos
-
-        if ($from) {
-            $query->where('creado_en', '>=', $from);
+    // Filtro rápido
+    if ($request->filled('periodo')) {
+        switch ($request->periodo) {
+            case '7':
+                $query->where('creado_en', '>=', Carbon::now()->subDays(7));
+                break;
+            case '15':
+                $query->where('creado_en', '>=', Carbon::now()->subDays(15));
+                break;
+            case '30':
+                $query->where('creado_en', '>=', Carbon::now()->subDays(30));
+                break;
+            case 'mes':
+                $query->whereMonth('creado_en', Carbon::now()->month)
+                      ->whereYear('creado_en', Carbon::now()->year);
+                break;
+            case 'mes_pasado':
+                $query->whereMonth('creado_en', Carbon::now()->subMonth()->month)
+                      ->whereYear('creado_en', Carbon::now()->subMonth()->year);
+                break;
         }
-        if ($to) {
-            $query->where('creado_en', '<=', $to);
-        }
-        if ($cliente) {
-            $query->where('cliente_id', $cliente);
-        }
-
-        $ventas = $query->orderBy('creado_en', 'desc')->get();
-
-        return view('admin.reportes.ventas', compact('ventas','from','to','cliente'));
     }
+
+    // Filtro personalizado
+    if ($request->filled('from')) {
+        $query->whereDate('creado_en', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $query->whereDate('creado_en', '<=', $request->to);
+    }
+
+    // Cliente (ID o nombre)
+    if ($request->filled('cliente')) {
+        $cliente = $request->cliente;
+        $query->whereHas('cliente', function ($q) use ($cliente) {
+            $q->where('id', $cliente)
+              ->orWhere('nombre', 'like', "%$cliente%");
+        });
+    }
+
+    $ventas = $query->latest()->get();
+
+    return view('admin.reportes.ventas', compact('ventas'));
+}
 }

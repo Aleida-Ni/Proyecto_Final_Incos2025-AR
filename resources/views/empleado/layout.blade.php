@@ -12,17 +12,15 @@
 
 @section('css')
     <style>
-        /* Fondo fijo en azul degradado */
-/* Fondo del panel principal */
+
 body {
-    background: linear-gradient(to bottom, #2f2f2f, #4a4a4a); /* degradado plomo */
+    background: linear-gradient(to bottom, #2f2f2f, #4a4a4a); 
 }
 
-/* Sidebar degradado plomo oscuro -> claro */
 .main-sidebar {
     position: relative;
     background: linear-gradient(to bottom, #3a3a3a, #6b6b6b) !important;
-    overflow: hidden; /* Para que los elementos decorativos no sobresalgan */
+    overflow: hidden; 
 }
 .main-sidebar::before {
     content: '';
@@ -54,28 +52,23 @@ body {
     z-index: 1;
 }
 
-/* Sidebar links activos */
 .main-sidebar .nav-link.active {
     background: rgba(255, 255, 255, 0.15) !important;
     border-radius: 10px;
     color: #ffffff !important;
 }
 
-
-/* Sidebar links hover */
 .main-sidebar .nav-link:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     color: #ffffff !important;
 }
 
-/* Topnav con círculos */
 .navbar {
     position: relative;
     background: linear-gradient(to right, #3a3a3a, #6b6b6b) !important;
     overflow: hidden;
 }
 
-/* Asegurar que links del navbar estén sobre los círculos */
 .navbar .nav-link,
 .navbar .navbar-brand {
     position: relative;
@@ -135,20 +128,17 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
-/* Inputs */
 .form-control, .input-group-text {
     background: rgba(100, 100, 100, 0.3);
     color: #ffffff;
     border: none;
 }
 
-/* Títulos dentro de tarjetas */
 .card h3, .card h4 {
     color: #ffffff;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
 }
 
-/* Links comunes */
 a {
     color: #c5c5c5;
 }
@@ -157,7 +147,6 @@ a:hover {
     color: #ffffff;
 }
 
-/* Footer si existiera */
 .main-footer {
     background: linear-gradient(to right, #3a3a3a, #6b6b6b);
     color: #e0e0e0;

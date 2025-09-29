@@ -15,7 +15,6 @@ class ReservaController extends Controller
      */
 public function index()
 {
-    // Cambiar automáticamente reservas vencidas
     Reserva::where('estado', 'pendiente')
         ->where(function($q) {
             $q->where('fecha', '<', now()->toDateString())
@@ -38,7 +37,6 @@ public function marcar($id, $estado)
 {
     $reserva = Reserva::findOrFail($id);
 
-    // Validar que solo se cambie a un estado permitido
     if (!in_array($estado, ['realizada', 'no_asistio'])) {
         return redirect()->back()->with('error', 'Estado no válido.');
     }
@@ -60,7 +58,7 @@ public function marcar($id, $estado)
 
         $inicio = Carbon::createFromTime(9, 30);
         $fin = Carbon::createFromTime(19, 30);
-        $intervalo = 60; // minutos
+        $intervalo = 60;
 
         $horas = [];
 
@@ -69,7 +67,6 @@ public function marcar($id, $estado)
             $inicio->addMinutes($intervalo);
         }
 
-        // Buscar horas ocupadas
         $ocupadas = Reserva::where('barbero_id', $barberoId)
             ->where('fecha', $fecha)
             ->pluck('hora')

@@ -1,6 +1,9 @@
 @extends('adminlte::page')
 
 @section('title', 'Gestión de Reservas')
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
 
 @section('content_header')
     <h1>Gestión de Reservas</h1>
@@ -23,12 +26,21 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        use Carbon\Carbon;
+                        $now = Carbon::now();
+                    @endphp
+
                     @forelse($reservas as $r)
+                        @php
+                            $fechaHoraReserva = Carbon::parse($r->fecha . ' ' . $r->hora);
+                            $pasada = $fechaHoraReserva->lt($now);
+                        @endphp
                         <tr>
                             <td>{{ $r->id }}</td>
                             <td>{{ optional($r->cliente)->nombre ?? 'Usuario' }}</td>
                             <td>{{ optional($r->barbero)->nombre ?? '—' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}</td>
+                            <td>{{ Carbon::parse($r->fecha)->format('d/m/Y') }}</td>
                             <td>{{ $r->hora }}</td>
                             <td>
                                 <span class="badge 
@@ -39,6 +51,11 @@
                                     @endif">
                                     {{ ucfirst($r->estado) }}
                                 </span>
+
+                                {{-- Mostrar aviso si la hora ya pasó --}}
+                                @if($r->estado == 'pendiente' && $pasada)
+                                    <span class="badge bg-secondary">Hora pasada</span>
+                                @endif
                             </td>
                             <td>
                                 @if($r->estado == 'pendiente')

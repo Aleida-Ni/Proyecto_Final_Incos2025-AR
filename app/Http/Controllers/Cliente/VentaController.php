@@ -17,7 +17,7 @@ class VentaController extends Controller
      */
     public function index()
     {
-        $carrito = session('carrito', []); // usamos 'carrito' como sesión
+        $carrito = session('carrito', []); 
         return view('cliente.ventas.index', compact('carrito'));
     }
 
@@ -116,7 +116,7 @@ public function confirmarCompra(Request $request)
 
     DB::beginTransaction();
     try {
-        // Crear la venta
+
         $venta = Venta::create([
             'cliente_id' => $user->id,
             'empleado_id' => null,
@@ -127,7 +127,6 @@ public function confirmarCompra(Request $request)
         foreach ($carrito as $id => $item) {
             $producto = Producto::findOrFail($id);
 
-            // Verificar stock
             if ($producto->stock < $item['cantidad']) {
                 throw new \Exception("No hay suficiente stock de {$producto->nombre}");
             }

@@ -12,26 +12,19 @@ use App\Mail\EmpleadoCreadoMail;
 
 class EmpleadoController extends Controller
 {
-    /**
-     * Mostrar la lista de empleados.
-     */
+
     public function index()
     {
         $empleados = User::where('rol', 'empleado')->get();
         return view('admin.empleados.index', compact('empleados'));
     }
 
-    /**
-     * Mostrar el formulario de creación.
-     */
     public function create()
     {
         return view('admin.empleados.create');
     }
 
-    /**
-     * Guardar un nuevo empleado.
-     */
+ 
     public function store(Request $request)
     {
         $request->validate([
@@ -42,11 +35,7 @@ class EmpleadoController extends Controller
             'telefono'          => 'nullable|string|max:20',
             'fecha_nacimiento'  => 'nullable|date',
         ]);
-
-        // 🔑 Generar contraseña aleatoria
         $contraseniaGenerada = Str::random(10);
-
-        // Crear el empleado
         $empleado = User::create([
             'nombre'            => $request->nombre,
             'apellido_paterno'  => $request->apellido_paterno,
@@ -56,10 +45,9 @@ class EmpleadoController extends Controller
             'telefono'          => $request->telefono,
             'fecha_nacimiento'  => $request->fecha_nacimiento,
             'rol'               => 'empleado',
-            'estado'            => 1, // activo por defecto
+            'estado'            => 1, 
         ]);
 
-        // 📧 Enviar el correo con la contraseña generada
         Mail::to($empleado->correo)->send(new EmpleadoCreadoMail($empleado, $contraseniaGenerada));
 
         return redirect()->route('admin.empleados.index')
@@ -103,9 +91,6 @@ class EmpleadoController extends Controller
         return redirect()->route('admin.empleados.index')->with('success', 'Empleado actualizado correctamente');
     }
 
-    /**
-     * Eliminar un empleado.
-     */
     public function destroy(string $id)
     {
         $empleado = User::findOrFail($id);

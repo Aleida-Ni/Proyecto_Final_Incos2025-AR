@@ -37,11 +37,6 @@
                 <input type="date" name="to" class="form-control" value="{{ request('to') }}">
             </div>
 
-            <!-- Cliente -->
-            <div class="col-md-3">
-                <label>Cliente (ID o nombre)</label>
-                <input type="text" name="cliente" class="form-control" value="{{ request('cliente') }}">
-            </div>
 
             <!-- Botones -->
             <div class="col-md-2">

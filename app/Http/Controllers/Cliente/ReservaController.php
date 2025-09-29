@@ -14,7 +14,6 @@ class ReservaController extends Controller
         $barbero = Barbero::findOrFail($barberoId);
         $fecha = $request->input('fecha', now()->format('Y-m-d'));
 
-        // Generar horas de trabajo (puedes mover a config)
         $horas = [
             '09:00' => true,
             '10:00' => true,
@@ -27,7 +26,6 @@ class ReservaController extends Controller
             '17:00' => true,
         ];
 
-        // Obtener horas ya reservadas
         $reservadas = Reserva::where('barbero_id', $barbero->id)
             ->where('fecha', $fecha)
             ->pluck('hora')

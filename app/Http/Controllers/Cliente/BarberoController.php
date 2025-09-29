@@ -16,7 +16,6 @@ public function index(Request $request)
     $query = Barbero::query();
 
     if ($request->filled('fecha') && $request->filled('hora')) {
-        // Aquí iría tu lógica para filtrar barberos disponibles en esa fecha y hora
         $query->whereDoesntHave('reservas', function ($q) use ($request) {
             $q->where('fecha', $request->fecha)
               ->where('hora', $request->hora);

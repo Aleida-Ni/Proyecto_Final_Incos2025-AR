@@ -13,7 +13,6 @@ class ReporteController extends Controller
 {
     public function __construct()
     {
-        // Protege con los mismos middlewares que el resto del admin si quieres:
         $this->middleware(['auth', 'role:admin|empleado']);
     }
 
@@ -47,7 +46,6 @@ public function reservas(Request $request)
         }
     }
 
-    // Filtro personalizado
     if ($request->filled('from')) {
         $query->where('fecha', '>=', $request->from);
     }
@@ -55,7 +53,6 @@ public function reservas(Request $request)
         $query->where('fecha', '<=', $request->to);
     }
 
-    // Estado
     if ($request->filled('estado')) {
         $query->where('estado', $request->estado);
     }
@@ -77,7 +74,6 @@ public function ventas(Request $request)
 {
     $query = Venta::with(['cliente', 'detalles.producto']);
 
-    // Filtro rápido
     if ($request->filled('periodo')) {
         switch ($request->periodo) {
             case '7':
@@ -100,7 +96,6 @@ public function ventas(Request $request)
         }
     }
 
-    // Filtro personalizado
     if ($request->filled('from')) {
         $query->whereDate('creado_en', '>=', $request->from);
     }
@@ -108,7 +103,6 @@ public function ventas(Request $request)
         $query->whereDate('creado_en', '<=', $request->to);
     }
 
-    // Cliente (ID o nombre)
     if ($request->filled('cliente')) {
         $cliente = $request->cliente;
         $query->whereHas('cliente', function ($q) use ($cliente) {

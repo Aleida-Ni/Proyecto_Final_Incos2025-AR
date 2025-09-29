@@ -33,7 +33,6 @@ class ProductoController extends Controller
     {
         $categorias = Categoria::all();
 
-        // Si no hay categorías en BD, creamos 3 por defecto (evita fallo en 'exists' durante store)
         if ($categorias->isEmpty()) {
             $defaults = [
                 ['nombre' => 'CERAS Y GELES'],
@@ -51,7 +50,6 @@ class ProductoController extends Controller
 
     public function store(Request $request)
     {
-        // Validación
         $data = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
@@ -70,7 +68,6 @@ class ProductoController extends Controller
 
             return redirect()->route('admin.productos.index')->with('success', 'Producto creado exitosamente.');
         } catch (\Throwable $e) {
-            // Log para debugging y volver con error (no perder el request)
             Log::error('Error al crear producto: '.$e->getMessage());
             return back()->withInput()->withErrors(['error' => 'Ocurrió un error al guardar el producto. Revisa los logs.']);
         }

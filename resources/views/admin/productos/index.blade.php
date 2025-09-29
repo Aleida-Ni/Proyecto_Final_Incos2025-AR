@@ -11,10 +11,8 @@
         Lista de Productos
     </h1>
 
-    <!-- Contenedor gris -->
     <div class="report-container">
 
-        <!-- Encabezados de categorías -->
         <div class="text-center mb-3">
             @foreach ($categorias as $categoria)
                 <span class="categoria-label">{{ strtoupper($categoria->nombre) }}</span>
@@ -36,19 +34,16 @@
                     </select>
                 </div>
                 <div class="col-md-2 text-center">
-                    <a href="{{ route('admin.productos.index') }}" class="btn btn-reset w-100">🔄 Reset</a>
+                    <a href="{{ route('admin.productos.index') }}" class="btn btn-reset w-100">Reset</a>
                 </div>
             </div>
         </form>
 
-        <!-- Botón agregar producto -->
         <div class="text-right mb-3">
             <a href="{{ route('admin.productos.create') }}" class="btn btn-add">Agregar Producto</a>
         </div>
 
-        <!-- Mostrar productos -->
         @if(request('categoria_id'))
-            <!-- Solo una categoría -->
             @php
                 $categoria = $categorias->firstWhere('id', request('categoria_id'));
                 $productosCat = $productos->where('categoria_id', $categoria->id);

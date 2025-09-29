@@ -13,10 +13,9 @@
         <table class="table custom-table">
             <thead>
                 <tr>
-                    <th>Nombre Completo</th> {{-- Cambié encabezado --}}
+                    <th>Nombre Completo</th> 
                     <th>Correo</th>
                     <th>Teléfono</th>
-                    <th>Cargo</th>
                     <th>Imagen</th>
                     <th>Acciones</th>
                 </tr>
@@ -24,10 +23,9 @@
             <tbody>
                 @foreach ($barberos as $barbero)
                     <tr>
-                        <td>{{ $barbero->nombre_completo }}</td> {{-- Usamos accesor --}}
+                        <td>{{ $barbero->nombre_completo }}</td> 
                         <td>{{ $barbero->correo }}</td>
                         <td>{{ $barbero->telefono }}</td>
-                        <td>{{ $barbero->cargo }}</td>
                         <td>
                             @if($barbero->imagen)
                                 <img src="{{ asset('storage/' . $barbero->imagen) }}" width="80" alt="Imagen del barbero">
@@ -54,23 +52,20 @@
 
 @push('css')
 <style>
-/* Contenedor de tabla */
 .table-container {
-    background-color: #f0f0f0; /* plomo claro */
+    background-color: #f0f0f0; 
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
 
-/* Título principal */
 h1.text-dark {
-    color: #1c1c1c; /* gris muy oscuro */
+    color: #1c1c1c; 
     text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
 }
 
-/* Botón Agregar */
 .btn-custom {
-    background-color: #4a4a4a; /* plomo oscuro */
+    background-color: #4a4a4a; 
     color: #fff;
     border-radius: 6px;
     padding: 6px 14px;
@@ -80,24 +75,23 @@ h1.text-dark {
 }
 
 .btn-custom:hover {
-    background-color: #333; /* negro suave */
+    background-color: #333; 
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.4);
 }
 
-/* Tabla */
 .custom-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     border-radius: 12px;
     overflow: hidden;
-    background-color: #e8e8e8; /* plomo claro */
+    background-color: #e8e8e8; 
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .custom-table thead {
-    background-color: #c2c2c2; /* un poco más oscuro que el resto */
+    background-color: #c2c2c2; 
 }
 
 .custom-table th, .custom-table td {
@@ -105,17 +99,17 @@ h1.text-dark {
     text-align: center;
     vertical-align: middle;
     color: #1c1c1c;
-    border-bottom: 1px solid #b0b0b0; /* borde sutil */
+    border-bottom: 1px solid #b0b0b0; 
 }
 
 /* Hover de fila */
 .custom-table tbody tr:hover {
-    background-color: #d0d0d0; /* plomo medio suave */
+    background-color: #d0d0d0; 
 }
 
 /* Imagen del barbero */
 .custom-table img {
-    width: 60px; /* más pequeña */
+    width: 60px; 
     height: auto;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -164,7 +158,7 @@ h1.text-dark {
 
 /* Formularios (inputs) */
 input, select, textarea {
-    border: 1px solid #333; /* borde negro */
+    border: 1px solid #333; 
     border-radius: 6px;
     padding: 6px 10px;
     background-color: #fff;

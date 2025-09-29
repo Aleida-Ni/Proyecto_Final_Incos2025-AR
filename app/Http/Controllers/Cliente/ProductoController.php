@@ -20,7 +20,7 @@ public function index(Request $request)
         if ($categoria) {
             $productos = Producto::where('categoria_id', $categoria->id)->get();
         } else {
-            $productos = collect(); // vacío si no encuentra categoría
+            $productos = collect(); 
         }
     } else {
         $productos = Producto::all();

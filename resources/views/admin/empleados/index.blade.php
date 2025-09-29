@@ -11,7 +11,7 @@
 
 @section('content')
     <div class="container table-container">
-        <a href="{{ route('admin.empleados.create') }}" class="btn btn-custom mb-3">➕ Nuevo Empleado</a>
+        <a href="{{ route('admin.empleados.create') }}" class="btn btn-custom mb-3"> Nuevo Empleado</a>
 
         @if(session('success'))
             <div class="alert alert-success text-center">{{ session('success') }}</div>

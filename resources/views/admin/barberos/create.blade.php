@@ -27,7 +27,7 @@
                 {{-- Apellidos --}}
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="apellido_paterno" class="form-label">Apellido Paterno <span class="text-danger">*</span></label>
+                        <label for="apellido_paterno" class="form-label">Primer Apellido <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror" 
                                name="apellido_paterno" value="{{ old('apellido_paterno') }}" required>
                         @error('apellido_paterno')
@@ -35,7 +35,7 @@
                         @enderror
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="apellido_materno" class="form-label">Apellido Materno <span class="text-danger">*</span></label>
+                        <label for="apellido_materno" class="form-label">Segundo Apellido <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('apellido_materno') is-invalid @enderror" 
                                name="apellido_materno" value="{{ old('apellido_materno') }}" required>
                         @error('apellido_materno')
@@ -65,15 +65,7 @@
                     </div>
                 </div>
 
-                {{-- Cargo --}}
-                <div class="mb-3">
-                    <label for="cargo" class="form-label">Cargo <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('cargo') is-invalid @enderror" 
-                           name="cargo" value="{{ old('cargo') }}" required>
-                    @error('cargo')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+
 
                 {{-- Imagen --}}
                 <div class="mb-3">

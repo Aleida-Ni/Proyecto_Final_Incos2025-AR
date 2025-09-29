@@ -20,12 +20,12 @@
             </div>
 
             <div class="form-group">
-                <label>Apellido Paterno</label>
+                <label>Primer Apellido</label>
                 <input type="text" name="apellido_paterno" value="{{ $empleado->apellido_paterno }}" class="form-control" required>
             </div>
 
             <div class="form-group">
-                <label>Apellido Materno</label>
+                <label>Segundo Apellido</label>
                 <input type="text" name="apellido_materno" value="{{ $empleado->apellido_materno }}" class="form-control" required>
             </div>
 
@@ -44,8 +44,8 @@
                 <input type="date" name="fecha_nacimiento" value="{{ $empleado->fecha_nacimiento }}" class="form-control">
             </div>
 
-            <button type="submit" class="btn btn-primary">💾 Actualizar</button>
-            <a href="{{ route('admin.empleados.index') }}" class="btn btn-secondary">↩ Volver</a>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="{{ route('admin.empleados.index') }}" class="btn btn-secondary">Volver</a>
         </form>
     </div>
 @stop

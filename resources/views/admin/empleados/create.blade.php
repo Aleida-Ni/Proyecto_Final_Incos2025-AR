@@ -13,7 +13,7 @@
     <a href="{{ route('admin.empleados.index') }}" 
        class="btn btn-secondary mb-4 px-4"
        style="border-radius: 25px; font-weight:700; box-shadow: 0 4px 10px rgba(100,100,100,0.5);">
-       ⬅ Volver
+        Volver
     </a>
 
     <form action="{{ route('admin.empleados.store') }}" method="POST" class="p-4" style="background-color: #111; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,170,255,0.3);">
@@ -25,12 +25,12 @@
         </div>
 
         <div class="form-group mb-3">
-            <label class="text-white">Apellido Paterno</label>
+            <label class="text-white">Primer Apellido</label>
             <input type="text" name="apellido_paterno" class="form-control border-secondary bg-dark text-white" placeholder="Ingrese el apellido paterno" required>
         </div>
 
         <div class="form-group mb-3">
-            <label class="text-white">Apellido Materno</label>
+            <label class="text-white">Segundo Apellido</label>
             <input type="text" name="apellido_materno" class="form-control border-secondary bg-dark text-white" placeholder="Ingrese el apellido materno" required>
         </div>
 

@@ -52,11 +52,9 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     if (!$user->correo_verificado_en) {
         $user->correo_verificado_en = now();
-        $user->estado = 1; // si quieres activar estado al verificar
+        $user->estado = 1;
         $user->save();
     }
-
-    // Redirigir según rol (admin/empleado no requieren verificación pero si vienen por el link...)
     if ($user->rol === 'admin') {
         return redirect()->route('admin');
     } elseif ($user->rol === 'empleado') {
@@ -72,15 +70,7 @@ Route::post('/email/verification-notification', function (Request $request) {
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
-/*
-|--------------------------------------------------------------------------
-| PANEL ADMIN
-|--------------------------------------------------------------------------
-| - /admin (route name 'admin') accesible por admin|empleado
-| - Rutas bajo /admin/... con middleware role:admin|empleado
-| - Recursos de configuración (empleados) protegidos solo para admin
-|--------------------------------------------------------------------------
-*/
+/*PANEL ADMIN*/
 
 // Grupo de rutas /admin/*
 Route::middleware(['auth', 'role:admin|empleado'])
@@ -115,11 +105,7 @@ Route::middleware(['auth', 'role:admin|empleado'])
 
 
 
-/*
-|--------------------------------------------------------------------------
-| PANEL EMPLEADO
-|--------------------------------------------------------------------------
-*/
+/*PANEL EMPLEADO*/
 Route::middleware(['auth', 'estado', 'role:empleado'])
     ->prefix('empleado')
     ->name('empleado.')
@@ -130,13 +116,7 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
         Route::resource('reservas', AdminReservaController::class);
     });
 
-/* =======================
-   PANEL CLIENTE (Limpio y consistente)
-   Todas las rutas del cliente están bajo:
-   - prefix: /cliente
-   - name:  cliente.*
-   - middleware: auth + can:is-cliente
-========================== */
+/*PANEL CLIENTE*/
 Route::middleware(['auth', 'verified', 'estado','can:is-cliente'])
     ->prefix('cliente')
     ->name('cliente.')
@@ -147,7 +127,7 @@ Route::middleware(['auth', 'verified', 'estado','can:is-cliente'])
             return view('cliente.home', compact('barberos'));
         })->name('home');
 
-        // Página de inicio (controlador)
+        // Página de inicio 
         Route::get('/inicio', [ClienteHomeController::class, 'inicio'])->name('inicio');
 
         // Barberos / Reservas
@@ -156,29 +136,21 @@ Route::middleware(['auth', 'verified', 'estado','can:is-cliente'])
         Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
         Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
 
-        // Productos (lista pública para clientes)
-        Route::get('/productos', [ClienteProductoController::class, 'index'])->name('productos.index');
-
-        /*
-         * Ventas / Carrito
-         * NOMBRES CONSISTENTES: cliente.ventas.*
-         */
         // Modal / fragmento del carrito (AJAX)
         Route::get('/ventas/carrito', [VentaController::class, 'modalCarrito'])->name('ventas.carrito');
 
         // Ver carrito completo
         Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
 
-        // Acciones del carrito (agregar/eliminar/aumentar/disminuir/vaciar/confirmar)
+        // Acciones del carrito
         Route::post('/ventas/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
         Route::post('/ventas/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
         Route::post('/ventas/aumentar/{producto}', [VentaController::class, 'aumentar'])->name('ventas.aumentar');
         Route::post('/ventas/disminuir/{producto}', [VentaController::class, 'disminuir'])->name('ventas.disminuir');
         Route::post('/ventas/vaciar', [VentaController::class, 'vaciar'])->name('ventas.vaciar');
-
-        // Confirmar compra (guarda la venta)
+        Route::get('/productos', [App\Http\Controllers\Cliente\ProductoController::class, 'index'])
+            ->name('productos.index');
+        // Confirmar compra 
         Route::post('/ventas/confirmar', [VentaController::class, 'confirmarCompra'])->name('ventas.confirmar');
-
-        // (Opcional) Detalle/éxito de compra
         Route::get('/ventas/exito/{venta}', [VentaController::class, 'exito'])->name('ventas.exito');
     });

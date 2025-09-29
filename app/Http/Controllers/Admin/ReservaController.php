@@ -13,15 +13,42 @@ class ReservaController extends Controller
     /**
      * Listar todas las reservas
      */
-    public function index()
-    {
-        $reservas = Reserva::with(['cliente', 'barbero'])
-            ->orderBy('fecha', 'desc')
-            ->orderBy('hora', 'asc')
-            ->get();
+public function index()
+{
+    // Cambiar automáticamente reservas vencidas
+    Reserva::where('estado', 'pendiente')
+        ->where(function($q) {
+            $q->where('fecha', '<', now()->toDateString())
+              ->orWhere(function($q2) {
+                  $q2->where('fecha', now()->toDateString())
+                     ->where('hora', '<', now()->format('H:i'));
+              });
+        })
+        ->update(['estado' => 'no_asistio']);
 
-        return view('admin.reservas.index', compact('reservas'));
+    $reservas = Reserva::orderBy('fecha', 'desc')
+        ->orderBy('hora', 'desc')
+        ->get();
+
+    return view('admin.reservas.index', compact('reservas'));
+}
+
+
+public function marcar($id, $estado)
+{
+    $reserva = Reserva::findOrFail($id);
+
+    // Validar que solo se cambie a un estado permitido
+    if (!in_array($estado, ['realizada', 'no_asistio'])) {
+        return redirect()->back()->with('error', 'Estado no válido.');
     }
+
+    $reserva->estado = $estado;
+    $reserva->save();
+
+    return redirect()->route('admin.reservas.index')
+        ->with('success', 'Reserva actualizada correctamente.');
+}
 
     /**
      * Crear reserva para un barbero

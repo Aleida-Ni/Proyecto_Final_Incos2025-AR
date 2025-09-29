@@ -342,6 +342,12 @@ return [
             'icon' => '',
             'can' => 'menu-admin',
         ],
+                [
+            'text' => 'Reservas',
+            'route'  => 'admin.reservas.index',
+            'icon' => '',
+            'can' => 'menu-admin',
+        ],
         // dentro del array 'menu' en config/adminlte.php
         [
             'text' => 'Reportes',
@@ -385,7 +391,12 @@ return [
             'icon' => 'fas fa-boxes',
             'can' => 'menu-empleado',
         ],
-        // dentro del array 'menu' en config/adminlte.php
+                        [
+            'text' => 'Reservas',
+            'route'  => 'admin.reservas.index',
+            'icon' => '',
+            'can' => 'menu-empleado',
+        ],
         [
             'text' => 'Reportes',
             'icon' => 'fas fa-chart-line',

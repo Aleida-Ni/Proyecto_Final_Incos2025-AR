@@ -82,11 +82,6 @@ Route::post('/email/verification-notification', function (Request $request) {
 |--------------------------------------------------------------------------
 */
 
-// Ruta principal /admin (nombre 'admin' — útil para redirects existentes)
-Route::get('/admin', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'estado', 'role:admin|empleado'])
-    ->name('admin');
-
 // Grupo de rutas /admin/*
 Route::middleware(['auth', 'role:admin|empleado'])
     ->prefix('admin')
@@ -97,23 +92,26 @@ Route::middleware(['auth', 'role:admin|empleado'])
 
         // Rutas de recursos principales
         Route::resource('barberos', AdminBarberoController::class);
-        Route::resource('productos', ProductoController::class);   // 👈 ya no en "config"
+        Route::resource('productos', ProductoController::class);
         Route::resource('reservas', AdminReservaController::class);
+
+        // Ruta para marcar reservas como realizada o no asistió
+        Route::post('reservas/{id}/{estado}', [App\Http\Controllers\Admin\ReservaController::class, 'marcar'])
+            ->name('reservas.marcar');
 
         // Configuración
         Route::prefix('config')->group(function () {
             Route::resource('empleados', EmpleadoController::class);
             Route::view('settings', 'admin.settings')->name('settings');
         });
-        Route::prefix('reservas')->name('reservas.')->group(function () {
-            Route::patch('/{reserva}/realizada', [App\Http\Controllers\Admin\ReservaController::class, 'marcarRealizada'])->name('realizada');
-            Route::patch('/{reserva}/cancelada', [App\Http\Controllers\Admin\ReservaController::class, 'marcarCancelada'])->name('cancelada');
-        });
+
+        // Reportes
         Route::prefix('reportes')->name('reportes.')->group(function () {
             Route::get('/reservas', [ReporteController::class, 'reservas'])->name('reservas');
             Route::get('/ventas',   [ReporteController::class, 'ventas'])->name('ventas');
         });
     });
+
 
 
 

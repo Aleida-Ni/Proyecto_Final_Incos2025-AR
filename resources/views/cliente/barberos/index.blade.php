@@ -6,24 +6,21 @@
 <h1 class="text-center mb-4">Elige tu barbero</h1>
 
 <div class="d-flex justify-content-between mb-3">
-    <!-- Botón: Ver Mis Reservas -->
     <a href="{{ route('cliente.reservas') }}" class="btn btn-custom">
         <i class="fas fa-ticket-alt"></i> Ver Mis Reservas
     </a>
 
-    <!-- Botón: Ver todos los barberos -->
     <a href="{{ route('cliente.barberos.index') }}" class="btn btn-custom">
         <i class="fas fa-users"></i> Ver Todos
     </a>
 </div>
 
-<!-- Formulario de filtros (más compacto) -->
 <div class="card mb-4 p-3 bg-dark text-white border-0 mx-auto" style="max-width: 900px;">
     <form action="{{ route('cliente.barberos.index') }}" method="GET" class="row g-3 align-items-end">
         <div class="col-md-5">
             <label for="fecha" class="form-label">Selecciona un día</label>
             <div class="input-group">
-                <span class="input-group-text bg-black text-white border-0">
+                <span class="input-group-text bg-black text-white border-0 calendar-icon">
                     <i class="fas fa-calendar-alt"></i>
                 </span>
                 <input type="date" name="fecha" id="fecha" class="form-control bg-black text-white border-0"
@@ -88,6 +85,7 @@
         background: none;
         border: none;
         color: white;
+        border: 1px solid #fff;
         font-weight: bold;
         transition: color 0.3s ease;
     }
@@ -100,10 +98,14 @@
         border: none !important;
         box-shadow: none !important;
     }
+    .form-control::-webkit-calendar-picker-indicator {
+        filter: invert(1); /* 👈 icono del calendario visible en fondo oscuro */
+    }
     .input-group-text {
         background-color: #000 !important;
         border: none !important;
-        color: #fff !important; /* 👈 icono blanco */
+        color: #fff !important;
+        cursor: pointer;
     }
     .barbero-card {
         background: #fff;
@@ -152,3 +154,11 @@
     }
 </style>
 @endsection
+
+@push('js')
+<script>
+document.querySelector('.calendar-icon').addEventListener('click', () => {
+    document.getElementById('fecha').focus();
+});
+</script>
+@endpush

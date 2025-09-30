@@ -53,7 +53,7 @@
 
         <button type="submit" class="btn btn-gradient-success btn-lg w-100"
             style="background: linear-gradient(135deg, #00ff99, #00cc66); color:#111; font-weight:700; border-radius:25px; box-shadow:0 4px 15px rgba(0,255,170,0.5); transition:0.3s;">
-            💾 Guardar
+             Guardar
         </button>
     </form>
 </div>

@@ -31,7 +31,7 @@ class EmpleadoController extends Controller
             'nombre'            => 'required|string|max:255',
             'apellido_paterno'  => 'required|string|max:255',
             'apellido_materno'  => 'required|string|max:255',
-            'correo'            => 'required|string|email|max:255|unique:users,correo',
+            'correo'            => 'required|string|email|max:255|unique:usuarios,correo',
             'telefono'          => 'nullable|string|max:20',
             'fecha_nacimiento'  => 'nullable|date',
         ]);
@@ -74,7 +74,7 @@ class EmpleadoController extends Controller
             'nombre'            => 'required|string|max:255',
             'apellido_paterno'  => 'required|string|max:255',
             'apellido_materno'  => 'required|string|max:255',
-            'correo'            => 'required|string|email|max:255|unique:users,correo,' . $empleado->id,
+            'correo'            => 'required|string|email|max:255|unique:usuarios,correo,' . $empleado->id,
             'telefono'          => 'nullable|string|max:20',
             'fecha_nacimiento'  => 'nullable|date',
         ]);

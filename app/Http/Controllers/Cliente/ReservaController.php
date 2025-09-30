@@ -94,4 +94,17 @@ return redirect()
     {
         return view('cliente.home');
     }
+    public function generarTicket(Request $request, Barbero $barbero)
+{
+    $request->validate([
+        'fecha' => 'required|date',
+        'hora' => 'required',
+    ]);
+
+    $fecha = $request->fecha;
+    $hora = $request->hora;
+
+    return view('cliente.reservas.ticket', compact('barbero', 'fecha', 'hora'));
+}
+
 }

@@ -35,7 +35,7 @@ class RegisterController extends Controller
             'nombre' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
             'apellido_paterno' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
             'apellido_materno' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
-            'correo'            => ['required', 'string', 'email', 'max:255', 'unique:users,correo'],
+            'correo'            => ['required', 'string', 'email', 'max:255', 'unique:usuarios,correo'],
             'telefono'          => ['required', 'string', 'min:7', 'max:15'],
             'fecha_nacimiento'  => ['required', 'date'],
             'contrasenia'        => ['required', 'string', 'min:8', 'confirmed'],

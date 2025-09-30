@@ -134,7 +134,8 @@ Route::middleware(['auth', 'verified', 'estado','can:is-cliente'])
         Route::get('/barberos', [ClienteBarberoController::class, 'index'])->name('barberos.index');
         Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
         Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
-        Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
+        Route::get('/reservas', action: [ClienteReservaController::class, 'misReservas'])->name('reservas');
+Route::post('/reservar/ticket/{barbero}', [ClienteReservaController::class, 'generarTicket'])->name('reservar.ticket');
 
         // Modal / fragmento del carrito (AJAX)
         Route::get('/ventas/carrito', [VentaController::class, 'modalCarrito'])->name('ventas.carrito');

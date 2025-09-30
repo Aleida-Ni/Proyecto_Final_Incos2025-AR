@@ -15,6 +15,13 @@
     padding: 20px;
     color: #fff;
   }
+  #selectorFecha {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #dc3545;
+    border-radius: 5px;
+    padding: 6px 12px;
+}
 
   .barbero-img {
     max-width: 100%;
@@ -97,7 +104,6 @@
     <h3 class="text-center mb-4">Reservar con {{ $barbero->nombre }}</h3>
 
     <div class="row">
-      <!-- Columna de la foto -->
       <div class="col-md-4 text-center">
         <img src="{{ asset('storage/' . $barbero->imagen) }}" 
              alt="Foto de {{ $barbero->nombre }}" 
@@ -106,12 +112,12 @@
         <p class="text-muted">{{ $barbero->cargo }}</p>
       </div>
 
-      <!-- Columna de la reserva -->
       <div class="col-md-8">
         <form action="{{ route('cliente.reservar.store') }}" method="POST" id="formReserva">
           @csrf
           <input type="hidden" name="barbero_id" value="{{ $barbero->id }}">
           <input type="hidden" name="fecha" id="fechaInput" value="{{ $fecha }}">
+          <input type="hidden" name="hora" id="horaInput">
 
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div><strong>Fecha seleccionada:</strong> <span id="fechaSeleccionada">{{ $fecha }}</span></div>
@@ -128,7 +134,7 @@
             @foreach($horas as $hora => $disponible)
               @if($disponible)
                 <label class="hora-disponible">
-                  <input type="radio" name="hora" value="{{ $hora }}" required hidden>
+                  <input type="radio" name="horaRadio" value="{{ $hora }}" hidden>
                   {{ $hora }}
                 </label>
               @else
@@ -138,7 +144,7 @@
           </div>
 
           <div class="text-center">
-            <button type="submit" class="btn-confirmar">Confirmar Reserva</button>
+            <button type="button" class="btn-confirmar" id="btnConfirmar">Confirmar Reserva</button>
           </div>
         </form>
       </div>
@@ -162,6 +168,24 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal Ticket -->
+  <div class="modal fade" id="modalTicket" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Ticket de Reserva</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="ticket-content">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" onclick="window.print()">Imprimir</button>
+          <button type="button" class="btn btn-primary" id="confirmarTicket">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 @endsection
 
@@ -176,6 +200,10 @@ function setFecha() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  const horaInputs = document.querySelectorAll('.hora-disponible input[type=radio]');
+  const horaInputHidden = document.getElementById('horaInput');
+
   document.querySelectorAll('.hora-disponible').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.hora-disponible').forEach(b => b.classList.remove('selected'));
@@ -184,9 +212,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('formReserva').addEventListener('submit', e => {
-    const selected = document.querySelector('input[name="hora"]:checked');
-    if(!selected) { e.preventDefault(); alert("Por favor selecciona una hora disponible."); }
+  document.getElementById('btnConfirmar').addEventListener('click', () => {
+    const selected = document.querySelector('input[name="horaRadio"]:checked');
+    if(!selected) return alert("Por favor selecciona una hora disponible.");
+
+    horaInputHidden.value = selected.value;
+
+    const ticketContent = document.getElementById('ticket-content');
+    ticketContent.innerHTML = `
+      <h3>Ticket de Reserva</h3>
+      <p><strong>Barbero:</strong> {{ $barbero->nombre }}</p>
+      <p><strong>Fecha:</strong> ${document.getElementById('fechaInput').value}</p>
+      <p><strong>Hora:</strong> ${selected.value}</p>
+      <p><strong>Cliente:</strong> {{ auth()->user()->nombre }} {{ auth()->user()->apellido_paterno }}</p>
+    `;
+
+    const modalTicket = new bootstrap.Modal(document.getElementById('modalTicket'));
+    modalTicket.show();
+  });
+
+  document.getElementById('confirmarTicket').addEventListener('click', () => {
+    document.getElementById('formReserva').submit();
   });
 
   document.querySelectorAll('.hora-no-disponible').forEach(btn => {

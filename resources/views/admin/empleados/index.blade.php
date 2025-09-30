@@ -131,7 +131,6 @@
 /* Editar: negro con sombra plomo */
 .btn-editar {
     color: #1c1c1c;
-    text-shadow: 1px 1px 2px #6b6b6b, -1px -1px 2px #6b6b6b;
 }
 
 .btn-editar:hover {
@@ -142,8 +141,7 @@
 
 /* Eliminar: rojo con sombra roja */
 .btn-eliminar {
-    color: #2e2b2bff;
-    text-shadow: 1px 1px 2px #c82333, -1px -1px 2px #c82333;
+    color: #d42727ff;
 }
 
 .btn-eliminar:hover {

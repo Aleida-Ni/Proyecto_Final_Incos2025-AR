@@ -26,11 +26,12 @@ class Reserva extends Model
     // Relaciones
     public function cliente()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function barbero()
     {
         return $this->belongsTo(Barbero::class);
     }
+    
 }

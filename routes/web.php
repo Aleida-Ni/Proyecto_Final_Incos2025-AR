@@ -116,42 +116,43 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
         Route::resource('reservas', AdminReservaController::class);
     });
 
-/*PANEL CLIENTE*/
-Route::middleware(['auth', 'verified', 'estado','can:is-cliente'])
+/* PANEL CLIENTE */
+Route::middleware(['auth', 'verified', 'estado', 'can:is-cliente'])
     ->prefix('cliente')
     ->name('cliente.')
     ->group(function () {
 
+        // Página de inicio / Home
         Route::get('/home', function () {
             $barberos = Barbero::all();
             return view('cliente.home', compact('barberos'));
         })->name('home');
 
-        // Página de inicio 
         Route::get('/inicio', [ClienteHomeController::class, 'inicio'])->name('inicio');
+
+        // Productos
+        Route::get('/productos', [App\Http\Controllers\Cliente\ProductoController::class, 'index'])
+            ->name('productos.index');
+// Carrito / Ventas
+Route::prefix('ventas')->group(function () {
+    Route::get('/', [VentaController::class, 'index'])->name('ventas.index'); // vista carrito
+    Route::get('/carrito', [VentaController::class, 'modalCarrito'])->name('ventas.carrito'); // modal AJAX
+    
+    Route::post('/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
+    Route::post('/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
+    Route::post('/aumentar/{id}', [VentaController::class, 'aumentar'])->name('ventas.aumentar');
+    Route::post('/disminuir/{id}', [VentaController::class, 'disminuir'])->name('ventas.disminuir');
+    Route::post('/vaciar', [VentaController::class, 'vaciar'])->name('ventas.vaciar');
+    Route::post('/confirmar', [VentaController::class, 'confirmarCompra'])->name('ventas.confirmar');
+    Route::get('/exito/{venta}', [VentaController::class, 'exito'])->name('ventas.exito');
+});
+
 
         // Barberos / Reservas
         Route::get('/barberos', [ClienteBarberoController::class, 'index'])->name('barberos.index');
         Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
         Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
-        Route::get('/reservas', action: [ClienteReservaController::class, 'misReservas'])->name('reservas');
-Route::post('/reservar/ticket/{barbero}', [ClienteReservaController::class, 'generarTicket'])->name('reservar.ticket');
+        Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
 
-        // Modal / fragmento del carrito (AJAX)
-        Route::get('/ventas/carrito', [VentaController::class, 'modalCarrito'])->name('ventas.carrito');
+});
 
-        // Ver carrito completo
-        Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
-
-        // Acciones del carrito
-        Route::post('/ventas/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
-        Route::post('/ventas/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
-        Route::post('/ventas/aumentar/{producto}', [VentaController::class, 'aumentar'])->name('ventas.aumentar');
-        Route::post('/ventas/disminuir/{producto}', [VentaController::class, 'disminuir'])->name('ventas.disminuir');
-        Route::post('/ventas/vaciar', [VentaController::class, 'vaciar'])->name('ventas.vaciar');
-        Route::get('/productos', [App\Http\Controllers\Cliente\ProductoController::class, 'index'])
-            ->name('productos.index');
-        // Confirmar compra 
-        Route::post('/ventas/confirmar', [VentaController::class, 'confirmarCompra'])->name('ventas.confirmar');
-        Route::get('/ventas/exito/{venta}', [VentaController::class, 'exito'])->name('ventas.exito');
-    });

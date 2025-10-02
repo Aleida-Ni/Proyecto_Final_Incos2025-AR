@@ -30,58 +30,32 @@
 </div>
 
 <!-- Modal Carrito -->
-<div class="modal fade" id="carritoModal" tabindex="-1" role="dialog" aria-labelledby="carritoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="carritoModalLabel">Carrito de Compras</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<div class="modal fade" id="modalConfirmarCompra" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Compra</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <div class="modal-body text-center">
+                <h4>Pedido Pendiente</h4>
+                <p>Total: ${{ $venta->total }}</p>
 
-            <div class="modal-body">
-                @if(empty($carrito))
-                    <p>No hay productos en el carrito.</p>
-                @else
-                    <form action="{{ route('venta.confirmar') }}" method="POST">
-                        @csrf
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Precio</th>
-                                    <th>Cantidad</th>
-                                    <th>Subtotal</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php $total = 0; @endphp
-                                @foreach($carrito as $id => $item)
-                                    @php $total += $item['precio'] * $item['cantidad']; @endphp
-                                    <tr>
-                                        <td>{{ $item['nombre'] }}</td>
-                                        <td>Bs. {{ number_format($item['precio'], 2) }}</td>
-                                        <td>{{ $item['cantidad'] }}</td>
-                                        <td>Bs. {{ number_format($item['precio'] * $item['cantidad'], 2) }}</td>
-                                        <td>
-                                            <form action="{{ route('cliente.ventas.eliminar', $id) }}" method="POST">
-                                                @csrf
-                                                <button class="btn btn-danger btn-sm">Eliminar</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                <h5>Escanea el QR para confirmar o guardar</h5>
+                <img src="data:image/png;base64,{{ $qr }}" alt="QR de la venta" class="mb-3">
 
-                        <h4>Total: Bs. {{ number_format($total, 2) }}</h4>
-                        <button type="submit" class="btn btn-success">Confirmar Compra</button>
-                    </form>
-                @endif
+                <h5>Comprobante de pago</h5>
+                <p>Pago pendiente. Una vez confirmado, tu pedido será procesado.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ route('cliente.ventas.confirmar_pago', $venta->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">Confirmar Compra</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
 @endsection

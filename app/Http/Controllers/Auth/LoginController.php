@@ -51,7 +51,7 @@ protected function authenticated(Request $request, $user)
             $this->username() => $request->get($this->username()),
             'password' => $request->get('contrasenia'),
             'correo'   => $request->correo,
-            'password' => $request->contrasenia, // 👈 siempre "password"
+            'password' => $request->contrasenia, 
         ];
     }
 

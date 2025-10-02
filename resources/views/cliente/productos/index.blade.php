@@ -70,6 +70,8 @@ return optional($p->categoria)->nombre ?? 'Sin categoría';
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="carrito-body">
+                <!-- Se carga via AJAX -->
+                <p class="text-center text-muted">Cargando...</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger" id="vaciar-carrito">Cancelar Compra</button>
@@ -187,76 +189,139 @@ return optional($p->categoria)->nombre ?? 'Sin categoría';
         color: black;
     }
 </style>
-
 {{-- Scripts --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const carritoCount = document.getElementById('carrito-count');
-        const carritoBody = document.getElementById('carrito-body');
+document.addEventListener('DOMContentLoaded', function() {
+    const carritoCount = document.getElementById('carrito-count');
+    const carritoBody = document.getElementById('carrito-body');
 
-        // Función para cargar modal
-        function cargarCarrito() {
-            fetch("{{ route('cliente.ventas.carrito') }}")
-                .then(res => res.text())
-                .then(html => carritoBody.innerHTML = html);
+    // Función para recargar el contenido del modal
+    function actualizarCarrito() {
+        fetch("{{ route('cliente.ventas.carrito') }}")
+            .then(res => res.text())
+            .then(html => carritoBody.innerHTML = html);
+    }
+
+    // Cargar carrito al abrir modal
+    const carritoModal = document.getElementById('carritoModal');
+    carritoModal.addEventListener('show.bs.modal', actualizarCarrito);
+
+    // Delegación de clicks dentro del modal para +, -, eliminar
+    carritoBody.addEventListener('click', function(e) {
+        const target = e.target;
+
+        // Aumentar cantidad
+        if(target.classList.contains('btn-aumentar')){
+            const id = target.dataset.id;
+            fetch(`/cliente/ventas/aumentar/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).then(res => res.json())
+              .then(data => {
+                  if(data.status === 'ok'){
+                      actualizarCarrito();
+                      carritoCount.textContent = data.cantidad_total;
+                  }
+              });
         }
 
-        // Inicializar modal
-        const carritoModal = document.getElementById('carritoModal');
-        carritoModal.addEventListener('show.bs.modal', cargarCarrito);
+        // Disminuir cantidad
+        if(target.classList.contains('btn-disminuir')){
+            const id = target.dataset.id;
+            fetch(`/cliente/ventas/disminuir/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).then(res => res.json())
+              .then(data => {
+                  if(data.status === 'ok'){
+                      actualizarCarrito();
+                      carritoCount.textContent = data.cantidad_total;
+                  }
+              });
+        }
 
-        // Agregar producto
-        document.querySelectorAll('.agregar-form').forEach(form => {
-            form.addEventListener('submit', e => {
-                e.preventDefault();
-                fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': form.querySelector('input[name=_token]').value
-                        },
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        carritoCount.innerText = data.cantidad_total;
-                        cargarCarrito();
-                    });
-            });
-        });
+        // Eliminar producto
+        if(target.classList.contains('btn-eliminar')){
+            const id = target.dataset.id;
+            fetch(`/cliente/ventas/eliminar/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).then(res => res.json())
+              .then(data => {
+                  if(data.status === 'ok'){
+                      actualizarCarrito();
+                      carritoCount.textContent = data.cantidad_total;
+                  }
+              });
+        }
+    });
 
-        // Vaciar carrito
-        document.getElementById('vaciar-carrito').addEventListener('click', function() {
-            fetch("{{ route('cliente.ventas.vaciar') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'ok') {
-                        carritoCount.innerText = 0;
-                        cargarCarrito();
-                    }
-                });
-        });
-
-        // Delegación para + y - del carrito
-        carritoBody.addEventListener('submit', function(e) {
-            if (e.target.classList.contains('cantidad-form')) {
-                e.preventDefault();
-                fetch(e.target.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': e.target.querySelector('input[name=_token]').value
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        carritoCount.innerText = data.cantidad_total;
-                        cargarCarrito();
-                    });
-            }
+    // Agregar producto al carrito (botón "Agregar")
+    document.querySelectorAll('.agregar-form').forEach(form => {
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': this.querySelector('input[name=_token]').value,
+                    'Accept': 'application/json'
+                }
+            }).then(res => res.json())
+              .then(data => {
+                  carritoCount.textContent = data.cantidad_total;
+              });
         });
     });
+
+    // Vaciar carrito
+    document.getElementById('vaciar-carrito').addEventListener('click', function(){
+        fetch("{{ route('cliente.ventas.vaciar') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        }).then(res => res.json())
+          .then(data => {
+              if(data.status === 'ok'){
+                  carritoCount.textContent = 0;
+                  carritoBody.innerHTML = '<p class="text-center text-muted">Tu carrito está vacío.</p>';
+              }
+          });
+    });
+
+    // Confirmar compra
+
+    // Confirmar compra
+    document.getElementById('confirmar-compra-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': this.querySelector('input[name=_token]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            document.body.appendChild(tempDiv);
+            const modalEl = tempDiv.querySelector('#modalConfirmarCompra');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        })
+        .catch(err => console.error(err));
+    });
+});
 </script>
 @endsection

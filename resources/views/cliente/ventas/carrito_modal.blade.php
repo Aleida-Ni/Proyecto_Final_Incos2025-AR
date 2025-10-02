@@ -13,16 +13,16 @@
         <tbody>
             @php $total = 0; @endphp
             @foreach($carrito as $id => $item)
-                @php $subtotal = $item['precio'] * $item['cantidad']; $total += $subtotal; @endphp
+                @php $total += $item['precio'] * $item['cantidad']; @endphp
                 <tr>
                     <td>{{ $item['nombre'] }}</td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-outline-light btn-disminuir" data-url="{{ route('cliente.ventas.disminuir', $id) }}">-</button>
-                        <span class="mx-2">{{ $item['cantidad'] }}</span>
-                        <button class="btn btn-sm btn-outline-light btn-aumentar" data-url="{{ route('cliente.ventas.aumentar', $id) }}">+</button>
+                        <button class="btn btn-sm btn-outline-light btn-disminuir" data-id="{{ $id }}">-</button>
+                        <span class="mx-2 cantidad-{{ $id }}">{{ $item['cantidad'] }}</span>
+                        <button class="btn btn-sm btn-outline-light btn-aumentar" data-id="{{ $id }}">+</button>
                     </td>
                     <td>Bs. {{ number_format($item['precio'], 2) }}</td>
-                    <td>Bs. {{ number_format($subtotal, 2) }}</td>
+                    <td>Bs. {{ number_format($item['precio'] * $item['cantidad'], 2) }}</td>
                 </tr>
             @endforeach
         </tbody>

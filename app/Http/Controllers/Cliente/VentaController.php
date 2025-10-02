@@ -5,65 +5,114 @@ namespace App\Http\Controllers\Cliente;
 use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Models\Venta;
-use App\Models\DetalleVenta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class VentaController extends Controller
 {
-    /**
-     * Mostrar carrito (desde sesión)
-     */
+    // Mostrar carrito (vista normal)
     public function index()
     {
-        $carrito = session('carrito', []); 
+        $carrito = session('carrito', []);
         return view('cliente.ventas.index', compact('carrito'));
     }
 
-    /**
-     * Agregar producto al carrito
-     */
-public function agregar(Request $request, $id)
-{
-    $producto = Producto::findOrFail($id);
-    $carrito = session()->get('carrito', []);
-
-    if (isset($carrito[$id])) {
-        $carrito[$id]['cantidad']++;
-    } else {
-        $carrito[$id] = [
-            'nombre' => $producto->nombre,
-            'precio' => $producto->precio,
-            'cantidad' => 1,
-        ];
-    }
-
-    session()->put('carrito', $carrito);
-
-    return response()->json([
-        'cantidad_total' => array_sum(array_column($carrito, 'cantidad'))
-    ]);
-}
-
-
-    /**
-     * Eliminar producto del carrito
-     */
-    public function eliminar(Request $request, $productoId)
+    // Agregar producto al carrito (AJAX)
+    public function agregar(Request $request, $id)
     {
-        $carrito = $request->session()->get('carrito', []);
-        if (isset($carrito[$productoId])) {
-            unset($carrito[$productoId]);
-            $request->session()->put('carrito', $carrito);
+        $producto = Producto::findOrFail($id);
+        $carrito = session()->get('carrito', []);
+
+        if (isset($carrito[$id])) {
+            $carrito[$id]['cantidad']++;
+        } else {
+            $carrito[$id] = [
+                'nombre' => $producto->nombre,
+                'precio' => $producto->precio,
+                'cantidad' => 1,
+            ];
         }
 
-        return back()->with('success', 'Producto eliminado del carrito.');
+        session()->put('carrito', $carrito);
+
+        return response()->json([
+            'cantidad_total' => array_sum(array_column($carrito, 'cantidad'))
+        ]);
     }
-/**
- * Aumentar cantidad de un producto en el carrito
- */
-public function aumentar($id)
+
+    // Vaciar carrito
+    public function vaciar()
+    {
+        session()->forget('carrito');
+        return response()->json(['status' => 'ok']);
+    }
+// Devuelve el partial del carrito
+// Devuelve el partial del carrito
+public function modalCarrito()
+{
+    $carrito = session('carrito', []);
+    return view('cliente.ventas.carrito_modal', compact('carrito'));
+}
+
+public function verCarrito()
+{
+    $carrito = session('carrito', []);
+    return view('cliente.partials.carrito_modal', compact('carrito'));
+}
+
+    // Confirmar compra (devuelve modal con QR)
+    public function confirmarCompra(Request $request)
+    {
+        $user = auth()->user();
+        $carrito = session('carrito', []);
+
+        if (empty($carrito)) {
+            return response()->json(['error' => 'Carrito vacío'], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $venta = Venta::create([
+                'cliente_id' => $user->id,
+                'empleado_id' => null,
+                'codigo' => 'PED-' . strtoupper(uniqid()),
+                'total' => 0,
+            ]);
+
+            $total = 0;
+            foreach ($carrito as $id => $item) {
+                $subtotal = $item['precio'] * $item['cantidad'];
+                $total += $subtotal;
+
+                $venta->detalles()->create([
+                    'producto_id' => $id,
+                    'cantidad' => $item['cantidad'],
+                    'precio' => $item['precio'],
+                    'subtotal' => $subtotal,
+                ]);
+
+                $producto = Producto::find($id);
+                $producto->stock -= $item['cantidad'];
+                $producto->save();
+            }
+
+            $venta->update(['total' => $total]);
+
+            session()->forget('carrito');
+
+            // Generar QR en SVG
+            $qrSvg = QrCode::format('svg')->size(200)->generate($venta->codigo);
+
+            return view('cliente.ventas.modal_confirmar', compact('venta', 'qrSvg'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+// Aumentar cantidad
+public function aumentar(Request $request, $id)
 {
     $carrito = session()->get('carrito', []);
 
@@ -78,10 +127,8 @@ public function aumentar($id)
     ]);
 }
 
-/**
- * Disminuir cantidad de un producto en el carrito
- */
-public function disminuir($id)
+// Disminuir cantidad
+public function disminuir(Request $request, $id)
 {
     $carrito = session()->get('carrito', []);
 
@@ -97,88 +144,6 @@ public function disminuir($id)
         'status' => 'ok',
         'cantidad_total' => array_sum(array_column($carrito, 'cantidad'))
     ]);
-}
-
-    /**
-     * Confirmar compra
-     */
-public function confirmarCompra(Request $request)
-{
-    $user = auth()->user();
-    $carrito = session('carrito', []);
-
-    if (empty($carrito)) {
-        return redirect()->route('cliente.ventas.index')
-            ->with('error', 'El carrito está vacío.');
-    }
-
-    $total = 0;
-
-    DB::beginTransaction();
-    try {
-
-        $venta = Venta::create([
-            'cliente_id' => $user->id,
-            'empleado_id' => null,
-            'codigo' => 'PED-' . strtoupper(uniqid()),
-            'total' => 0,
-        ]);
-
-        foreach ($carrito as $id => $item) {
-            $producto = Producto::findOrFail($id);
-
-            if ($producto->stock < $item['cantidad']) {
-                throw new \Exception("No hay suficiente stock de {$producto->nombre}");
-            }
-
-            $subtotal = $item['precio'] * $item['cantidad'];
-            $total += $subtotal;
-
-            // Crear detalle
-            $venta->detalles()->create([
-                'producto_id' => $id,
-                'cantidad' => $item['cantidad'],
-                'precio' => $item['precio'],
-                'subtotal' => $subtotal,
-            ]);
-
-            // Descontar stock
-            $producto->stock -= $item['cantidad'];
-            $producto->save();
-        }
-
-        // Actualizar total
-        $venta->update(['total' => $total]);
-
-        DB::commit();
-
-        session()->forget('carrito');
-
-        return view('cliente.ventas.confirmar', compact('venta'));
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->route('cliente.ventas.index')
-            ->with('error', $e->getMessage());
-    }
-}
-
-    /**
-     * Página de detalle de venta (opcional)
-     */
-    public function exito($ventaId)
-    {
-        $venta = Venta::with('detalles.producto')->findOrFail($ventaId);
-        return view('cliente.ventas.confirmar', compact('venta'));
-    }
-public function modalCarrito() {
-    $carrito = session('carrito', []);
-    return view('cliente.partials.carrito_modal', compact('carrito'));
-}
-
-public function vaciar() {
-
-    session()->forget('carrito');
-    return response()->json(['status' => 'ok']);
 }
 
 }

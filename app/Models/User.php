@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +12,7 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-protected $table = 'usuarios';
+    protected $table = 'usuarios';
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';
 
@@ -38,61 +39,50 @@ protected $table = 'usuarios';
         'correo_verificado_en' => 'datetime',
         'contrasenia' => 'hashed',
     ];
-public function hasVerifiedEmail()
-{
-    return ! is_null($this->correo_verificado_en);
-}
 
-public function markEmailAsVerified()
-{
-    return $this->forceFill([
-        'correo_verificado_en' => now(),
-    ])->save();
-}
+    // Verificación de correo
+    public function hasVerifiedEmail()
+    {
+        return !is_null($this->correo_verificado_en);
+    }
 
-    // Relación
+    public function markEmailAsVerified()
+    {
+        return $this->forceFill([
+            'correo_verificado_en' => now(),
+        ])->save();
+    }
+
+    // Relación con reservas
     public function reservas()
     {
         return $this->hasMany(Reserva::class);
     }
 
-    // Para que Laravel use "correo" en lugar de "email"
-    public function getAuthIdentifierName()
-    {
-        return 'correo';
-    }
-
-    // Para notificaciones generales
+    // Para notificaciones por correo
     public function routeNotificationForMail($notification)
     {
         return $this->correo;
     }
 
-    // Para verificación de correo (solo clientes)
     public function getEmailForVerification()
     {
         return $this->correo;
     }
 
-    // 👇 Aquí está la clave para usar "contrasenia"
+    // Para usar "contrasenia" en lugar de "password"
     public function getAuthPassword()
     {
         return $this->contrasenia;
     }
 
+    // Getter del nombre completo opcional
     public function getNameAttribute()
     {
         return $this->attributes['nombre'];
     }
 
-    /**
-     * Método can() personalizado para roles en AdminLTE.
-     */
-    public function sendEmailVerificationNotification()
-{
-    $this->notify(new \App\Notifications\VerifyEmailCustom);
-}
-
+    // Método para verificar roles
     public function can($ability, $arguments = [])
     {
         if ($ability === 'is-admin') {
@@ -108,5 +98,11 @@ public function markEmailAsVerified()
         }
 
         return false;
+    }
+
+    // Enviar notificación de verificación personalizada
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\VerifyEmailCustom);
     }
 }

@@ -348,7 +348,12 @@ return [
             'icon' => '',
             'can' => 'menu-admin',
         ],
-        // dentro del array 'menu' en config/adminlte.php
+                                        [
+            'text' => 'Registrar ventas',
+            'route'  => 'admin.ventas.index',
+            'icon' => '',
+            'can' => 'menu-admin',
+        ],
         [
             'text' => 'Reportes',
             'icon' => 'fas fa-chart-line',
@@ -394,6 +399,12 @@ return [
                         [
             'text' => 'Reservas',
             'route'  => 'admin.reservas.index',
+            'icon' => '',
+            'can' => 'menu-empleado',
+        ],
+                                [
+            'text' => 'Registrar ventas',
+            'route'  => 'admin.ventas.index',
             'icon' => '',
             'can' => 'menu-empleado',
         ],

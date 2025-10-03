@@ -19,12 +19,14 @@
             @csrf
 
             <!-- Correo -->
-            <div class="mb-3">
-                <x-adminlte-input name="correo" type="email" placeholder="usuario@correo.com" required autofocus icon="fas fa-user" />
+            <div class="mb-3 text-start">
+                <label for="correo" class="form-label">Ingresar correo</label>
+                <x-adminlte-input id="correo" name="correo" type="email" placeholder="usuario@correo.com" required autofocus icon="fas fa-user" />
             </div>
 
             <!-- Contraseña con ojo -->
-            <div class="mb-3 position-relative">
+            <div class="mb-3 text-start position-relative">
+                <label for="contrasenia" class="form-label">Contraseña</label>
                 <x-adminlte-input 
                     id="contrasenia" 
                     name="contrasenia" 
@@ -38,7 +40,7 @@
             <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Ingresar</button>
         </form>
 
-        <div class="text-center">
+        <div class="text-center mt-2">
             <a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a><br>
             <a href="{{ route('register') }}">Crear una cuenta</a>
         </div>
@@ -53,86 +55,91 @@
 /* Fondo completo */
 body.login-page {
     margin: 0; padding: 0;
-    background: url("{{ asset('imagenes/servicios/login-background.png') }}") no-repeat center center;
-    background-size: cover;
+    background: #c8c6c68b !important;
+    align-items: center;   /* Fondo blanco */
     font-family: 'Nunito', sans-serif;
+    color: #333;
 }
 
 /* Contenedor central */
-.login-wrapper {
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    top: 100px;
-    left: 0;
-    width: 100%;
-    height: auto;
+.login-wrapper { display: flex;
+    justify-content: center; 
+    position: fixed; 
+    top: 100px; 
+    left: 0; 
+    width: 100%; 
+    height: auto; 
 }
 
 /* Caja tipo glass */
 .login-glass {
-    background: rgba(255, 255, 255, 0.1); 
-    border-radius: 20px;
+    background: rgba(245, 245, 245, 0.7);  /* gris muy claro/plomo */
+    border-radius: 12px;
     padding: 2rem;
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    text-align: center;
-    transform: translateY(-80px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    text-align: initial;
+    transform: translateY(-80px); 
 }
 
 /* Logo */
 .logo-container { display: flex; justify-content: center; }
-.login-logo { max-width: 120px; height: auto; margin-bottom: 15px; }
+.login-logo { max-width: 120px; height: auto; margin-bottom: 15px; 
+    filter: drop-shadow(0px 0px 6px rgba(0,0,0,0.8));}
 
 /* Título */
-.login-glass h2 { font-weight: bold; color: #ffffff; }
+.login-glass h2 { font-weight: bold; color: #111; }
 
 /* Botón */
 .custom-btn {
-    background: linear-gradient(135deg, #3b82f6, #06b6d4);
-    color: white;
+    background: #000;     /* negro */
+    color: #fff;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;   /* bordes cuadrados */
     padding: 0.6rem;
     font-weight: bold;
     text-transform: uppercase;
     transition: 0.3s ease;
 }
 .custom-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #0891b2);
+    background: #444;  /* plomo oscuro al hover */
 }
 
 /* Links */
-a { color: #93c5fd; font-size: 0.9rem; }
-a:hover { color: #38bdf8; }
+a { color: #555; font-size: 0.9rem; }
+a:hover { color: #000; }
 
 /* Inputs */
 .input-group-text,
 .form-control {
-    background: rgba(255,255,255,0.15);
-    border: none;
-    color: white;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #ccc;
+    color: #000;
+}
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
 }
 
 /* Posicionar el ojo sobre el input */
 .position-relative { position: relative; }
 .password-toggle {
     position: absolute;
-    top: 50%;              /* Centrado vertical */
-    right: 12px;           /* Separación del borde derecho */
-    transform: translateY(-50%); /* Centrado exacto */
+    top: 65%;              /* centrado respecto al input */
+    right: 12px;           
+    transform: translateY(-50%); 
     cursor: pointer;
-    color: #bbb;
+    color: #555;
     font-size: 1.1rem;
     z-index: 5;
     transition: 0.3s;
 }
-.password-toggle:hover { color: white; }
+.password-toggle:hover { color: #000; }
 </style>
 @endpush
 

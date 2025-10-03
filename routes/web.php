@@ -11,7 +11,8 @@ use App\Http\Controllers\Cliente\HomeController as ClienteHomeController;
 use App\Http\Controllers\Cliente\BarberoController as ClienteBarberoController;
 use App\Http\Controllers\Cliente\ProductoController as ClienteProductoController;
 use App\Http\Controllers\Cliente\ReservaController as ClienteReservaController;
-use App\Http\Controllers\Cliente\VentaController;
+use App\Http\Controllers\Admin\VentaController;
+
 
 use App\Http\Controllers\Admin\BarberoController as AdminBarberoController;
 use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
@@ -70,24 +71,33 @@ Route::post('/email/verification-notification', function (Request $request) {
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
-/*PANEL ADMIN*/
-
-// Grupo de rutas /admin/*
-Route::middleware(['auth', 'role:admin|empleado'])
+/* ==============================
+   PANEL ADMIN
+   ============================== */
+Route::middleware(['auth', 'estado', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
         // Panel principal
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Rutas de recursos principales
+        // Recursos
         Route::resource('barberos', AdminBarberoController::class);
-        Route::resource('productos', ProductoController::class);
+        Route::resource('productos', AdminProductoController::class);
         Route::resource('reservas', AdminReservaController::class);
 
-        // Ruta para marcar reservas como realizada o no asistió
-        Route::post('reservas/{id}/{estado}', [App\Http\Controllers\Admin\ReservaController::class, 'marcar'])
+        // Marcar reservas
+        Route::post('reservas/{id}/{estado}', [AdminReservaController::class, 'marcar'])
             ->name('reservas.marcar');
+
+        // Ventas (admin)
+        Route::prefix('ventas')->name('ventas.')->group(function () {
+            Route::get('/', [VentaController::class, 'index'])->name('index');
+            Route::get('/crear', [VentaController::class, 'create'])->name('create');
+            Route::post('/', [VentaController::class, 'store'])->name('store');
+            Route::get('/{venta}', [VentaController::class, 'show'])->name('show');
+        });
 
         // Configuración
         Route::prefix('config')->group(function () {
@@ -103,17 +113,27 @@ Route::middleware(['auth', 'role:admin|empleado'])
     });
 
 
-
-
-/*PANEL EMPLEADO*/
+/* ==============================
+   PANEL EMPLEADO
+   ============================== */
 Route::middleware(['auth', 'estado', 'role:empleado'])
     ->prefix('empleado')
     ->name('empleado.')
     ->group(function () {
+
+        // Panel principal
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Recursos
         Route::resource('barberos', AdminBarberoController::class);
         Route::resource('productos', AdminProductoController::class);
         Route::resource('reservas', AdminReservaController::class);
+
+        // Ventas (empleado)
+        Route::prefix('ventas')->name('ventas.')->group(function () {
+            Route::get('/crear', [VentaController::class, 'create'])->name('create');
+            Route::post('/', [VentaController::class, 'store'])->name('store');
+        });
     });
 
 /* PANEL CLIENTE */
@@ -133,19 +153,7 @@ Route::middleware(['auth', 'verified', 'estado', 'can:is-cliente'])
         // Productos
         Route::get('/productos', [App\Http\Controllers\Cliente\ProductoController::class, 'index'])
             ->name('productos.index');
-// Carrito / Ventas
-Route::prefix('ventas')->group(function () {
-    Route::get('/', [VentaController::class, 'index'])->name('ventas.index'); // vista carrito
-    Route::get('/carrito', [VentaController::class, 'modalCarrito'])->name('ventas.carrito'); // modal AJAX
-    
-    Route::post('/agregar/{producto}', [VentaController::class, 'agregar'])->name('ventas.agregar');
-    Route::post('/eliminar/{producto}', [VentaController::class, 'eliminar'])->name('ventas.eliminar');
-    Route::post('/aumentar/{id}', [VentaController::class, 'aumentar'])->name('ventas.aumentar');
-    Route::post('/disminuir/{id}', [VentaController::class, 'disminuir'])->name('ventas.disminuir');
-    Route::post('/vaciar', [VentaController::class, 'vaciar'])->name('ventas.vaciar');
-    Route::post('/confirmar', [VentaController::class, 'confirmarCompra'])->name('ventas.confirmar');
-    Route::get('/exito/{venta}', [VentaController::class, 'exito'])->name('ventas.exito');
-});
+
 
 
         // Barberos / Reservas

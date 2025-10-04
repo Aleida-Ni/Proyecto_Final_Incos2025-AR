@@ -1,77 +1,77 @@
 @extends('adminlte::page')
 
-@section('title', 'Ventas')
+@section('title', 'Lista de Ventas')
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+@endsection
+@section('content_header')
+    <h1>Ventas</h1>
+@stop
 
 @section('content')
-<div class="d-flex justify-content-between mb-3">
-    <h1>Ventas</h1>
-    <a href="{{ route('admin.ventas.create') }}" class="btn btn-primary">Registrar Nueva Venta</a>
-</div>
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($ventas as $venta)
-        <tr>
-            <td>{{ $venta->id }}</td>
-            <td>{{ $venta->creado_en }}</td>
-            <td>Bs. {{ number_format($venta->total, 2) }}</td>
-            <td>
-                <button class="btn btn-info btn-sm" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#modalVenta" 
-                        data-venta="{{ $venta->id }}">
-                    Ver
-                </button>
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
-{{ $ventas->links() }}
-
-{{-- Modal de Ticket --}}
-<div class="modal fade" id="modalVenta" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ticket de Venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="modal-venta-body">
-                Cargando...
+    <div class="card">
+        <div class="card-header">
+            <a href="{{ route('admin.ventas.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nueva Venta
+            </a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Fecha</th>
+                        <th>Realizado por</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Método Pago</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($ventas as $venta)
+                    <tr>
+                        <td>{{ $venta->codigo ?? 'N/A' }}</td>
+                        <td>{{ $venta->fecha_formateada ?? 'N/A' }}</td>
+                        <td>
+                            {{ $venta->empleado->nombre ?? 'Usuario no encontrado' }}
+                            {{ $venta->empleado->apellido_paterno ?? '' }}
+                            <br>
+                            <small class="text-muted">{{ $venta->empleado->rol ?? '' }}</small>
+                        </td>
+                        <td>{{ $venta->total_formateado ?? '$ 0.00' }}</td>
+                        <td>{!! $venta->estado_badge ?? '<span class="badge badge-secondary">N/A</span>' !!}</td>
+                        <td>{{ ucfirst($venta->metodo_pago ?? 'efectivo') }}</td>
+                        <td>
+                            <a href="{{ route('admin.ventas.show', $venta) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            @if(($venta->estado ?? 'completada') === 'completada')
+                            <form action="{{ route('admin.ventas.destroy', $venta) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Anular esta venta?')">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </form>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            
+            <div class="mt-4">
+                {{ $ventas->links() }}
             </div>
         </div>
     </div>
-</div>
-
-@endsection
-
-@section('js')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var modal = document.getElementById('modalVenta');
-    modal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var ventaId = button.getAttribute('data-venta');
-        var modalBody = document.getElementById('modal-venta-body');
-
-        modalBody.innerHTML = 'Cargando...';
-
-        fetch(`/admin/ventas/${ventaId}`)
-            .then(res => res.text())
-            .then(html => {
-                modalBody.innerHTML = html;
-            });
-    });
-});
-</script>
-@endsection
+@stop

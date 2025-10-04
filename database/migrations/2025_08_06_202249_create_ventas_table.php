@@ -10,7 +10,6 @@ return new class extends Migration
     {
         Schema::create('ventas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('cliente_id');
             $table->unsignedBigInteger('empleado_id');
             $table->timestamps();
 

@@ -13,23 +13,45 @@ class ReservaController extends Controller
     /**
      * Listar todas las reservas
      */
-public function index()
+// En tu ReservaController - método index
+public function index(Request $request)
 {
-    Reserva::where('estado', 'pendiente')
-        ->where(function($q) {
-            $q->where('fecha', '<', now()->toDateString())
-              ->orWhere(function($q2) {
-                  $q2->where('fecha', now()->toDateString())
-                     ->where('hora', '<', now()->format('H:i'));
-              });
-        })
-        ->update(['estado' => 'no_asistio']);
-
-    $reservas = Reserva::orderBy('fecha', 'desc')
-        ->orderBy('hora', 'desc')
-        ->get();
-
-    return view('admin.reservas.index', compact('reservas'));
+    $query = Reserva::with(['cliente', 'barbero']);
+    
+    // Aplicar filtros
+    if ($request->filled('estado')) {
+        $query->where('estado', $request->estado);
+    }
+    
+    if ($request->filled('fecha')) {
+        $hoy = Carbon::today();
+        switch ($request->fecha) {
+            case 'hoy':
+                $query->whereDate('fecha', $hoy);
+                break;
+            case 'futuro':
+                $query->whereDate('fecha', '>=', $hoy);
+                break;
+            case 'pasado':
+                $query->whereDate('fecha', '<', $hoy);
+                break;
+        }
+    }
+    
+    $reservas = $query->orderBy('fecha')->orderBy('hora')->paginate(20);
+    
+    // Calcular estadísticas
+    $estadisticas = [
+        'total' => Reserva::count(),
+        'pendientes' => Reserva::where('estado', 'pendiente')->count(),
+        'hoy' => Reserva::whereDate('fecha', Carbon::today())->count(),
+        'esta_semana' => Reserva::whereBetween('fecha', [
+            Carbon::now()->startOfWeek(),
+            Carbon::now()->endOfWeek()
+        ])->count(),
+    ];
+    
+    return view('admin.reservas.index', compact('reservas', 'estadisticas'));
 }
 
 

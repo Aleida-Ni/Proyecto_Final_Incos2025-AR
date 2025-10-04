@@ -14,83 +14,174 @@ use App\Models\User;
 class VentaController extends Controller
 {
     // Lista de ventas
-public function index()
-{
-    // Traemos todas las ventas ordenadas por fecha
-    $ventas = Venta::orderByDesc('creado_en')->paginate(25); // tu columna en español
-    
-    return view('admin.ventas.index', compact('ventas'));
-}
-
+    public function index()
+    {
+        $ventas = Venta::with(['detalles.producto', 'empleado'])
+            ->orderByDesc('creado_en')
+            ->paginate(25);
+        
+        return view('admin.ventas.index', compact('ventas'));
+    }
 
     // Formulario POS (crear venta)
-public function create()
-{
-    $productos = Producto::with('categoria')->orderBy('nombre')->get();
-    $productosPorCategoria = $productos->groupBy(fn($p) => $p->categoria->nombre ?? 'Sin categoría');
+    public function create()
+    {
+        $productos = Producto::with('categoria')
+            ->orderBy('nombre')
+            ->get();
+        
+        // Agrupar por categoría
+        $productosPorCategoria = $productos->groupBy(function($producto) {
+            return $producto->categoria->nombre ?? 'Sin categoría';
+        });
 
-    $clientes = User::where('rol', 'cliente')->orderBy('nombre')->get();
+        // Agregar opción "Todas" con todos los productos
+        $productosPorCategoria = $productosPorCategoria->prepend($productos, 'Todas las categorías');
 
-    return view('admin.ventas.create', compact('productosPorCategoria', 'clientes'));
-}
-
-
-    // Guardar venta
-public function store(Request $request)
-{
-    $data = $request->all(); // viene JSON
-    $items = $data['items'] ?? [];
-
-    if(empty($items)) {
-        return response()->json(['error'=>'No hay productos'],400);
+        return view('admin.ventas.create', compact('productosPorCategoria'));
     }
 
-    $venta = Venta::create([
-        'cliente_id' => $data['cliente_id'] ?? null,
-        'empleado_id' => auth()->id(),
-        'total' => 0, // se calcula luego
-        'creado_en' => now(),
-    ]);
 
-    $total = 0;
-    $detalleItems = [];
-    foreach($items as $id => $cantidad){
-        $producto = Producto::find($id);
-        if(!$producto) continue;
+    // Guardar venta - CON REGISTRO DEL USUARIO AUTENTICADO
+    public function store(Request $request)
+    {
+        DB::beginTransaction();
+        
+        try {
+            $data = $request->all();
+            $items = $data['items'] ?? [];
 
-        $subtotal = $producto->precio * $cantidad;
-        $total += $subtotal;
+            if(empty($items)) {
+                return response()->json(['error' => 'No hay productos en la venta'], 400);
+            }
 
-        $detalle = DetalleVenta::create([
-            'venta_id' => $venta->id,
-            'producto_id' => $producto->id,
-            'cantidad' => $cantidad,
-            'precio' => $producto->precio,
-        ]);
+            // Generar código único para la venta
+            $codigo = 'V-' . date('Ymd') . '-' . strtoupper(Str::random(6));
 
-        $detalleItems[] = [
-            'nombre' => $producto->nombre,
-            'cantidad' => $cantidad,
-            'precio' => $producto->precio,
-        ];
+            // Crear la venta - el empleado_id será el usuario autenticado (admin o empleado)
+            $venta = Venta::create([
+                'cliente_id' => null, // Sin cliente específico
+                'empleado_id' => auth()->id(), // Usuario que realiza la venta
+                'estado' => 'completada',
+                'metodo_pago' => $data['metodo_pago'] ?? 'efectivo',
+                'referencia_pago' => $data['referencia_pago'] ?? null,
+                'fecha_pago' => now(),
+                'codigo' => $codigo,
+                'total' => 0,
+                'creado_en' => now(),
+            ]);
+
+            $total = 0;
+            $detalleItems = [];
+            
+            // Procesar cada producto
+            foreach($items as $item) {
+                $producto = Producto::find($item['producto_id']);
+                
+                if(!$producto) {
+                    throw new \Exception("Producto no encontrado: {$item['producto_id']}");
+                }
+
+                // Verificar si existe stock
+                if(isset($producto->stock) && $producto->stock < $item['cantidad']) {
+                    throw new \Exception("Stock insuficiente para: {$producto->nombre}");
+                }
+
+                $subtotal = $producto->precio * $item['cantidad'];
+                $total += $subtotal;
+
+                // Crear detalle de venta
+                DetalleVenta::create([
+                    'venta_id' => $venta->id,
+                    'producto_id' => $producto->id,
+                    'cantidad' => $item['cantidad'],
+                    'precio' => $producto->precio,
+                    'subtotal' => $subtotal,
+                ]);
+
+                // Actualizar stock si existe la columna
+                if(isset($producto->stock)) {
+                    $producto->decrement('stock', $item['cantidad']);
+                }
+
+                $detalleItems[] = [
+                    'nombre' => $producto->nombre,
+                    'cantidad' => $item['cantidad'],
+                    'precio' => $producto->precio,
+                    'subtotal' => $subtotal,
+                ];
+            }
+
+            // Actualizar total de la venta
+            $venta->update(['total' => $total]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'venta_id' => $venta->id,
+                'codigo' => $codigo,
+                'total' => $total,
+                'items' => $detalleItems,
+                'message' => 'Compra registrada con éxito',
+                'redirect_url' => route('admin.ventas.show', $venta)
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Error al procesar la venta: ' . $e->getMessage()
+            ], 500);
+        }
     }
-
-    $venta->total = $total;
-    $venta->save();
-
-    return response()->json([
-        'success' => true,
-        'venta_id' => $venta->id,
-        'total' => $total,
-        'items' => $detalleItems,
-    ]);
-}
 
     // Ver detalle de venta
-public function show(Venta $venta)
-{
-    $venta->load('detalles.producto');
-    return view('admin.ventas.show', compact('venta'));
-}
+    public function show(Venta $venta)
+    {
+        $venta->load(['detalles.producto', 'empleado']);
+        return view('admin.ventas.show', compact('venta'));
+    }
 
+    // Anular venta
+    public function destroy(Venta $venta)
+    {
+        DB::beginTransaction();
+        
+        try {
+            // Solo permitir anular ventas recientes (menos de 24 horas)
+            if($venta->creado_en->diffInHours(now()) > 24) {
+                return redirect()->back()
+                    ->with('error', 'Solo se pueden anular ventas de menos de 24 horas');
+            }
+
+            if($venta->estado === 'anulada') {
+                return redirect()->back()
+                    ->with('error', 'Esta venta ya está anulada');
+            }
+
+            // Restaurar stock de productos si existe la columna
+            foreach($venta->detalles as $detalle) {
+                $producto = $detalle->producto;
+                if(isset($producto->stock)) {
+                    $producto->increment('stock', $detalle->cantidad);
+                }
+            }
+
+            // Actualizar estado de la venta
+            $venta->update([
+                'estado' => 'anulada',
+                'actualizado_en' => now()
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.ventas.index')
+                ->with('success', 'Venta anulada exitosamente');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Error al anular la venta: ' . $e->getMessage());
+        }
+    }
 }

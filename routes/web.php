@@ -97,6 +97,7 @@ Route::middleware(['auth', 'estado', 'role:admin'])
             Route::get('/crear', [VentaController::class, 'create'])->name('create');
             Route::post('/', [VentaController::class, 'store'])->name('store');
             Route::get('/{venta}', [VentaController::class, 'show'])->name('show');
+             Route::delete('/{venta}', [VentaController::class, 'destroy'])->name('destroy');
         });
 
         // Configuración
@@ -133,6 +134,7 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
         Route::prefix('ventas')->name('ventas.')->group(function () {
             Route::get('/crear', [VentaController::class, 'create'])->name('create');
             Route::post('/', [VentaController::class, 'store'])->name('store');
+             Route::delete('/{venta}', [VentaController::class, 'destroy'])->name('destroy');
         });
     });
 

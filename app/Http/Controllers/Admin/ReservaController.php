@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Barbero;
 use App\Models\Reserva;
+use App\Models\Servicio;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -138,18 +139,6 @@ public function marcar($id, $estado)
         return redirect()->route('admin.reservas.index')
             ->with('success', 'Reserva creada con éxito');
     }
-
-    /**
-     * Marcar reserva como realizada
-     */
-    public function marcarRealizada(Reserva $reserva)
-    {
-        $reserva->update(['estado' => 'realizada']);
-
-        return redirect()->route('admin.reservas.index')
-            ->with('success', 'Reserva marcada como realizada.');
-    }
-
     /**
      * Marcar reserva como cancelada
      */
@@ -160,4 +149,82 @@ public function marcar($id, $estado)
         return redirect()->route('admin.reservas.index')
             ->with('success', 'Reserva cancelada.');
     }
+     public function showMarcarRealizada(Reserva $reserva)
+    {
+        $servicios = Servicio::where('activo', true)->get();
+        return view('admin.reservas.marcar-realizada', compact('reserva', 'servicios'));
+    }
+
+    /**
+     * Procesar reserva realizada con servicios
+     */
+    public function marcarRealizada(Request $request, Reserva $reserva)
+    {
+        $request->validate([
+            'servicios' => 'required|array|min:1',
+            'servicios.*' => 'exists:servicios,id',
+            'metodo_pago' => 'required|in:efectivo,tarjeta,transferencia',
+            'referencia_pago' => 'nullable|string|max:50'
+        ]);
+
+        // Iniciar transacción
+        \DB::beginTransaction();
+
+        try {
+            // Actualizar estado de la reserva
+            $reserva->update([
+                'estado' => 'realizada',
+                'actualizado_en' => now()
+            ]);
+
+            // Adjuntar servicios con sus precios actuales
+            $serviciosConPrecios = [];
+            foreach ($request->servicios as $servicioId) {
+                $servicio = Servicio::find($servicioId);
+                $serviciosConPrecios[$servicioId] = ['precio' => $servicio->precio];
+            }
+
+            $reserva->servicios()->attach($serviciosConPrecios);
+
+            // Crear venta automáticamente
+            $total = $reserva->total_servicios;
+            $codigo = 'V-' . date('Ymd') . '-' . strtoupper(\Str::random(6));
+
+            $venta = \App\Models\Venta::create([
+                'cliente_id' => $reserva->usuario_id, // El cliente que hizo la reserva
+                'empleado_id' => auth()->id(),
+                'estado' => 'completada',
+                'metodo_pago' => $request->metodo_pago,
+                'referencia_pago' => $request->referencia_pago,
+                'fecha_pago' => now(),
+                'codigo' => $codigo,
+                'total' => $total,
+                'creado_en' => now(),
+            ]);
+
+            // Crear detalles de venta para cada servicio
+            foreach ($reserva->servicios as $servicio) {
+                \App\Models\DetalleVenta::create([
+                    'venta_id' => $venta->id,
+                    'producto_id' => null, // O puedes crear productos para servicios
+                    'servicio_id' => $servicio->id,
+                    'nombre_servicio' => $servicio->nombre,
+                    'cantidad' => 1,
+                    'precio' => $servicio->pivot->precio,
+                    'subtotal' => $servicio->pivot->precio,
+                ]);
+            }
+
+            \DB::commit();
+
+            return redirect()->route('admin.reservas.index')
+                ->with('success', 'Reserva marcada como realizada y venta registrada exitosamente. Total: $' . number_format($total, 2));
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Error al procesar la reserva: ' . $e->getMessage());
+        }
+    }
+
 }

@@ -1,9 +1,7 @@
 @extends('adminlte::page')
 
 @section('title', 'Reportes - Ventas')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-@endsection
+
 
 @section('content_header')
     <h1>Reporte de Ventas</h1>

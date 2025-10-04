@@ -2,22 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Servicio extends Model
 {
-    use HasFactory;
-    protected $fillable = ['nombre', 'descripcion', 'precio'];
+    protected $table = 'servicios';
 
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'precio',
+        'duracion_minutos',
+        'activo'
+    ];
+
+    protected $casts = [
+        'precio' => 'decimal:2',
+        'activo' => 'boolean'
+    ];
+
+    // Relación con reservas
     public function reservas()
     {
-        return $this->belongsToMany(Reserva::class);
+        return $this->belongsToMany(Reserva::class, 'servicio_reserva')
+                    ->withPivot('precio')
+                    ->withTimestamps();
     }
-
-public function barberos()
-{
-    return $this->belongsToMany(Barbero::class);
-}
-
 }

@@ -1,9 +1,7 @@
 @extends('adminlte::page')
 
 @section('title', 'Agregar Barbero')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-@endsection
+
 @section('content')
 <div class="container mt-4">
     <div class="card shadow-lg border-primary">

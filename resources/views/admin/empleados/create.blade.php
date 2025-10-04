@@ -1,9 +1,7 @@
 @extends('adminlte::page')
 
 @section('title', 'Registrar Empleado')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-@endsection
+
 @section('content_header')
 <h1 class="text-center text-primary" style="text-shadow: 0 0 5px #00aaff, 0 0 10px #00ccff;">Registrar Nuevo Empleado</h1>
 @stop

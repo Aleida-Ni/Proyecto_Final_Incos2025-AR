@@ -1,12 +1,21 @@
 <?php
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
 
 class DetalleVenta extends Model
 {
     protected $table = 'detalles_venta';
-    public $timestamps = false; // si tu tabla no tiene timestamps
-    protected $fillable = ['venta_id', 'producto_id', 'cantidad', 'precio', 'subtotal'];
+    
+    public $timestamps = false; // Si tu tabla no tiene timestamps
+
+    protected $fillable = [
+        'venta_id', 
+        'producto_id', 
+        'cantidad', 
+        'precio', 
+        'subtotal'
+    ];
 
     public function producto()
     {

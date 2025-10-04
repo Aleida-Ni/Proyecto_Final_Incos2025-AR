@@ -11,18 +11,15 @@ use App\Http\Controllers\Cliente\HomeController as ClienteHomeController;
 use App\Http\Controllers\Cliente\BarberoController as ClienteBarberoController;
 use App\Http\Controllers\Cliente\ProductoController as ClienteProductoController;
 use App\Http\Controllers\Cliente\ReservaController as ClienteReservaController;
+
+// Admin Controllers
 use App\Http\Controllers\Admin\VentaController;
-
-
 use App\Http\Controllers\Admin\BarberoController as AdminBarberoController;
 use App\Http\Controllers\Admin\ProductoController as AdminProductoController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Admin\ReporteController as ReporteController;
 use App\Http\Controllers\Admin\EmpleadoController;
-use App\Http\Controllers\Admin\ProductoController;
-
-use App\Http\Controllers\Empleado\DashboardController;
-use App\Http\Controllers\Empleado\ProductoController as EmpleadoProductoController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,8 +77,52 @@ Route::middleware(['auth', 'estado', 'role:admin'])
     ->group(function () {
 
         // Panel principal
-        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+        // Recursos
+        Route::resource('barberos', AdminBarberoController::class);
+        Route::resource('productos', AdminProductoController::class);
+        Route::resource('reservas', AdminReservaController::class);
+
+        // Marcar reservas
+        Route::post('reservas/{id}/{estado}', [AdminReservaController::class, 'marcar'])
+            ->name('reservas.marcar');
+        Route::get('reservas/{reserva}/marcar-realizada', [AdminReservaController::class, 'showMarcarRealizada'])
+            ->name('reservas.marcar-realizada');
+        Route::post('reservas/{reserva}/marcar-realizada', [AdminReservaController::class, 'marcarRealizada'])
+            ->name('reservas.marcar-realizada.store');
+        // Ventas (admin)
+        Route::prefix('ventas')->name('ventas.')->group(function () {
+            Route::get('/', [VentaController::class, 'index'])->name('index');
+            Route::get('/crear', [VentaController::class, 'create'])->name('create');
+            Route::post('/', [VentaController::class, 'store'])->name('store');
+            Route::get('/{venta}', [VentaController::class, 'show'])->name('show');
+            Route::delete('/{venta}', [VentaController::class, 'destroy'])->name('destroy');
+        });
+
+        // Configuración - CORREGIDO: agregar name al grupo
+        Route::prefix('config')->name('config.')->group(function () {
+            Route::resource('empleados', EmpleadoController::class);
+            Route::view('settings', 'admin.settings')->name('settings');
+        });
+
+        // Reportes
+        Route::prefix('reportes')->name('reportes.')->group(function () {
+            Route::get('/reservas', [ReporteController::class, 'reservas'])->name('reservas');
+            Route::get('/ventas',   [ReporteController::class, 'ventas'])->name('ventas');
+        });
+    });
+
+/* ==============================
+   PANEL ADMIN
+   ============================== */
+Route::middleware(['auth', 'estado', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        // Panel principal
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         // Recursos
         Route::resource('barberos', AdminBarberoController::class);
         Route::resource('productos', AdminProductoController::class);
@@ -123,13 +164,13 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
     ->group(function () {
 
         // Panel principal
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         // Recursos
         Route::resource('barberos', AdminBarberoController::class);
         Route::resource('productos', AdminProductoController::class);
         Route::resource('reservas', AdminReservaController::class);
-
+        Route::post('reservas/{id}/{estado}', [AdminReservaController::class, 'marcar'])
+            ->name('reservas.marcar');
         // Ventas (empleado)
         Route::prefix('ventas')->name('ventas.')->group(function () {
             Route::get('/crear', [VentaController::class, 'create'])->name('create');
@@ -137,7 +178,6 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
              Route::delete('/{venta}', [VentaController::class, 'destroy'])->name('destroy');
         });
     });
-
 /* PANEL CLIENTE */
 Route::middleware(['auth', 'verified', 'estado', 'can:is-cliente'])
     ->prefix('cliente')
@@ -155,7 +195,11 @@ Route::middleware(['auth', 'verified', 'estado', 'can:is-cliente'])
         // Productos
         Route::get('/productos', [App\Http\Controllers\Cliente\ProductoController::class, 'index'])
             ->name('productos.index');
-
+        Route::prefix('config')->name('config.')->group(function () {
+            // Esta ruta debe existir
+            Route::resource('empleados', EmpleadoController::class);
+            Route::view('settings', 'admin.settings')->name('settings');
+        });
 
 
         // Barberos / Reservas

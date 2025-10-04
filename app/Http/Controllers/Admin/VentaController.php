@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
 use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
@@ -43,97 +42,109 @@ class VentaController extends Controller
 
 
     // Guardar venta - CON REGISTRO DEL USUARIO AUTENTICADO
-    public function store(Request $request)
-    {
-        DB::beginTransaction();
-        
-        try {
-            $data = $request->all();
-            $items = $data['items'] ?? [];
+public function store(Request $request)
+{
+    DB::beginTransaction();
+    
+    try {
+        $data = $request->all();
+        $items = $data['items'] ?? [];
 
-            if(empty($items)) {
-                return response()->json(['error' => 'No hay productos en la venta'], 400);
-            }
-
-            // Generar código único para la venta
-            $codigo = 'V-' . date('Ymd') . '-' . strtoupper(Str::random(6));
-
-            // Crear la venta - el empleado_id será el usuario autenticado (admin o empleado)
-            $venta = Venta::create([
-                'cliente_id' => null, // Sin cliente específico
-                'empleado_id' => auth()->id(), // Usuario que realiza la venta
-                'estado' => 'completada',
-                'metodo_pago' => $data['metodo_pago'] ?? 'efectivo',
-                'referencia_pago' => $data['referencia_pago'] ?? null,
-                'fecha_pago' => now(),
-                'codigo' => $codigo,
-                'total' => 0,
-                'creado_en' => now(),
-            ]);
-
-            $total = 0;
-            $detalleItems = [];
-            
-            // Procesar cada producto
-            foreach($items as $item) {
-                $producto = Producto::find($item['producto_id']);
-                
-                if(!$producto) {
-                    throw new \Exception("Producto no encontrado: {$item['producto_id']}");
-                }
-
-                // Verificar si existe stock
-                if(isset($producto->stock) && $producto->stock < $item['cantidad']) {
-                    throw new \Exception("Stock insuficiente para: {$producto->nombre}");
-                }
-
-                $subtotal = $producto->precio * $item['cantidad'];
-                $total += $subtotal;
-
-                // Crear detalle de venta
-                DetalleVenta::create([
-                    'venta_id' => $venta->id,
-                    'producto_id' => $producto->id,
-                    'cantidad' => $item['cantidad'],
-                    'precio' => $producto->precio,
-                    'subtotal' => $subtotal,
-                ]);
-
-                // Actualizar stock si existe la columna
-                if(isset($producto->stock)) {
-                    $producto->decrement('stock', $item['cantidad']);
-                }
-
-                $detalleItems[] = [
-                    'nombre' => $producto->nombre,
-                    'cantidad' => $item['cantidad'],
-                    'precio' => $producto->precio,
-                    'subtotal' => $subtotal,
-                ];
-            }
-
-            // Actualizar total de la venta
-            $venta->update(['total' => $total]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'venta_id' => $venta->id,
-                'codigo' => $codigo,
-                'total' => $total,
-                'items' => $detalleItems,
-                'message' => 'Compra registrada con éxito',
-                'redirect_url' => route('admin.ventas.show', $venta)
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'error' => 'Error al procesar la venta: ' . $e->getMessage()
-            ], 500);
+        if(empty($items)) {
+            return response()->json(['error' => 'No hay productos en la venta'], 400);
         }
+
+        // Generar código único para la venta
+        $codigo = 'V-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+
+        // Crear la venta
+        $venta = Venta::create([
+            'cliente_id' => null,
+            'empleado_id' => auth()->id(),
+            'estado' => 'completada',
+            'metodo_pago' => $data['metodo_pago'] ?? 'efectivo',
+            'referencia_pago' => $data['referencia_pago'] ?? null,
+            'fecha_pago' => now(),
+            'codigo' => $codigo,
+            'total' => 0,
+            'creado_en' => now(),
+        ]);
+
+        $total = 0;
+        $detalleItems = [];
+        
+        // VERIFICA QUE ESTÉ PROCESANDO LOS PRODUCTOS CORRECTAMENTE
+        foreach($items as $item) {
+            // Asegúrate de que $item tenga la estructura correcta
+            \Log::info('Procesando item:', $item);
+            
+            $producto = Producto::find($item['producto_id']);
+            
+            if(!$producto) {
+                throw new \Exception("Producto no encontrado: {$item['producto_id']}");
+            }
+
+            // Verificar stock
+            if(isset($producto->stock) && $producto->stock < $item['cantidad']) {
+                throw new \Exception("Stock insuficiente para: {$producto->nombre}");
+            }
+
+            $subtotal = $producto->precio * $item['cantidad'];
+            $total += $subtotal;
+
+            // CREAR DETALLE DE VENTA - ESTA ES LA PARTE IMPORTANTE
+            $detalle = DetalleVenta::create([
+                'venta_id' => $venta->id,
+                'producto_id' => $producto->id,
+                'cantidad' => $item['cantidad'],
+                'precio' => $producto->precio,
+                'subtotal' => $subtotal,
+            ]);
+
+            \Log::info('Detalle creado:', $detalle->toArray());
+
+            // Actualizar stock si existe
+            if(isset($producto->stock)) {
+                $producto->decrement('stock', $item['cantidad']);
+            }
+
+            $detalleItems[] = [
+                'nombre' => $producto->nombre,
+                'cantidad' => $item['cantidad'],
+                'precio' => $producto->precio,
+                'subtotal' => $subtotal,
+            ];
+        }
+
+        // Actualizar total de la venta
+        $venta->update(['total' => $total]);
+
+        DB::commit();
+
+        \Log::info('Venta completada:', [
+            'venta_id' => $venta->id,
+            'total' => $total,
+            'items_count' => count($detalleItems)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'venta_id' => $venta->id,
+            'codigo' => $codigo,
+            'total' => $total,
+            'items' => $detalleItems,
+            'message' => 'Venta registrada exitosamente',
+            'redirect_url' => route('admin.ventas.show', $venta)
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        \Log::error('Error en store venta:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'error' => 'Error al procesar la venta: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     // Ver detalle de venta
     public function show(Venta $venta)

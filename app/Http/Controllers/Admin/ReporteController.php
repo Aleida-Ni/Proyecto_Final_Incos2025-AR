@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Reserva;
 use App\Models\Venta;
+use App\Models\Barbero;
 use App\Models\User;
 use App\Models\DetalleVenta;
 use Carbon\Carbon;
@@ -21,32 +22,43 @@ class ReporteController extends Controller
     /**
      * Reporte de reservas con estadísticas
      */
-    public function reservas(Request $request)
-    {
-        $query = Reserva::with(['cliente', 'barbero']);
+// En ReporteController - método reservas
+public function reservas(Request $request)
+{
+    $query = Reserva::with(['cliente', 'barbero']);
 
-        // Aplicar filtros
-        $this->aplicarFiltrosFecha($query, $request, 'fecha');
-        
-        if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
-        }
-
-        // CAMBIO: Usar paginate en lugar de get
-        $reservas = $query->latest()->paginate(20);
-        
-        // Calcular estadísticas (usamos get para las estadísticas)
-        $reservasParaEstadisticas = $query->get();
-        $estadisticas = [
-            'total' => $reservasParaEstadisticas->count(),
-            'pendientes' => $reservasParaEstadisticas->where('estado', 'pendiente')->count(),
-            'realizadas' => $reservasParaEstadisticas->where('estado', 'realizada')->count(),
-            'canceladas' => $reservasParaEstadisticas->where('estado', 'cancelada')->count(),
-        ];
-
-        return view('admin.reportes.reservas', compact('reservas', 'estadisticas'))
-            ->with($request->only(['from', 'to', 'estado', 'periodo']));
+    // Aplicar filtros
+    $this->aplicarFiltrosFecha($query, $request, 'fecha');
+    
+    if ($request->filled('estado')) {
+        $query->where('estado', $request->estado);
     }
+
+    if ($request->filled('barbero_id')) {
+        $query->where('barbero_id', $request->barbero_id);
+    }
+
+    $reservas = $query->latest()->paginate(20);
+    
+    // CORRECCIÓN: Obtener barberos desde la tabla barberos
+    $barberos = Barbero::all(); // Cambiar User::where('rol', 'barbero') por Barbero::all()
+    
+    // Calcular estadísticas
+    $reservasParaEstadisticas = clone $query;
+    $totalReservas = $reservasParaEstadisticas->count();
+    $estadisticas = [
+        'total' => $totalReservas,
+        'pendientes' => $reservasParaEstadisticas->where('estado', 'pendiente')->count(),
+        'realizadas' => $reservasParaEstadisticas->where('estado', 'realizada')->count(),
+        'canceladas' => $reservasParaEstadisticas->where('estado', 'cancelada')->count(),
+        'no_asistio' => $reservasParaEstadisticas->where('estado', 'no_asistio')->count(),
+        'tasa_asistencia' => $totalReservas > 0 ? 
+            round(($reservasParaEstadisticas->where('estado', 'realizada')->count() / $totalReservas) * 100, 1) : 0,
+    ];
+
+    return view('admin.reportes.reservas', compact('reservas', 'estadisticas', 'barberos'))
+        ->with($request->only(['from', 'to', 'estado', 'periodo', 'barbero_id']));
+}
 
     /**
      * Reporte de ventas con métricas

@@ -3,7 +3,6 @@
 @section('title', 'Lista de Productos')
 
 @section('content')
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 
 <div class="container mt-4">
     <!-- Cabecera -->

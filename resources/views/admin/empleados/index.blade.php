@@ -1,9 +1,7 @@
 @extends('adminlte::page')
 
 @section('title', 'Lista de Empleados')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-@endsection
+
 
 @section('content_header')
     <h1 class="text-center text-dark title-shadow">Lista de Empleados</h1>

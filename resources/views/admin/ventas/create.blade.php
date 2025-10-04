@@ -1,8 +1,6 @@
 @extends('adminlte::page')
 @section('title','Registrar venta')
-@section('css')
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-@endsection
+
 @section('content')
 <div class="row">
     <div class="col-md-8">

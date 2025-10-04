@@ -1,32 +1,63 @@
 @extends('adminlte::page')
 
+@section('title', 'Dashboard')
+
+@section('content_header')
+    <h1>Panel de Control</h1>
+@stop
+
 @section('content')
-
-    <div class="hero-section">
-        <div class="container py-5">
-            <h1 class="display-4 fw-bold">Transforma tu estilo</h1>
-            <p class="lead">Descubre barberos expertos y productos de alta calidad</p>
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>150</h3>
+                    <p>Nuevos Pedidos</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-bag"></i>
+                </div>
+                <a href="#" class="small-box-footer">Más información <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>53<sup style="font-size: 20px">%</sup></h3>
+                    <p>Ratio de Rebote</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-stats-bars"></i>
+                </div>
+                <a href="#" class="small-box-footer">Más información <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>44</h3>
+                    <p>Registros de Usuarios</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-person-add"></i>
+                </div>
+                <a href="#" class="small-box-footer">Más información <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>65</h3>
+                    <p>Visitantes Únicos</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-pie-graph"></i>
+                </div>
+                <a href="#" class="small-box-footer">Más información <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
         </div>
     </div>
-
-    <div class="white-section py-5">
-        <div class="container">
-        </div>
-    </div>
-
-@endsection
-
-@push('css')
-<style>
-    .hero-section {
-        background-color: #f8f9fa; 
-        padding-top: 80px;
-        padding-bottom: 100px;
-        color: #212529; 
-    }
-
-    .white-section {
-        background-color: #fff;
-    }
-</style>
-@endpush
+@stop

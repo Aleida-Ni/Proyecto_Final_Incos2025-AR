@@ -75,4 +75,5 @@ class Venta extends Model
         $color = $badges[$this->estado] ?? 'secondary';
         return "<span class='badge badge-{$color}'>" . ucfirst($this->estado) . "</span>";
     }
+    
 }

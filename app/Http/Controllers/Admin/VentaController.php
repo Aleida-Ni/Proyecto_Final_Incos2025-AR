@@ -8,7 +8,8 @@ use Illuminate\Support\Str;
 use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
-use App\Models\User;
+use Illuminate\Support\Facades\Log;
+
 
 class VentaController extends Controller
 {
@@ -73,10 +74,8 @@ public function store(Request $request)
         $total = 0;
         $detalleItems = [];
         
-        // VERIFICA QUE ESTÉ PROCESANDO LOS PRODUCTOS CORRECTAMENTE
         foreach($items as $item) {
-            // Asegúrate de que $item tenga la estructura correcta
-            \Log::info('Procesando item:', $item);
+            Log::info('Procesando item:', $item);
             
             $producto = Producto::find($item['producto_id']);
             
@@ -101,7 +100,7 @@ public function store(Request $request)
                 'subtotal' => $subtotal,
             ]);
 
-            \Log::info('Detalle creado:', $detalle->toArray());
+            Log::info('Detalle creado:', $detalle->toArray());
 
             // Actualizar stock si existe
             if(isset($producto->stock)) {
@@ -121,7 +120,7 @@ public function store(Request $request)
 
         DB::commit();
 
-        \Log::info('Venta completada:', [
+        Log::info('Venta completada:', [
             'venta_id' => $venta->id,
             'total' => $total,
             'items_count' => count($detalleItems)
@@ -139,7 +138,7 @@ public function store(Request $request)
 
     } catch (\Exception $e) {
         DB::rollBack();
-        \Log::error('Error en store venta:', ['error' => $e->getMessage()]);
+        Log::error('Error en store venta:', ['error' => $e->getMessage()]);
         return response()->json([
             'error' => 'Error al procesar la venta: ' . $e->getMessage()
         ], 500);

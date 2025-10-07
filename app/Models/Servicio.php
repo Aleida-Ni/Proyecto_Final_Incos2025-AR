@@ -21,11 +21,16 @@ class Servicio extends Model
         'activo' => 'boolean'
     ];
 
-    // Relación con reservas
+
     public function reservas()
-    {
-        return $this->belongsToMany(Reserva::class, 'servicio_reserva')
-                    ->withPivot('precio')
-                    ->withTimestamps();
-    }
+{
+    return $this->belongsToMany(Reserva::class, 'servicio_reserva')
+                ->withPivot('precio')
+                ->withTimestamps();
+}
+
+public function serviciosReserva()
+{
+    return $this->hasMany(ServicioReserva::class);
+}
 }

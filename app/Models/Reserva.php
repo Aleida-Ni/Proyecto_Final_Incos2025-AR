@@ -33,16 +33,20 @@ class Reserva extends Model
     {
         return $this->belongsTo(Barbero::class);
     }
-        public function servicios()
-    {
-        return $this->belongsToMany(Servicio::class, 'servicio_reserva')
-                    ->withPivot('precio')
-                    ->withTimestamps();
-    }
 
     // Calcular total de servicios
     public function getTotalServiciosAttribute()
     {
         return $this->servicios->sum('pivot.precio');
     }
+
+public function servicios()
+{
+    return $this->hasMany(ServicioReserva::class);
+}
+
+public function serviciosReserva()
+{
+    return $this->hasMany(ServicioReserva::class);
+}
 }

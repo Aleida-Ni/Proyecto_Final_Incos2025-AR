@@ -194,9 +194,11 @@
 function setFecha() {
   const valor = document.getElementById('selectorFecha').value;
   if(valor) {
-    const barberoId = {{ $barbero->id }};
+    const barberoId = "{{ $barbero->id }}";
     window.location.href = `/cliente/reservar/${barberoId}?fecha=${valor}`;
-  } else alert("Selecciona una fecha válida.");
+  } else {
+    alert("Selecciona una fecha válida.");
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

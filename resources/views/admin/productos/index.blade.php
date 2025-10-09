@@ -3,15 +3,16 @@
 @section('title', 'Lista de Productos')
 
 @section('content')
-
 <div class="container mt-4">
+
     <!-- Cabecera -->
-    <h1 class="text-center bg-white text-dark py-3 mb-0">
+    <h1 class="text-center text-dark py-3 mb-0">
         Lista de Productos
     </h1>
 
     <div class="report-container">
 
+        <!-- Etiquetas de categorías -->
         <div class="text-center mb-3">
             @foreach ($categorias as $categoria)
                 <span class="categoria-label">{{ strtoupper($categoria->nombre) }}</span>
@@ -38,17 +39,20 @@
             </div>
         </form>
 
+        <!-- Botón Agregar -->
         <div class="text-right mb-3">
             <a href="{{ route('admin.productos.create') }}" class="btn btn-add">Agregar Producto</a>
         </div>
 
+        <!-- Mostrar productos -->
         @if(request('categoria_id'))
             @php
                 $categoria = $categorias->firstWhere('id', request('categoria_id'));
                 $productosCat = $productos->where('categoria_id', $categoria->id);
             @endphp
 
-            <h3 class="text-light border-bottom pb-2">{{ strtoupper($categoria->nombre) }}</h3>
+            <h3 class="categoria-titulo">{{ strtoupper($categoria->nombre) }}</h3>
+            @includeWhen($productosCat->isNotEmpty(), 'admin.productos.index', ['productosCat' => $productosCat])
             <div class="table-responsive">
                 <table class="table report-table">
                     <thead>
@@ -78,7 +82,7 @@
                                     <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn-eliminar" 
-                                                onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
+                                            onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
                                     </form>
                                 </td>
                             </tr>
@@ -88,11 +92,9 @@
                     </tbody>
                 </table>
             </div>
-
         @else
-            <!-- Todas las categorías -->
             @foreach ($categorias as $categoria)
-                <h3 class="text-light border-bottom pb-2">{{ strtoupper($categoria->nombre) }}</h3>
+                <h3 class="categoria-titulo">{{ strtoupper($categoria->nombre) }}</h3>
                 <div class="table-responsive">
                     <table class="table report-table">
                         <thead>
@@ -122,7 +124,7 @@
                                         <form action="{{ route('admin.productos.destroy', $producto->id) }}" method="POST" class="d-inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn-eliminar" 
-                                                    onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
+                                                onclick="return confirm('¿Seguro que deseas eliminar este producto?')">Eliminar</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -134,105 +136,145 @@
                 </div>
             @endforeach
         @endif
+
     </div>
 </div>
 @stop
 
 @push('css')
 <style>
-.report-container {
-    background: #6e6b6bff;
-    padding: 25px;
-    border: 1px solid #fff;
-    border-top: none;
-    max-width: 1100px;
-    margin: 0 auto;
-    color: #fff;
+/* ======== CONTENEDOR PRINCIPAL ======== */
+body {
+    background-color: #fff !important;
 }
 
-.categoria-label {
-    display: inline-block;
+.report-container {
+    padding: 25px;
+    border: 2px solid #000;
+    border-radius: 10px;
     background: #fff;
     color: #000;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ======== ETIQUETAS ======== */
+.categoria-label {
+    display: inline-block;
+    background: #000;
+    color: #fff;
     font-weight: bold;
-    padding: 5px 12px;
+    padding: 6px 14px;
     margin: 3px;
-    border: 1px solid #000;
+    border-radius: 20px;
+    transition: background 0.3s;
+}
+.categoria-label:hover {
+    background: #444;
 }
 
+/* ======== FILTROS ======== */
 .filter-input {
-    background: #6e6b6bff;
-    color: #fff;
-    border: 1px solid #fff;
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 8px;
+}
+.filter-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0,123,255,0.3);
 }
 
-.filter-input option {
-    background: #6e6b6bff;
-    color: #fff;
-}
-
+/* ======== BOTONES ======== */
 .btn-reset, .btn-add {
-    border: 1px solid #fff;
-    border-radius: 0;
+    border: 2px solid #000;
+    border-radius: 8px;
     padding: 8px 15px;
-    font-weight: bold;
-    color: #fff;
+    font-weight: 600;
+    color: #000;
     transition: 0.3s;
 }
-
 .btn-reset {
-    background: #4a5568;
+    background: #e2e8f0;
 }
-.btn-reset:hover { background: #2d3748; }
-
+.btn-reset:hover {
+    background: #cbd5e0;
+}
 .btn-add {
-    background: #3b3c3dff;
+    background: #007bff;
+    color: #fff;
+    border: none;
 }
-.btn-add:hover { background: #2b6cb0; }
+.btn-add:hover {
+    background: #0056b3;
+}
 
+/* ======== TABLAS ======== */
 .report-table {
     width: 100%;
-    background: #6e6b6bff;
-    border: 1px solid #fff;
-    color: #fff;
-    margin-bottom: 20px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 10px;
+    color: #000;
+    margin-bottom: 25px;
+    overflow: hidden;
 }
-
 .report-table thead {
-    background: #6e6b6bff;
+    background: #f5f5f5;
+    font-weight: bold;
 }
-
 .report-table th, .report-table td {
     padding: 12px 15px;
     text-align: center;
-    vertical-align: middle;
-    border: 1px solid #fff;
+    border: 1px solid #000;
 }
 
+/* ======== IMÁGENES ======== */
 .product-img {
     width: 60px;
     height: 60px;
     object-fit: cover;
-    border: 1px solid #fff;
-    border-radius: 50%; /* circulares */
+    border: 2px solid #000;
+    border-radius: 50%;
     transition: all 0.3s ease;
 }
 .product-img:hover {
     transform: scale(1.2);
-    border-radius: 0; /* cuadradas al pasar mouse */
+    border-radius: 0;
 }
 
-/* ======== BOTONES ACCIONES ======== */
+/* ======== BOTONES ACCIÓN ======== */
 .btn-editar, .btn-eliminar {
-    background: none;
     border: none;
-    font-weight: bold;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
-.btn-editar { color: #63b3ed; }
-.btn-editar:hover { color: #4299e1; }
-.btn-eliminar { color: #f56565; }
-.btn-eliminar:hover { color: #c53030; }
+.btn-editar {
+    background: #17a2b8;
+}
+.btn-editar:hover {
+    background: #138496;
+    transform: translateY(-2px);
+}
+.btn-eliminar {
+    background: #e63946;
+}
+.btn-eliminar:hover {
+    background: #c53030;
+    transform: translateY(-2px);
+}
+
+/* ======== TITULOS ======== */
+.categoria-titulo {
+    border-bottom: 2px solid #000;
+    padding-bottom: 5px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
 </style>
 @endpush

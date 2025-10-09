@@ -110,13 +110,15 @@
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>
-                        <th width="80">ID</th>
+                        <!-- COLUMNA ID ELIMINADA -->
                         <th>Cliente</th>
                         <th>Barbero</th>
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Contacto</th>
                         <th>Estado</th>
+                        <!-- NUEVA COLUMNA MÉTODO DE PAGO -->
+                        <th>Pago</th>
                         <th width="250">Acciones</th>
                     </tr>
                 </thead>
@@ -152,9 +154,7 @@
                     @endphp
                         
                     <tr class="{{ $claseFila }}">
-                        <td>
-                            <strong>#{{ $r->id }}</strong>
-                        </td>
+                        <!-- ID ELIMINADO DE LA VISTA -->
                         <td>
                             <div class="fw-bold">{{ optional($r->cliente)->nombre ?? 'Cliente' }}</div>
                             @if($r->cliente && $r->cliente->telefono)
@@ -212,6 +212,23 @@
                                 @elseif($esProximaHora)
                                 <br><small class="text-success"><i class="fas fa-bell"></i> Próxima hora</small>
                                 @endif
+                            @endif
+                        </td>
+                        <!-- NUEVA COLUMNA MÉTODO DE PAGO -->
+                        <td>
+                            @if($r->estado == 'realizada' && $r->metodo_pago)
+                                <span class="badge 
+                                    @if($r->metodo_pago == 'efectivo') bg-success
+                                    @elseif($r->metodo_pago == 'qr') bg-primary
+                                    @elseif($r->metodo_pago == 'transferencia') bg-info
+                                    @else bg-secondary
+                                    @endif">
+                                    {{ ucfirst($r->metodo_pago) }}
+                                </span>
+                            @elseif($r->estado == 'pendiente')
+                                <small class="text-muted">Pendiente</small>
+                            @else
+                                <small class="text-muted">—</small>
                             @endif
                         </td>
                         <td>
@@ -344,6 +361,14 @@
                                                             {{ ucfirst($r->estado) }}
                                                         </span>
                                                     </p>
+                                                    <!-- MÉTODO DE PAGO EN MODAL -->
+                                                    @if($r->estado == 'realizada' && $r->metodo_pago)
+                                                    <p><strong>Método de Pago:</strong> 
+                                                        <span class="badge bg-info text-dark">
+                                                            {{ ucfirst($r->metodo_pago) }}
+                                                        </span>
+                                                    </p>
+                                                    @endif
                                                 </div>
                                             </div>
 
@@ -382,6 +407,17 @@
                                                                     <th colspan="2" class="text-end">Total:</th>
                                                                     <th class="text-end">${{ number_format($totalServicios, 2) }}</th>
                                                                 </tr>
+                                                                <!-- MÉTODO DE PAGO EN TABLA DEL MODAL -->
+                                                                @if($r->estado == 'realizada' && $r->metodo_pago)
+                                                                <tr>
+                                                                    <th colspan="2" class="text-end">Método de Pago:</th>
+                                                                    <th class="text-end">
+                                                                        <span class="badge bg-info text-dark">
+                                                                            {{ ucfirst($r->metodo_pago) }}
+                                                                        </span>
+                                                                    </th>
+                                                                </tr>
+                                                                @endif
                                                             </tfoot>
                                                         </table>
                                                     </div>

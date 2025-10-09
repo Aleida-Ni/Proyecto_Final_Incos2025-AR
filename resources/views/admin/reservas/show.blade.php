@@ -48,6 +48,14 @@
                                     {{ ucfirst($reserva->estado) }}
                                 </span>
                             </p>
+                            <!-- MÉTODO DE PAGO AÑADIDO -->
+                            @if($reserva->estado == 'realizada' && $reserva->metodo_pago)
+                            <p><strong>Método de Pago:</strong> 
+                                <span class="badge bg-info text-dark">
+                                    {{ ucfirst($reserva->metodo_pago) }}
+                                </span>
+                            </p>
+                            @endif
                         </div>
                     </div>
 
@@ -90,6 +98,17 @@
                                     <th colspan="2" class="text-end">Total:</th>
                                     <th>${{ number_format($total, 2) }}</th>
                                 </tr>
+                                <!-- LÍNEA ADICIONAL PARA MOSTRAR MÉTODO DE PAGO EN LA TABLA -->
+                                @if($reserva->estado == 'realizada' && $reserva->metodo_pago)
+                                <tr>
+                                    <th colspan="2" class="text-end">Método de Pago:</th>
+                                    <th>
+                                        <span class="badge bg-info text-dark">
+                                            {{ ucfirst($reserva->metodo_pago) }}
+                                        </span>
+                                    </th>
+                                </tr>
+                                @endif
                             </tfoot>
                         </table>
                     </div>

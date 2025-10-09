@@ -47,144 +47,154 @@
     </div>
 @endsection
 
-
 @push('css')
 <style>
 .table-container {
-    background-color: #f0f0f0; 
+    background-color: #ffffff; 
     padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
 }
 
 h1.text-dark {
-    color: #1c1c1c; 
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    color: #2c3e50; 
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
 
 .btn-custom {
-    background-color: #4a4a4a; 
+    background-color: #2c3e50; 
     color: #fff;
     border-radius: 6px;
-    padding: 6px 14px;
-    font-weight: 600;
+    padding: 8px 16px;
+    font-weight: 500;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-custom:hover {
-    background-color: #333; 
+    background-color: #34495e; 
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .custom-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
-    background-color: #e8e8e8; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .custom-table thead {
-    background-color: #c2c2c2; 
+    background-color: #f8f9fa; 
+    border-bottom: 2px solid #e9ecef;
 }
 
-.custom-table th, .custom-table td {
+.custom-table th {
+    font-weight: 600;
+    color: #495057;
+    padding: 14px 15px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.custom-table td {
     padding: 12px 15px;
     text-align: center;
     vertical-align: middle;
-    color: #1c1c1c;
-    border-bottom: 1px solid #b0b0b0; 
+    color: #6c757d;
+    border-bottom: 1px solid #f1f3f4;
 }
 
-/* Hover de fila */
+.custom-table tbody tr {
+    transition: all 0.2s ease;
+}
+
 .custom-table tbody tr:hover {
-    background-color: #d0d0d0; 
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* Imagen del barbero */
 .custom-table img {
-    width: 60px; 
-    height: auto;
+    width: 60px;
+    height: 60px;
     border-radius: 8px;
+    object-fit: cover;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .custom-table img:hover {
-    transform: scale(1.3); /* agranda al pasar mouse */
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transform: scale(1.3);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-/* Botones tipo link sin fondo ni borde */
 .btn-editar, .btn-eliminar {
-    background: none;
     border: none;
-    padding: 4px 10px;
-    font-weight: 600;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-weight: 500;
     cursor: pointer;
-    position: relative;
     transition: all 0.3s ease;
+    font-size: 0.85rem;
+    margin: 2px;
 }
 
-/* Editar: negro con sombras plomo */
 .btn-editar {
-    color: #1c1c1c;
-    text-shadow: 1px 1px 2px #6b6b6b, -1px -1px 2px #6b6b6b;
+    background-color: #3498db;
+    color: white;
+    box-shadow: 0 1px 3px rgba(52, 152, 219, 0.3);
 }
 
 .btn-editar:hover {
-    color: #000;
-    text-shadow: 2px 2px 6px #7a7a7a, -2px -2px 6px #7a7a7a;
-    transform: scale(1.1);
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(52, 152, 219, 0.4);
 }
 
-/* Eliminar: rojo con sombras rojas */
 .btn-eliminar {
-    color: #2e2b2bff;
-    text-shadow: 1px 1px 2px #c82333, -1px -1px 2px #c82333;
+    background-color: #e74c3c;
+    color: white;
+    box-shadow: 0 1px 3px rgba(231, 76, 60, 0.3);
 }
 
 .btn-eliminar:hover {
-    color: #ff4c4c;
-    text-shadow: 2px 2px 6px #e55353, -2px -2px 6px #e55353;
-    transform: scale(1.1);
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(231, 76, 60, 0.4);
 }
 
-/* Formularios (inputs) */
-input, select, textarea {
-    border: 1px solid #333; 
-    border-radius: 6px;
-    padding: 6px 10px;
-    background-color: #fff;
-    color: #1c1c1c;
-    transition: 0.3s;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: #000;
-    box-shadow: 0 0 6px rgba(0,0,0,0.3);
-    outline: none;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
+    .table-container {
+        padding: 15px;
+    }
+    
     .custom-table th, .custom-table td {
         padding: 8px 10px;
+        font-size: 0.9rem;
     }
 
-    .btn-custom, .btn-editar, .btn-eliminar {
-        padding: 4px 8px;
+    .btn-custom {
+        padding: 6px 12px;
         font-size: 0.9rem;
+    }
+
+    .btn-editar, .btn-eliminar {
+        padding: 4px 8px;
+        font-size: 0.8rem;
     }
 
     .custom-table img {
         width: 50px;
+        height: 50px;
     }
 }
 </style>
 @endpush
-

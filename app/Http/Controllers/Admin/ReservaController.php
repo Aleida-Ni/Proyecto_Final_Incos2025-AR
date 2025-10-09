@@ -100,14 +100,13 @@ public function completar(Request $request, Reserva $reserva)
 
         DB::commit();
 
-        // ✅ REDIRIGIR AL SHOW CON MENSAJE DE ÉXITO
         return redirect()->route('admin.reservas.show', $reserva)
-            ->with('success', '✅ Reserva completada exitosamente! Total: $' . number_format($request->monto_total, 2));
+            ->with('success', 'Reserva completada exitosamente! Total: $' . number_format($request->monto_total, 2));
 
     } catch (\Exception $e) {
         DB::rollBack();
         Log::error('Error al completar reserva: ' . $e->getMessage());
-        return back()->with('error', '❌ Error: ' . $e->getMessage());
+        return back()->with('error', 'Error: ' . $e->getMessage());
     }
 }
     public function marcar($id, $estado)
@@ -238,4 +237,5 @@ public function show(Reserva $reserva)
 
         return response()->json($horasDisponibles);
     }
+    
 }

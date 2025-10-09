@@ -49,4 +49,21 @@ public function serviciosReserva()
 {
     return $this->hasMany(ServicioReserva::class);
 }
+    public function venta()
+    {
+        return $this->hasOne(Venta::class, 'reserva_id');
+    }
+
+    // Método para calcular el total de servicios
+    public function getTotalAttribute()
+    {
+        return $this->servicios->sum('pivot.precio');
+    }
+
+    // Método para verificar si tiene venta asociada
+    public function getTieneVentaAttribute()
+    {
+        return $this->venta !== null;
+    }
+    
 }

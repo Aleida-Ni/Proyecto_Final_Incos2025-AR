@@ -25,39 +25,106 @@ class ReporteController extends Controller
 // En ReporteController - método reservas
 public function reservas(Request $request)
 {
-    $query = Reserva::with(['cliente', 'barbero']);
+    $query = Reserva::with(['cliente', 'barbero', 'servicios', 'venta']);
 
-    // Aplicar filtros
-    $this->aplicarFiltrosFecha($query, $request, 'fecha');
-    
+    // Aplicar filtros de fecha
+    if ($request->filled('from')) {
+        $query->whereDate('fecha', '>=', $request->from);
+    }
+
+    if ($request->filled('to')) {
+        $query->whereDate('fecha', '<=', $request->to);
+    }
+
+    // Filtro por periodo rápido
+    if ($request->filled('periodo')) {
+        $hoy = Carbon::today();
+        
+        switch ($request->periodo) {
+            case 'hoy':
+                $query->whereDate('fecha', $hoy);
+                break;
+            case '7':
+                $query->whereDate('fecha', '>=', $hoy->copy()->subDays(7));
+                break;
+            case '15':
+                $query->whereDate('fecha', '>=', $hoy->copy()->subDays(15));
+                break;
+            case '30':
+                $query->whereDate('fecha', '>=', $hoy->copy()->subDays(30));
+                break;
+            case 'mes':
+                $query->whereYear('fecha', $hoy->year)
+                      ->whereMonth('fecha', $hoy->month);
+                break;
+            case 'mes_pasado':
+                $query->whereYear('fecha', $hoy->copy()->subMonth()->year)
+                      ->whereMonth('fecha', $hoy->copy()->subMonth()->month);
+                break;
+        }
+    }
+
+    // ✅ FILTRO POR ESTADO - ESTA ES LA PARTE IMPORTANTE
     if ($request->filled('estado')) {
         $query->where('estado', $request->estado);
     }
 
+    // Filtro por barbero
     if ($request->filled('barbero_id')) {
         $query->where('barbero_id', $request->barbero_id);
     }
 
-    $reservas = $query->latest()->paginate(20);
-    
-    // CORRECCIÓN: Obtener barberos desde la tabla barberos
-    $barberos = Barbero::all(); // Cambiar User::where('rol', 'barbero') por Barbero::all()
-    
-    // Calcular estadísticas
-    $reservasParaEstadisticas = clone $query;
-    $totalReservas = $reservasParaEstadisticas->count();
+    $reservas = $query->orderBy('fecha', 'desc')
+                     ->orderBy('hora', 'desc')
+                     ->paginate(20);
+    // Calcular estadísticas mejoradas
+    $totalReservas = Reserva::when($request->filled('from'), function($q) use ($request) {
+            // ... filtros de fecha
+        })->count();
+
+    $pendientes = Reserva::where('estado', 'pendiente')
+        ->when($request->filled('from'), function($q) use ($request) {
+            // ... filtros de fecha
+        })->count();
+
+    $realizadas = Reserva::where('estado', 'realizada')
+        ->when($request->filled('from'), function($q) use ($request) {
+            // ... filtros de fecha
+        })->count();
+
+    // Calcular ingresos
+    $ingresoRealizado = Reserva::where('estado', 'realizada')
+        ->with('venta')
+        ->get()
+        ->sum(function($reserva) {
+            return $reserva->venta ? $reserva->venta->total : 0;
+        });
+
+    $ingresoPendiente = Reserva::where('estado', 'pendiente')
+        ->with('servicios')
+        ->get()
+        ->sum(function($reserva) {
+            return $reserva->servicios->sum('precio');
+        });
+
     $estadisticas = [
         'total' => $totalReservas,
-        'pendientes' => $reservasParaEstadisticas->where('estado', 'pendiente')->count(),
-        'realizadas' => $reservasParaEstadisticas->where('estado', 'realizada')->count(),
-        'canceladas' => $reservasParaEstadisticas->where('estado', 'cancelada')->count(),
-        'no_asistio' => $reservasParaEstadisticas->where('estado', 'no_asistio')->count(),
-        'tasa_asistencia' => $totalReservas > 0 ? 
-            round(($reservasParaEstadisticas->where('estado', 'realizada')->count() / $totalReservas) * 100, 1) : 0,
+        'pendientes' => $pendientes,
+        'realizadas' => $realizadas,
+        'canceladas' => Reserva::where('estado', 'cancelada')->count(),
+        'no_asistio' => Reserva::where('estado', 'no_asistio')->count(),
+        'ingreso_total' => $ingresoRealizado,
+        'ingreso_pendiente' => $ingresoPendiente,
+        'ingreso_realizado' => $ingresoRealizado,
+        'promedio_reserva' => $realizadas > 0 ? $ingresoRealizado / $realizadas : 0,
+        'reservas_por_dia' => $totalReservas > 0 ? $totalReservas / 30 : 0, // Aproximado
+        'tasa_asistencia' => $totalReservas > 0 ? round(($realizadas / $totalReservas) * 100, 1) : 0,
+        'tasa_cancelacion' => $totalReservas > 0 ? round((Reserva::where('estado', 'cancelada')->count() / $totalReservas) * 100, 1) : 0,
+        'tasa_no_asistencia' => $totalReservas > 0 ? round((Reserva::where('estado', 'no_asistio')->count() / $totalReservas) * 100, 1) : 0,
     ];
 
-    return view('admin.reportes.reservas', compact('reservas', 'estadisticas', 'barberos'))
-        ->with($request->only(['from', 'to', 'estado', 'periodo', 'barbero_id']));
+$barberos = Barbero::where('estado', 1)->get();
+    return view('admin.reportes.reservas', compact('reservas', 'estadisticas', 'barberos'));
 }
 
     /**

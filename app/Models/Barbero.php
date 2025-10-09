@@ -23,7 +23,10 @@ class Barbero extends Model
     ];
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';
-
+public function scopeActivos($query)
+{
+    return $query->where('estado', 1);
+}
     // Accesor para nombre completo
     public function getNombreCompletoAttribute()
     {

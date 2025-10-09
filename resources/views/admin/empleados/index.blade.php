@@ -2,7 +2,6 @@
 
 @section('title', 'Lista de Empleados')
 
-
 @section('content_header')
     <h1 class="text-center text-dark title-shadow">Lista de Empleados</h1>
 @stop
@@ -57,50 +56,52 @@
 
 @push('css')
 <style>
-/* Contenedor */
+/* ======== CONTENEDOR PRINCIPAL ======== */
 .table-container {
-    background-color: #f0f0f0; /* plomo claro */
+    background-color: #f9f9f9; /* Fondo claro */
     padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-/* Título */
+/* ======== TÍTULO ======== */
 .title-shadow {
+    font-weight: 700;
     color: #1c1c1c;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    letter-spacing: 1px;
 }
 
-/* Botón nuevo */
+/* ======== BOTÓN NUEVO EMPLEADO ======== */
 .btn-custom {
     background-color: #4a4a4a;
     color: #fff;
     border-radius: 6px;
-    padding: 6px 14px;
+    padding: 8px 16px;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
 .btn-custom:hover {
     background-color: #333;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.35);
 }
 
-/* Tabla */
+/* ======== TABLA ======== */
 .custom-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     border-radius: 12px;
     overflow: hidden;
-    background-color: #e8e8e8;
+    background-color: #ffffff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .custom-table thead {
-    background-color: #c2c2c2;
+    background-color: #dcdcdc;
 }
 
 .custom-table th, .custom-table td {
@@ -108,49 +109,49 @@
     text-align: center;
     vertical-align: middle;
     color: #1c1c1c;
-    border-bottom: 1px solid #b0b0b0;
+    border-bottom: 1px solid #bfbfbf;
 }
 
 .custom-table tbody tr:hover {
-    background-color: #d0d0d0;
+    background-color: #efefef;
 }
 
-/* Botones tipo link */
+/* ======== BOTONES EDITAR Y ELIMINAR ======== */
 .btn-editar, .btn-eliminar {
     background: none;
     border: none;
-    padding: 4px 10px;
+    padding: 5px 10px;
     font-weight: 600;
     cursor: pointer;
     position: relative;
     transition: all 0.3s ease;
 }
 
-/* Editar: negro con sombra plomo */
+/* Editar: gris oscuro con efecto moderno */
 .btn-editar {
-    color: #1c1c1c;
+    color: #222;
 }
 
 .btn-editar:hover {
     color: #000;
-    text-shadow: 2px 2px 6px #7a7a7a, -2px -2px 6px #7a7a7a;
-    transform: scale(1.1);
+    text-shadow: 0 0 8px rgba(100,100,100,0.4);
+    transform: scale(1.05);
 }
 
-/* Eliminar: rojo con sombra roja */
+/* Eliminar: rojo elegante con transición */
 .btn-eliminar {
-    color: #d42727ff;
+    color: #c9302c;
 }
 
 .btn-eliminar:hover {
-    color: #ff4c4c;
-    text-shadow: 2px 2px 6px #e55353, -2px -2px 6px #e55353;
-    transform: scale(1.1);
+    color: #ff4d4d;
+    text-shadow: 0 0 8px rgba(255,0,0,0.4);
+    transform: scale(1.05);
 }
 
-/* Formularios */
+/* ======== CAMPOS DE FORMULARIO ======== */
 input, select, textarea {
-    border: 1px solid #333;
+    border: 1px solid #ccc;
     border-radius: 6px;
     padding: 6px 10px;
     background-color: #fff;
@@ -164,7 +165,7 @@ input:focus, select:focus, textarea:focus {
     outline: none;
 }
 
-/* Responsive */
+/* ======== RESPONSIVE ======== */
 @media (max-width: 768px) {
     .custom-table th, .custom-table td {
         padding: 8px 10px;

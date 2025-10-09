@@ -151,7 +151,6 @@
         </div>
     </div>
 </div>
-<!-- ✅ AGREGAR MODAL DE ÉXITO COMO EN VENTAS -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -212,15 +211,14 @@ document.addEventListener('DOMContentLoaded', function() {
         checkbox.addEventListener('change', actualizarResumen);
     });
 
-    // ✅ MEJORAR VALIDACIÓN Y AGREGAR FEEDBACK VISUAL
     form.addEventListener('submit', function(e) {
-        console.log('🚀 Formulario enviándose...');
+        console.log('Formulario enviándose...');
         
         // Validar que se hayan seleccionado servicios
         const serviciosSeleccionados = document.querySelectorAll('.servicio-checkbox:checked');
         if (serviciosSeleccionados.length === 0) {
             e.preventDefault();
-            mostrarAlerta('❌ Por favor selecciona al menos un servicio', 'danger');
+            mostrarAlerta('Por favor selecciona al menos un servicio', 'danger');
             return;
         }
 
@@ -228,27 +226,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const metodoPago = document.querySelector('select[name="metodo_pago"]');
         if (!metodoPago.value) {
             e.preventDefault();
-            mostrarAlerta('❌ Por favor selecciona un método de pago', 'danger');
+            mostrarAlerta('Por favor selecciona un método de pago', 'danger');
             return;
         }
 
         // Validar monto total
         if (!montoTotal.value || parseFloat(montoTotal.value) <= 0) {
             e.preventDefault();
-            mostrarAlerta('❌ El monto total debe ser mayor a 0', 'danger');
+            mostrarAlerta('El monto total debe ser mayor a 0', 'danger');
             return;
         }
 
-        console.log('✅ Validación frontend pasada - Enviando formulario...');
+        console.log('Validación frontend pasada - Enviando formulario...');
 
-        // Mostrar loading
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
         submitBtn.disabled = true;
     });
 
-    // Función para mostrar alertas temporales
     function mostrarAlerta(mensaje, tipo = 'danger') {
-        // Crear elemento de alerta
         const alerta = document.createElement('div');
         alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
         alerta.innerHTML = `
@@ -269,10 +264,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    // ✅ INICIALIZAR CON VALORES ANTIGUOS SI EXISTEN
     @if(old('servicios'))
-        // Marcar checkboxes previamente seleccionados
-        const serviciosViejos = @json(old('servicios'));
+        const serviciosViejos = {!! json_encode(old('servicios')) !!};
         checkboxes.forEach(checkbox => {
             if (serviciosViejos.includes(checkbox.value)) {
                 checkbox.checked = true;
@@ -283,6 +276,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- ✅ INCLUIR BOOTSTRAP JS PARA LOS MODALES -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 @stop

@@ -7,62 +7,39 @@ use App\Models\Barbero;
 use App\Models\Reserva;
 use App\Models\Servicio;
 use App\Models\ServicioReserva;
+use App\Models\Venta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-
 
 class ReservaController extends Controller
 {
     /** Listar todas las reservas */
     public function index(Request $request)
-    {
-    $query = Reserva::with(['cliente', 'barbero', 'servicios']);
-
-        if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
-        }
-
-        if ($request->filled('fecha')) {
-            $hoy = Carbon::today();
-            switch ($request->fecha) {
-                case 'hoy':
-                    $query->whereDate('fecha', $hoy);
-                    break;
-                case 'futuro':
-                    $query->whereDate('fecha', '>=', $hoy);
-                    break;
-                case 'pasado':
-                    $query->whereDate('fecha', '<', $hoy);
-                    break;
-            }
-        }
-
-        $reservas = $query->orderBy('fecha')->orderBy('hora')->paginate(20);
-
-        // Estadísticas
-        $estadisticas = [
-            'total' => Reserva::count(),
-            'pendientes' => Reserva::where('estado', 'pendiente')->count(),
-            'hoy' => Reserva::whereDate('fecha', Carbon::today())->count(),
-            'esta_semana' => Reserva::whereBetween('fecha', [
-                Carbon::now()->startOfWeek(),
-                Carbon::now()->endOfWeek()
-            ])->count(),
-        ];
-
-        return view('admin.reservas.index', compact('reservas', 'estadisticas'));
-    }
-
-    /** Mostrar formulario para completar reserva */
-public function showCompletar(Reserva $reserva)
 {
-    $servicios = Servicio::where('activo', true)->get();
-    return view('admin.reservas.marcar-realizada', compact('reserva', 'servicios'));
-}
+    // Obtener todas las reservas SIN paginación
+    $reservas = Reserva::with(['cliente', 'barbero', 'servicios', 'venta'])
+        ->orderBy('fecha', 'desc')
+        ->orderBy('hora', 'desc')
+        ->get(); // Cambia paginate() por get()
 
+    // El resto de tu código para estadísticas se mantiene igual
+    $estadisticas = [
+        'total' => Reserva::count(),
+        'pendientes' => Reserva::where('estado', 'pendiente')->count(),
+        'hoy' => Reserva::whereDate('fecha', today())->count(),
+        'esta_semana' => Reserva::whereBetween('fecha', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+    ];
+
+    return view('admin.reservas.index', compact('reservas', 'estadisticas'));
+}
+    /** Mostrar formulario para completar reserva */
+    public function showCompletar(Reserva $reserva)
+    {
+        $servicios = Servicio::where('activo', true)->get();
+        return view('admin.reservas.marcar-realizada', compact('reserva', 'servicios'));
+    }
 
     /** Completar reserva y generar venta */
 public function completar(Request $request, Reserva $reserva)
@@ -78,14 +55,28 @@ public function completar(Request $request, Reserva $reserva)
     DB::beginTransaction();
 
     try {
-        // Actualizar reserva
         $reserva->update([
+            
             'estado' => 'realizada',
-            'observaciones' => $request->observaciones,
+            'metodo_pago' => $request->metodo_pago,
+            'pago_realizado' => 1,
             'actualizado_en' => now()
         ]);
 
-        // Registrar servicios
+        $venta = Venta::create([
+            'reserva_id' => $reserva->id,
+            'usuario_id' => $reserva->usuario_id,
+            'empleado_id' => auth()->id(),
+            'codigo' => 'VENTA-' . strtoupper(uniqid()),
+            'total' => $request->monto_total,
+            'metodo_pago' => $request->metodo_pago,
+            'estado' => 'completada',
+            'fecha_pago' => now(),
+            'observaciones' => $request->observaciones,
+            'creado_en' => now(),
+            'actualizado_en' => now()
+        ]);
+
         $serviciosSeleccionados = Servicio::whereIn('id', $request->servicios)->get();
         
         foreach ($serviciosSeleccionados as $servicio) {
@@ -109,6 +100,7 @@ public function completar(Request $request, Reserva $reserva)
         return back()->with('error', 'Error: ' . $e->getMessage());
     }
 }
+
     public function marcar($id, $estado)
     {
         $reserva = Reserva::findOrFail($id);
@@ -133,43 +125,65 @@ public function completar(Request $request, Reserva $reserva)
     }
 
     /** Guardar */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'barbero_id' => 'required|exists:barberos,id',
-            'fecha' => 'required|date',
-            'hora' => 'required',
-            'cliente_id' => 'required|exists:usuarios,id'
-        ]);
+// En el método store del controlador Admin
+public function store(Request $request)
+{
+    $request->validate([
+        'servicios' => 'required|array',
+        'servicios.*' => 'exists:servicios,id',
+        'metodo_pago' => 'required|in:efectivo,qr,transferencia',
+        'monto_total' => 'required|numeric|min:0',
+        'observaciones' => 'nullable|string'
+    ]);
 
-        $yaReservada = Reserva::where('barbero_id', $request->barbero_id)
-            ->where('fecha', $request->fecha)
-            ->where('hora', $request->hora)
-            ->exists();
+    try {
+        DB::beginTransaction();
 
-        if ($yaReservada) {
-            return back()->withErrors(['hora' => 'Esa hora ya está reservada'])->withInput();
-        }
-
-        Reserva::create([
+        // ✅ CORREGIDO: Usar usuario_id en lugar de cliente_id
+        $reserva = Reserva::create([
+            'usuario_id' => auth()->id(),  // ← CAMBIADO
             'barbero_id' => $request->barbero_id,
-            'usuario_id' => $request->cliente_id,
             'fecha' => $request->fecha,
             'hora' => $request->hora,
-            'estado' => 'pendiente',
+            'estado' => 'realizada',
+            'metodo_pago' => $request->metodo_pago,
+            'observaciones' => $request->observaciones,
+            'creado_en' => now(),
+            'actualizado_en' => now()
         ]);
 
-        return redirect()->route('admin.reservas.index')->with('success', 'Reserva creada exitosamente.');
-    }
+        $venta = Venta::create([
+            'reserva_id' => $reserva->id,
+            'usuario_id' => $reserva->usuario_id,  
+            'total' => $request->monto_total,
+            'metodo_pago' => $request->metodo_pago,
+            'estado' => 'completada'
+        ]);
 
-    /** Mostrar */
-public function show(Reserva $reserva)
-{
-    // Cargar relaciones necesarias
-    $reserva->load(['cliente', 'barbero', 'servicios.servicio']);
-    
-    return view('admin.reservas.show', compact('reserva'));
+        foreach ($request->servicios as $servicioId) {
+            $servicio = Servicio::find($servicioId);
+            $venta->servicios()->attach($servicioId, [
+                'precio' => $servicio->precio
+            ]);
+        }
+
+        DB::commit();
+
+        return redirect()->route('admin.reservas.index')
+            ->with('success', 'Reserva completada exitosamente');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Error al completar la reserva: ' . $e->getMessage());
+    }
 }
+    /** Mostrar */
+    public function show(Reserva $reserva)
+    {
+        $reserva->load(['cliente', 'barbero', 'servicios.servicio', 'venta']);
+        
+        return view('admin.reservas.show', compact('reserva'));
+    }
 
     /** Editar */
     public function edit(Reserva $reserva)
@@ -237,5 +251,4 @@ public function show(Reserva $reserva)
 
         return response()->json($horasDisponibles);
     }
-    
 }

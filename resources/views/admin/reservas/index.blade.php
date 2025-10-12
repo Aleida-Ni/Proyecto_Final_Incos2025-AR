@@ -29,54 +29,46 @@
 <div class="row mb-4">
     <!-- Tarjetas de estadísticas -->
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ $estadisticas['total'] ?? 0 }}</h4>
-                        <p class="card-text">Total Reservas</p>
-                    </div>
-                    <i class="fas fa-calendar-alt fa-2x opacity-50"></i>
-                </div>
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3>{{ $estadisticas['total'] ?? 0 }}</h3>
+                <p>Total Reservas</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-calendar-alt"></i>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ $estadisticas['pendientes'] ?? 0 }}</h4>
-                        <p class="card-text">Pendientes</p>
-                    </div>
-                    <i class="fas fa-clock fa-2x opacity-50"></i>
-                </div>
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ $estadisticas['pendientes'] ?? 0 }}</h3>
+                <p>Pendientes</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-clock"></i>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ $estadisticas['hoy'] ?? 0 }}</h4>
-                        <p class="card-text">Hoy</p>
-                    </div>
-                    <i class="fas fa-calendar-day fa-2x opacity-50"></i>
-                </div>
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ $estadisticas['hoy'] ?? 0 }}</h3>
+                <p>Hoy</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-calendar-day"></i>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ $estadisticas['esta_semana'] ?? 0 }}</h4>
-                        <p class="card-text">Esta Semana</p>
-                    </div>
-                    <i class="fas fa-calendar-week fa-2x opacity-50"></i>
-                </div>
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ $estadisticas['esta_semana'] ?? 0 }}</h3>
+                <p>Esta Semana</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-calendar-week"></i>
             </div>
         </div>
     </div>
@@ -84,10 +76,15 @@
 
 <div class="card">
     <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Lista de Reservas</h5>
-            <div class="text-muted small">
-                <i class="fas fa-sync-alt"></i> Actualizado: {{ now()->format('d/m/Y H:i') }}
+        <h3 class="card-title">
+            <i class="fas fa-calendar-check mr-1"></i>
+            Lista de Reservas
+        </h3>
+        <div class="card-tools">
+            <div class="btn-group">
+                <a href="{{ route('admin.reservas.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Nueva Reserva
+                </a>
             </div>
         </div>
     </div>
@@ -95,488 +92,312 @@
         @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif
 
         @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         @endif
 
+        <!-- TABLA MEJORADA -->
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover" id="tablaReservas">
                 <thead class="table-dark">
                     <tr>
-                        <!-- COLUMNA ID ELIMINADA -->
-                        <th>Cliente</th>
-                        <th>Barbero</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Contacto</th>
-                        <th>Estado</th>
-                        <!-- NUEVA COLUMNA MÉTODO DE PAGO -->
-                        <th>Pago</th>
-                        <th width="250">Acciones</th>
+                        <th width="180">Cliente</th>
+                        <th width="120">Contacto</th>
+                        <th width="120">Barbero</th>
+                        <th width="100">Fecha</th>
+                        <th width="80">Hora</th>
+                        <th width="120">Estado</th>
+                        <th width="150">Pago y Método</th>
+                        <th width="120" class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @php
-                    use Carbon\Carbon;
-                    $now = Carbon::now();
-                    $hoy = Carbon::today();
-                    @endphp
-
                     @forelse($reservas as $r)
-                    @php
-                    $fechaHoraReserva = Carbon::parse($r->fecha . ' ' . $r->hora);
-                    $pasada = $fechaHoraReserva->lt($now);
-                    $esHoy = $fechaHoraReserva->isToday();
-                    $esProximaHora = $fechaHoraReserva->diffInHours($now) <= 1 && !$pasada;
-                    $claseFila = '';
-                    
-                    if ($pasada && $r->estado == 'pendiente') {
-                        $claseFila = 'reserva-pasada';
-                    } elseif ($esHoy && $r->estado == 'pendiente') {
-                        $claseFila = 'reserva-hoy';
-                    }
-                    if ($esProximaHora && $r->estado == 'pendiente') {
-                        $claseFila .= ' reserva-urgente';
-                    }
-
-                    // Calcular total de servicios
-                    $totalServicios = 0;
-                    if ($r->servicios && $r->servicios->count() > 0) {
-                        $totalServicios = $r->servicios->sum('precio');
-                    }
-                    @endphp
+                        @php
+                            $fechaReserva = \Carbon\Carbon::parse($r->fecha);
+                            $esPasada = $fechaReserva->lt(\Carbon\Carbon::today());
+                            $totalReserva = $r->venta ? $r->venta->total : $r->servicios->sum('precio');
+                            $metodoPago = $r->metodo_pago ?? ($r->venta->metodo_pago ?? null);
+                        @endphp
                         
-                    <tr class="{{ $claseFila }}">
-                        <!-- ID ELIMINADO DE LA VISTA -->
-                        <td>
-                            <div class="fw-bold">{{ optional($r->cliente)->nombre ?? 'Cliente' }}</div>
-                            @if($r->cliente && $r->cliente->telefono)
-                            <small class="text-muted">{{ $r->cliente->telefono }}</small>
-                            @endif
-                        </td>
-                        <td>
-                            <span class="badge bg-secondary">{{ optional($r->barbero)->nombre ?? '—' }}</span>
-                        </td>
-                        <td>
-                            <div class="fw-bold {{ $esHoy ? 'text-primary' : '' }}">
-                                {{ Carbon::parse($r->fecha)->format('d/m/Y') }}
-                            </div>
-                            <small class="text-muted">
-                                {{ Carbon::parse($r->fecha)->locale('es')->dayName }}
-                            </small>
-                        </td>
-                        <td>
-                            <span class="fw-bold {{ $esProximaHora ? 'text-danger' : '' }}">
-                                {{ $r->hora }}
-                            </span>
-                            @if($esProximaHora && !$pasada)
-                            <br><small class="text-danger">¡Próxima!</small>
-                            @endif
-                        </td>
-                        <td>
-                            @if($r->cliente)
-                            <small>
-                                <i class="fas fa-phone"></i> {{ $r->cliente->telefono ?? 'N/A' }}<br>
-                                <i class="fas fa-envelope"></i> {{ $r->cliente->correo ?? 'N/A' }}
-                            </small>
-                            @else
-                            <small class="text-muted">Sin contacto</small>
-                            @endif
-                        </td>
-                        <td>
-                            <span class="badge 
-                                @if($r->estado=='pendiente') bg-warning 
-                                @elseif($r->estado=='realizada') bg-success 
-                                @elseif($r->estado=='cancelada') bg-danger
-                                @elseif($r->estado=='no_asistio') bg-dark
-                                @endif">
-                                {{ ucfirst($r->estado) }}
-                            </span>
+                        <tr class="{{ $esPasada && $r->estado == 'pendiente' ? 'table-warning' : '' }}">
 
-                            {{-- Mostrar total si la reserva está realizada --}}
-                            @if($r->estado == 'realizada' && $totalServicios > 0)
-                            <br><small class="text-success">${{ number_format($totalServicios, 2) }}</small>
-                            @endif
-
-                            {{-- Indicadores adicionales --}}
-                            @if($r->estado == 'pendiente')
-                                @if($pasada)
-                                <br><small class="text-danger"><i class="fas fa-clock"></i> Hora pasada</small>
-                                @elseif($esProximaHora)
-                                <br><small class="text-success"><i class="fas fa-bell"></i> Próxima hora</small>
+                            
+                            <td class="align-middle">
+                                <div class="fw-bold">{{ optional($r->cliente)->nombre ?? 'Cliente' }}</div>
+                                @if($r->cliente && $r->cliente->correo)
+                                    <small class="text-muted">{{ $r->cliente->correo }}</small>
                                 @endif
-                            @endif
-                        </td>
-                        <!-- NUEVA COLUMNA MÉTODO DE PAGO -->
-                        <td>
-                            @if($r->estado == 'realizada' && $r->metodo_pago)
-                                <span class="badge 
-                                    @if($r->metodo_pago == 'efectivo') bg-success
-                                    @elseif($r->metodo_pago == 'qr') bg-primary
-                                    @elseif($r->metodo_pago == 'transferencia') bg-info
-                                    @else bg-secondary
-                                    @endif">
-                                    {{ ucfirst($r->metodo_pago) }}
-                                </span>
-                            @elseif($r->estado == 'pendiente')
-                                <small class="text-muted">Pendiente</small>
-                            @else
-                                <small class="text-muted">—</small>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                @if($r->estado == 'pendiente')
-                                    {{-- BOTÓN COMPLETAR --}}
-                                    <a href="{{ route('admin.reservas.completar', $r) }}"
-                                       class="btn btn-success"
-                                       title="Completar reserva y registrar servicios">
-                                        <i class="fas fa-check"></i> Completar
-                                    </a>
-                                    
-                                    {{-- BOTÓN NO ASISTIÓ --}}
-                                    <button type="button" 
-                                            class="btn btn-dark" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalNoAsistio{{ $r->id }}"
-                                            title="Marcar como no asistió">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-
-                                    {{-- BOTÓN CANCELAR --}}
-                                    <button type="button" 
-                                            class="btn btn-danger" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalCancelar{{ $r->id }}"
-                                            title="Cancelar reserva">
-                                        <i class="fas fa-ban"></i>
-                                    </button>
+                            </td>
+                            
+                            <td class="align-middle">
+                                @if($r->cliente && $r->cliente->telefono)
+                                    <small><i class="fas fa-phone"></i> {{ $r->cliente->telefono }}</small>
                                 @else
-                                    {{-- Para reservas completadas, mostrar botón de detalles --}}
-                                    <a href="{{ route('admin.reservas.show', $r) }}" 
-                                       class="btn btn-outline-success"
-                                       title="Ver detalles completos">
-                                        <i class="fas fa-eye"></i> Detalles
-                                    </a>
+                                    <small class="text-muted">Sin contacto</small>
                                 @endif
-                                
-                                {{-- BOTÓN VER DETALLES RÁPIDOS --}}
-                                <button type="button" 
-                                        class="btn btn-info" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#modalDetalle{{ $r->id }}"
-                                        title="Vista rápida">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-
-                            <!-- Modal para Marcar como No Asistió -->
-                            <div class="modal fade" id="modalNoAsistio{{ $r->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Marcar como No Asistió</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p>¿Marcar que el cliente <strong>{{ $r->cliente->nombre ?? 'Cliente' }}</strong> no asistió?</p>
-                                            <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                            <form action="{{ route('admin.reservas.marcar', [$r->id, 'no_asistio']) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-dark">Sí, no asistió</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                            </td>
+                            
+                            <td class="align-middle">
+                                <span class="badge bg-secondary">{{ optional($r->barbero)->nombre ?? '—' }}</span>
+                            </td>
+                            
+                            <td class="align-middle">
+                                <div class="fw-bold">{{ $fechaReserva->format('d/m/Y') }}</div>
+                                <small class="text-muted">{{ $fechaReserva->locale('es')->dayName }}</small>
+                            </td>
+                            
+                            <td class="align-middle">
+                                <span class="fw-bold">{{ $r->hora }}</span>
+                            </td>
+                            
+                            <td class="align-middle">
+                                <span class="badge 
+                                    @if($r->estado=='pendiente') bg-warning 
+                                    @elseif($r->estado=='realizada') bg-success 
+                                    @elseif($r->estado=='cancelada') bg-danger
+                                    @elseif($r->estado=='no_asistio') bg-dark
+                                    @endif">
+                                    {{ ucfirst($r->estado) }}
+                                </span>
+                                @if($esPasada && $r->estado == 'pendiente')
+                                    <br><small class="text-danger"><i class="fas fa-clock"></i> Pasada</small>
+                                @endif
+                            </td>
+                            
+                            <td class="align-middle">
+                                @if($totalReserva > 0)
+                                    <div class="fw-bold text-success">${{ number_format($totalReserva, 2) }}</div>
+                                    @if($metodoPago)
+                                        <span class="badge 
+                                            @if($metodoPago == 'efectivo') bg-success
+                                            @elseif($metodoPago == 'qr') bg-primary
+                                            @elseif($metodoPago == 'transferencia') bg-info
+                                            @else bg-secondary @endif">
+                                            {{ ucfirst($metodoPago) }}
+                                        </span>
+                                    @else
+                                        <small class="text-muted">Sin método</small>
+                                    @endif
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            
+                            <td class="align-middle text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-info" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalDetalle{{ $r->id }}"
+                                            title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    
+                                    @if($r->estado == 'pendiente')
+                                        <a href="{{ route('admin.reservas.completar', $r) }}" 
+                                           class="btn btn-success" 
+                                           title="Completar reserva">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        
+                                        <button type="button" 
+                                                class="btn btn-dark" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalNoAsistio{{ $r->id }}"
+                                                title="Marcar como no asistió">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        
+                                        <button type="button" 
+                                                class="btn btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalCancelar{{ $r->id }}"
+                                                title="Cancelar reserva">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    @endif
                                 </div>
-                            </div>
+                            </td>
+                        </tr>
 
-                            <!-- Modal para Cancelar -->
-                            <div class="modal fade" id="modalCancelar{{ $r->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Cancelar Reserva</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p>¿Cancelar la reserva de <strong>{{ $r->cliente->nombre ?? 'Cliente' }}</strong>?</p>
-                                            <p class="text-warning"><small>Esta acción notificará al cliente.</small></p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No cancelar</button>
-                                            <form action="{{ route('admin.reservas.marcar', [$r->id, 'cancelada']) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-danger">Sí, cancelar</button>
-                                            </form>
-                                        </div>
+                        <!-- Modal Detalles -->
+                        <div class="modal fade" id="modalDetalle{{ $r->id }}" tabindex="-1" aria-labelledby="modalDetalleLabel{{ $r->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="modalDetalleLabel{{ $r->id }}">
+                                            <i class="fas fa-calendar-alt me-2"></i>Detalles Reserva #{{ $r->id }}
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Modal para Detalles Rápidos -->
-                            <div class="modal fade" id="modalDetalle{{ $r->id }}" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">
-                                                <i class="fas fa-calendar-check"></i> 
-                                                Detalles de Reserva #{{ $r->id }}
-                                                @if($r->estado == 'realizada')
-                                                <span class="badge bg-success ms-2">Completada</span>
-                                                @endif
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <!-- Información básica -->
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <h6><i class="fas fa-user"></i> Información del Cliente</h6>
-                                                    <p><strong>Nombre:</strong> {{ $r->cliente->nombre ?? 'Cliente' }}</p>
-                                                    <p><strong>Teléfono:</strong> {{ $r->cliente->telefono ?? 'N/A' }}</p>
-                                                    <p><strong>Email:</strong> {{ $r->cliente->correo ?? 'N/A' }}</p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <h6><i class="fas fa-calendar-alt"></i> Detalles de la Cita</h6>
-                                                    <p><strong>Barbero:</strong> {{ $r->barbero->nombre ?? 'N/A' }}</p>
-                                                    <p><strong>Fecha:</strong> {{ Carbon::parse($r->fecha)->format('d/m/Y') }}</p>
-                                                    <p><strong>Hora:</strong> {{ $r->hora }}</p>
-                                                    <p><strong>Estado:</strong> 
-                                                        <span class="badge 
-                                                            @if($r->estado == 'pendiente') bg-warning
-                                                            @elseif($r->estado == 'realizada') bg-success 
-                                                            @elseif($r->estado == 'cancelada') bg-danger
-                                                            @elseif($r->estado == 'no_asistio') bg-dark
-                                                            @endif">
-                                                            {{ ucfirst($r->estado) }}
-                                                        </span>
-                                                    </p>
-                                                    <!-- MÉTODO DE PAGO EN MODAL -->
-                                                    @if($r->estado == 'realizada' && $r->metodo_pago)
-                                                    <p><strong>Método de Pago:</strong> 
-                                                        <span class="badge bg-info text-dark">
-                                                            {{ ucfirst($r->metodo_pago) }}
-                                                        </span>
-                                                    </p>
-                                                    @endif
-                                                </div>
+                                    <div class="modal-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <strong>Cliente:</strong> {{ $r->cliente->nombre ?? 'Cliente no registrado' }}<br>
+                                                <strong>Teléfono:</strong> {{ $r->cliente->telefono ?? 'N/A' }}<br>
+                                                <strong>Email:</strong> {{ $r->cliente->correo ?? 'N/A' }}
                                             </div>
-
-                                            <hr>
-
-                                            <!-- Servicios Realizados -->
+                                            <div class="col-md-6">
+                                                <strong>Barbero:</strong> {{ $r->barbero->nombre ?? 'No asignado' }}<br>
+                                                <strong>Fecha:</strong> {{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}<br>
+                                                <strong>Hora:</strong> {{ $r->hora }}<br>
+                                                @if($r->estado == 'realizada' && $metodoPago)
+                                                    <strong>Método de Pago:</strong> 
+                                                    <span class="badge 
+                                                        @if($metodoPago == 'efectivo') bg-success
+                                                        @elseif($metodoPago == 'qr') bg-primary
+                                                        @elseif($metodoPago == 'transferencia') bg-info
+                                                        @endif">
+                                                        {{ ucfirst($metodoPago) }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="mb-3">
+                                            <strong>Servicios:</strong>
                                             @if($r->servicios && $r->servicios->count() > 0)
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <h6><i class="fas fa-concierge-bell"></i> Servicios Realizados</h6>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Servicio</th>
-                                                                    <th>Duración</th>
-                                                                    <th class="text-end">Precio</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach($r->servicios as $servicioReserva)
-                                                                <tr>
-                                                                    <td>
-                                                                        <strong>{{ $servicioReserva->servicio->nombre ?? 'Servicio' }}</strong>
-                                                                        @if($servicioReserva->servicio->descripcion ?? false)
-                                                                        <br><small class="text-muted">{{ $servicioReserva->servicio->descripcion }}</small>
-                                                                        @endif
-                                                                    </td>
-                                                                    <td>{{ $servicioReserva->servicio->duracion_minutos ?? 'N/A' }} min</td>
-                                                                    <td class="text-end">${{ number_format($servicioReserva->precio, 2) }}</td>
-                                                                </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                            <tfoot>
-                                                                <tr>
-                                                                    <th colspan="2" class="text-end">Total:</th>
-                                                                    <th class="text-end">${{ number_format($totalServicios, 2) }}</th>
-                                                                </tr>
-                                                                <!-- MÉTODO DE PAGO EN TABLA DEL MODAL -->
-                                                                @if($r->estado == 'realizada' && $r->metodo_pago)
-                                                                <tr>
-                                                                    <th colspan="2" class="text-end">Método de Pago:</th>
-                                                                    <th class="text-end">
-                                                                        <span class="badge bg-info text-dark">
-                                                                            {{ ucfirst($r->metodo_pago) }}
-                                                                        </span>
-                                                                    </th>
-                                                                </tr>
-                                                                @endif
-                                                            </tfoot>
-                                                        </table>
-                                                    </div>
+                                                <ul class="list-group mt-2">
+                                                    @foreach($r->servicios as $servicioReserva)
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            {{ $servicioReserva->servicio->nombre ?? 'Servicio no encontrado' }}
+                                                            <span class="badge bg-primary">
+                                                                ${{ number_format($servicioReserva->precio, 2) }}
+                                                            </span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                                <div class="mt-2 text-end">
+                                                    <strong>Total: ${{ number_format($r->servicios->sum('precio'), 2) }}</strong>
                                                 </div>
-                                            </div>
                                             @else
-                                            <div class="alert alert-info">
-                                                <i class="fas fa-info-circle"></i> 
-                                                @if($r->estado == 'pendiente')
-                                                Esta reserva está pendiente. No se han registrado servicios aún.
-                                                @else
-                                                No se registraron servicios para esta reserva.
-                                                @endif
-                                            </div>
-                                            @endif
-
-                                            <!-- Observaciones -->
-                                            @if($r->observaciones)
-                                            <hr>
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <h6><i class="fas fa-sticky-note"></i> Observaciones</h6>
-                                                    <div class="card bg-light">
-                                                        <div class="card-body">
-                                                            <p class="mb-0">{{ $r->observaciones }}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @endif
-
-                                            <!-- Información de timestamps -->
-                                            <hr>
-                                            <div class="row text-muted small">
-                                                <div class="col-md-6">
-                                                    <strong><i class="fas fa-plus-circle"></i> Creado:</strong> 
-                                                    {{ $r->creado_en->format('d/m/Y H:i') }}
-                                                </div>
-                                                @if($r->actualizado_en && $r->actualizado_en != $r->creado_en)
-                                                <div class="col-md-6 text-end">
-                                                    <strong><i class="fas fa-edit"></i> Actualizado:</strong> 
-                                                    {{ $r->actualizado_en->format('d/m/Y H:i') }}
-                                                </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                            @if($r->estado == 'pendiente')
-                                            <a href="{{ route('admin.reservas.completar', $r) }}" class="btn btn-success">
-                                                <i class="fas fa-check"></i> Completar Reserva
-                                            </a>
-                                            @else
-                                            <a href="{{ route('admin.reservas.show', $r) }}" class="btn btn-primary">
-                                                <i class="fas fa-external-link-alt"></i> Ver Detalles Completos
-                                            </a>
+                                                <p class="text-muted mt-2">No hay servicios registrados</p>
                                             @endif
                                         </div>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            <i class="fas fa-times me-1"></i>Cerrar
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+
+                        <!-- Modal No Asistió -->
+                        <div class="modal fade" id="modalNoAsistio{{ $r->id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-dark text-white">
+                                        <h5 class="modal-title">Marcar como No Asistió</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>¿Confirmar que el cliente <strong>{{ $r->cliente->nombre ?? 'Cliente' }}</strong> no asistió a su cita?</p>
+                                        <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <form action="{{ route('admin.reservas.marcar', [$r->id, 'no_asistio']) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-dark">
+                                                <i class="fas fa-times me-1"></i>Confirmar No Asistió
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Cancelar -->
+                        <div class="modal fade" id="modalCancelar{{ $r->id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title">Cancelar Reserva</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>¿Estás seguro de cancelar la reserva de <strong>{{ $r->cliente->nombre ?? 'Cliente' }}</strong>?</p>
+                                        <p class="text-warning"><small>Esta acción no se puede deshacer.</small></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No cancelar</button>
+                                        <form action="{{ route('admin.reservas.marcar', [$r->id, 'cancelada']) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-ban me-1"></i>Sí, Cancelar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                    <tr>
-                        <td colspan="8" class="text-center py-4">
-                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No hay reservas</h5>
-                            <p class="text-muted">No se encontraron reservas con los filtros aplicados</p>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No hay reservas</h5>
+                                <p class="text-muted">No se encontraron reservas con los filtros aplicados</p>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <!-- Paginación -->
-        @if($reservas->hasPages())
-        <div class="d-flex justify-content-between align-items-center mt-3">
-            <div class="text-muted">
-                Mostrando {{ $reservas->firstItem() }} - {{ $reservas->lastItem() }} de {{ $reservas->total() }} reservas
-            </div>
-            {{ $reservas->links() }}
-        </div>
-        @endif
+
     </div>
 </div>
+@stop
+
+@section('css')
+<style>
+.table td { vertical-align: middle; }
+.btn-group-sm > .btn { padding: .25rem .5rem; }
+.badge { font-size: 85%; }
+
+.modal-content {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+.modal-header {
+    border-radius: 10px 10px 0 0;
+}
+
+.small-box .icon {
+    font-size: 70px;
+    opacity: 0.2;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,123,255,0.075);
+}
+</style>
 @stop
 
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Auto-refresh cada 2 minutos para reservas pendientes
-    setTimeout(() => {
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
         window.location.reload();
     }, 120000);
 
-    // Notificación para reservas próximas
-    document.addEventListener('DOMContentLoaded', function() {
-        const reservasUrgentes = document.querySelectorAll('.reserva-urgente');
-        if (reservasUrgentes.length > 0) {
-            if (Notification.permission === "granted") {
-                new Notification("Reservas próximas", {
-                    body: `Tienes ${reservasUrgentes.length} reserva(s) en la próxima hora`,
-                    icon: "/icon.png"
-                });
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        new Notification("Reservas próximas", {
-                            body: `Tienes ${reservasUrgentes.length} reserva(s) en la próxima hora`,
-                            icon: "/icon.png"
-                        });
-                    }
-                });
-            }
-        }
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
     });
-
-    // Mejorar los modales
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-focus en el primer campo de los modales de formulario
-        const modales = document.querySelectorAll('.modal');
-        modales.forEach(modal => {
-            modal.addEventListener('shown.bs.modal', function() {
-                const input = this.querySelector('input, select, textarea');
-                if (input) {
-                    input.focus();
-                }
-            });
-        });
-    });
+});
 </script>
-
-<style>
-.reserva-pasada {
-    background-color: #fff3cd !important;
-}
-
-.reserva-hoy {
-    background-color: #d1ecf1 !important;
-}
-
-.reserva-urgente {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { background-color: #f8d7da; }
-    50% { background-color: #f1b0b7; }
-    100% { background-color: #f8d7da; }
-}
-
-.modal-lg {
-    max-width: 800px;
-}
-
-.table-responsive {
-    border-radius: 0.375rem;
-}
-</style>
 @stop

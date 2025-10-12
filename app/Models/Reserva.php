@@ -16,54 +16,68 @@ class Reserva extends Model
         'barbero_id',
         'fecha',
         'hora',
-        'estado'
+        'estado',
+        'metodo_pago',
+        'observaciones',
+        'creado_en',
+        'actualizado_en'
     ];
 
-    // Definimos los nombres de las columnas de timestamps personalizados
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';
 
-    // Relaciones
-    public function cliente()
+    protected $dates = [
+        'fecha',
+        'creado_en',
+        'actualizado_en'
+    ];
+
+    public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
+    // Alias para usuario() para mantener compatibilidad
+    public function cliente()
+    {
+        return $this->usuario();
+    }
+
     public function barbero()
     {
-        return $this->belongsTo(Barbero::class);
+        return $this->belongsTo(Barbero::class, 'barbero_id');
     }
 
-    // Calcular total de servicios
-    public function getTotalServiciosAttribute()
+    public function servicios()
     {
-        return $this->servicios->sum('pivot.precio');
+        return $this->hasMany(ServicioReserva::class);
     }
 
-public function servicios()
-{
-    return $this->hasMany(ServicioReserva::class);
-}
+    // Relación directa con servicios a través de la tabla pivot
+    public function serviciosDirectos()
+    {
+        return $this->belongsToMany(Servicio::class, 'servicio_reserva', 'reserva_id', 'servicio_id')
+                    ->withPivot('precio')
+                    ->withTimestamps();
+    }
 
-public function serviciosReserva()
-{
-    return $this->hasMany(ServicioReserva::class);
-}
     public function venta()
     {
         return $this->hasOne(Venta::class, 'reserva_id');
     }
 
-    // Método para calcular el total de servicios
+    // Método para calcular el total
     public function getTotalAttribute()
     {
-        return $this->servicios->sum('pivot.precio');
+        if ($this->venta) {
+            return $this->venta->total;
+        }
+        
+        return $this->servicios->sum('precio');
     }
 
-    // Método para verificar si tiene venta asociada
     public function getTieneVentaAttribute()
     {
         return $this->venta !== null;
     }
-    
 }

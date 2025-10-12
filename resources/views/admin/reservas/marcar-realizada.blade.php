@@ -39,25 +39,24 @@
                 <h5 class="card-title">Servicios Realizados</h5>
             </div>
             <div class="card-body">
-                {{-- filepath: resources/views/admin/reservas/marcar-realizada.blade.php --}}
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
 
-@if($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-                <!-- ✅ FORMULARIO CORREGIDO -->
-                <form action="{{ route('admin.reservas.completar.store', $reserva) }}" method="POST" id="completarForm">
+                @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                <form action="{{ route('admin.reservas.completar', $reserva) }}" method="POST" id="completarForm">
                     @csrf
                     
                     <div class="mb-3">
@@ -151,18 +150,8 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body text-center py-4">
-                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                <h5 class="text-success">¡Reserva completada con éxito!</h5>
-                <p class="mb-0">Redirigiendo al listado...</p>
-            </div>
-        </div>
-    </div>
-</div>
 @stop
+
 @section('js')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -212,8 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     form.addEventListener('submit', function(e) {
-        console.log('Formulario enviándose...');
-        
         // Validar que se hayan seleccionado servicios
         const serviciosSeleccionados = document.querySelectorAll('.servicio-checkbox:checked');
         if (serviciosSeleccionados.length === 0) {
@@ -237,8 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        console.log('Validación frontend pasada - Enviando formulario...');
-
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
         submitBtn.disabled = true;
     });
@@ -252,11 +237,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         
-        // Insertar al inicio del contenido
         const content = document.querySelector('.content');
         content.insertBefore(alerta, content.firstChild);
         
-        // Auto-eliminar después de 5 segundos
         setTimeout(() => {
             if (alerta.parentNode) {
                 alerta.remove();

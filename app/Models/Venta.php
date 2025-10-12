@@ -11,7 +11,8 @@ class Venta extends Model
     const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
-        'cliente_id',
+        'reserva_id',
+        'usuario_id',
         'empleado_id',
         'estado',
         'metodo_pago',
@@ -24,7 +25,7 @@ class Venta extends Model
     // Relaciones
     public function cliente()
     {
-        return $this->belongsTo(User::class, 'cliente_id');
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function empleado()
@@ -46,6 +47,11 @@ class Venta extends Model
     public function scopeAnuladas($query)
     {
         return $query->where('estado', 'anulada');
+    }
+
+    public function reserva()
+    {
+        return $this->belongsTo(Reserva::class, 'reserva_id');
     }
 
     public function scopeHoy($query)

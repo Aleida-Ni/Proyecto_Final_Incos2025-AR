@@ -18,6 +18,14 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
+
+@php
+    $cliente = $reserva->cliente;
+    $totalReserva = $reserva->venta ? $reserva->venta->total : $reserva->servicios->sum('precio');
+$metodoPago = $reserva->metodo_pago ?? ($reserva->venta->metodo_pago ?? null);
+    $nombreCompleto = $cliente ? $cliente->nombre . ' ' . ($cliente->apellido_paterno ?? '') : 'N/A';
+@endphp
+
 <div class="container">
     <div class="row">
         <div class="col-md-8 mx-auto">
@@ -30,9 +38,9 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h5>Reserva #{{ $reserva->id }}</h5>
-                            <p><strong>Cliente:</strong> {{ $reserva->cliente->nombre ?? 'N/A' }}</p>
-                            <p><strong>Teléfono:</strong> {{ $reserva->cliente->telefono ?? 'N/A' }}</p>
-                            <p><strong>Email:</strong> {{ $reserva->cliente->correo ?? 'N/A' }}</p>
+                            <p><strong>Cliente:</strong> {{ $nombreCompleto }}</p>
+                            <p><strong>Teléfono:</strong> {{ $cliente->telefono ?? 'N/A' }}</p>
+                            <p><strong>Email:</strong> {{ $cliente->correo ?? 'N/A' }}</p>
                         </div>
                         <div class="col-md-6 text-end">
                             <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}</p>
@@ -48,12 +56,26 @@
                                     {{ ucfirst($reserva->estado) }}
                                 </span>
                             </p>
-                            <!-- MÉTODO DE PAGO AÑADIDO -->
-                            @if($reserva->estado == 'realizada' && $reserva->metodo_pago)
+                            
+                            @if($totalReserva > 0)
+                            <p><strong>Total Pagado:</strong> 
+                                <span class="fw-bold text-success">${{ number_format($totalReserva, 2) }}</span>
+                            </p>
+                            @endif
+                            
+                            @if($metodoPago)
                             <p><strong>Método de Pago:</strong> 
-                                <span class="badge bg-info text-dark">
-                                    {{ ucfirst($reserva->metodo_pago) }}
+                                <span class="badge 
+                                    @if($metodoPago == 'efectivo') bg-success
+                                    @elseif($metodoPago == 'qr') bg-primary
+                                    @elseif($metodoPago == 'transferencia') bg-info
+                                    @else bg-secondary @endif">
+                                    {{ ucfirst($metodoPago) }}
                                 </span>
+                            </p>
+                            @else
+                            <p><strong>Método de Pago:</strong> 
+                                <span class="text-muted">No especificado</span>
                             </p>
                             @endif
                         </div>
@@ -98,15 +120,24 @@
                                     <th colspan="2" class="text-end">Total:</th>
                                     <th>${{ number_format($total, 2) }}</th>
                                 </tr>
-                                <!-- LÍNEA ADICIONAL PARA MOSTRAR MÉTODO DE PAGO EN LA TABLA -->
-                                @if($reserva->estado == 'realizada' && $reserva->metodo_pago)
+                                @if($metodoPago)
                                 <tr>
                                     <th colspan="2" class="text-end">Método de Pago:</th>
                                     <th>
-                                        <span class="badge bg-info text-dark">
-                                            {{ ucfirst($reserva->metodo_pago) }}
+                                        <span class="badge 
+                                            @if($metodoPago == 'efectivo') bg-success
+                                            @elseif($metodoPago == 'qr') bg-primary
+                                            @elseif($metodoPago == 'transferencia') bg-info
+                                            @else bg-secondary @endif">
+                                            {{ ucfirst($metodoPago) }}
                                         </span>
                                     </th>
+                                </tr>
+                                @endif
+                                @if($reserva->venta && $reserva->venta->created_at)
+                                <tr>
+                                    <th colspan="2" class="text-end">Fecha de Pago:</th>
+                                    <th>{{ $reserva->venta->created_at->format('d/m/Y H:i') }}</th>
                                 </tr>
                                 @endif
                             </tfoot>
@@ -159,4 +190,20 @@
         </div>
     </div>
 </div>
+@stop
+
+@section('css')
+<style>
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+.badge {
+    font-size: 85%;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+</style>
 @stop

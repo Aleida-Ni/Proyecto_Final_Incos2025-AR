@@ -11,26 +11,25 @@ class Venta extends Model
     const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
-        'reserva_id',
-        'usuario_id',
+        'cliente_id',
         'empleado_id',
-        'estado',
+        'total',
         'metodo_pago',
         'referencia_pago',
-        'fecha_pago',
-        'codigo',
-        'total',
+        'estado',
+        'creado_en',
+        'actualizado_en',
     ];
 
     // Relaciones
     public function cliente()
     {
-        return $this->belongsTo(User::class, 'usuario_id');
+        return $this->belongsTo(Usuario::class, 'cliente_id');
     }
 
     public function empleado()
     {
-        return $this->belongsTo(User::class, 'empleado_id');
+        return $this->belongsTo(Usuario::class, 'empleado_id');
     }
 
     public function detalles()

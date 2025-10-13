@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Usuario;
 
 class VerificationController extends Controller
 {
@@ -33,7 +33,7 @@ class VerificationController extends Controller
      */
     public function verify(Request $request, $id, $hash)
     {
-        $usuario = User::findOrFail($id);
+        $usuario = Usuario::findOrFail($id);
 
         // Validar hash
         if (! hash_equals(sha1($usuario->getEmailForVerification()), $hash)) {

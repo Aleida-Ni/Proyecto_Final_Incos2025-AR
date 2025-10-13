@@ -10,7 +10,6 @@
 @section('content')
 <div class="card">
     <div class="card-body">
-        <!-- FILTROS MEJORADOS -->
         <form method="GET" class="row g-3 mb-4 align-items-end">
             <div class="col-md-2">
                 <label class="form-label">Periodo rápido</label>
@@ -105,14 +104,47 @@
         </div>
         @endif
 
+        <!-- GRÁFICOS ESTADÍSTICOS -->
+        @if($ventas->count() > 0)
+        <div class="row mb-4">
+            <!-- Gráfico de Ventas por Día -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tendencia de Ventas</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="ventasPorDia" style="min-height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Métodos de Pago -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Distribución por Método de Pago</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="metodosPago" style="min-height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- BOTONES DE EXPORTACIÓN -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Detalle de Ventas</h5>
-            <div>
+            <div class="btn-group">
+                <a href="{{ route('admin.reportes.ventas.pdf') }}{{ Request::getQueryString() ? '?' . Request::getQueryString() : '' }}" 
+                   class="btn btn-danger btn-sm">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
                 <button class="btn btn-success btn-sm" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> Exportar Excel
+                    <i class="fas fa-file-excel"></i> Excel
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="window.print()">
+                <button class="btn btn-info btn-sm" onclick="window.print()">
                     <i class="fas fa-print"></i> Imprimir
                 </button>
             </div>
@@ -123,13 +155,13 @@
             <table class="table table-striped table-hover" id="tabla-ventas">
                 <thead class="table-dark">
                     <tr>
-                        <th>Código</th>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Empleado</th>
-                        <th>Método Pago</th>
-                        <th class="text-end">Total</th>
-                        <th>Acciones</th>
+                        <th style="width: 80px">Código</th>
+                        <th style="width: 120px">Fecha</th>
+                        <th style="width: 150px">Cliente/Empleado</th>
+                        <th>Productos</th>
+                        <th style="width: 100px">Método Pago</th>
+                        <th style="width: 120px" class="text-end">Total</th>
+                        <th style="width: 80px">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -139,8 +171,31 @@
                                 <span class="badge bg-secondary">{{ $venta->codigo }}</span>
                             </td>
                             <td>{{ $venta->creado_en->format('d/m/Y H:i') }}</td>
-                            <td>{{ $venta->cliente->nombre ?? 'Cliente no registrado' }}</td>
-                            <td>{{ $venta->empleado->nombre ?? 'N/A' }}</td>
+                            <td>
+                                <div class="mb-1">
+                                    <small class="text-muted">Cliente:</small><br>
+                                    <strong>{{ $venta->cliente->nombre ?? 'Cliente no registrado' }}</strong>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Atendido por:</small><br>
+                                    {{ $venta->empleado->nombre ?? 'N/A' }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="productos-lista">
+                                    @foreach($venta->detalles as $detalle)
+                                        <div class="producto-item mb-1">
+                                            <span class="producto-nombre">{{ $detalle->producto->nombre }}</span>
+                                            <small class="text-muted">
+                                                ({{ $detalle->cantidad }} x Bs. {{ number_format($detalle->precio_unitario, 2) }})
+                                            </small>
+                                            <div class="producto-subtotal text-success">
+                                                Bs. {{ number_format($detalle->total, 2) }}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </td>
                             <td>
                                 <span class="badge bg-info text-dark">{{ ucfirst($venta->metodo_pago) }}</span>
                             </td>
@@ -178,7 +233,6 @@
             </table>
         </div>
 
-        <!-- PAGINACIÓN FUNCIONAL -->
         @if($ventas->hasPages())
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div class="text-muted">
@@ -192,19 +246,144 @@
 @stop
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Datos para el gráfico de ventas por día
+    const ventasDiarias = @json($ventasPorDia ?? []);
+    new Chart(document.getElementById('ventasPorDia'), {
+        type: 'line',
+        data: {
+            labels: ventasDiarias.map(v => v.fecha),
+            datasets: [{
+                label: 'Monto de Ventas',
+                data: ventasDiarias.map(v => v.total),
+                borderColor: '#2563eb',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Tendencia de Ventas Diarias'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Bs. ' + value.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Datos para el gráfico de métodos de pago
+    const metodosPago = @json($metodosPago ?? []);
+    new Chart(document.getElementById('metodosPago'), {
+        type: 'doughnut',
+        data: {
+            labels: metodosPago.map(m => m.metodo.toUpperCase()),
+            datasets: [{
+                data: metodosPago.map(m => m.total),
+                backgroundColor: [
+                    '#2563eb',  // Azul
+                    '#16a34a',  // Verde
+                    '#ca8a04'   // Amarillo
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                title: {
+                    display: true,
+                    text: 'Distribución por Método de Pago'
+                }
+            }
+        }
+    });
+});
+
 function exportToExcel() {
-    // Implementar exportación a Excel
-    alert('Funcionalidad de exportación a Excel - Próximamente');
+    const tabla = document.getElementById('tabla-ventas');
+    let csv = [];
+    const rows = tabla.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length - 1; j++) { // Excluir columna acciones
+            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s)/gm, " ");
+            row.push('"' + data + '"');
+        }
+        
+        csv.push(row.join(","));        
+    }
+
+    // Descargar archivo
+    let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "reporte_ventas_{{ date('Y-m-d') }}.csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
 }
 
 // Auto-selección de fechas para filtros rápidos
 document.querySelector('select[name="periodo"]').addEventListener('change', function() {
-    if (this.value === 'hoy') {
-        const hoy = new Date().toISOString().split('T')[0];
-        document.querySelector('input[name="from"]').value = hoy;
-        document.querySelector('input[name="to"]').value = hoy;
+    const hoy = new Date();
+    const desde = document.querySelector('input[name="from"]');
+    const hasta = document.querySelector('input[name="to"]');
+    
+    switch(this.value) {
+        case 'hoy':
+            desde.value = hasta.value = hoy.toISOString().split('T')[0];
+            break;
+        case '7':
+            const hace7Dias = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+            desde.value = hace7Dias.toISOString().split('T')[0];
+            hasta.value = hoy.toISOString().split('T')[0];
+            break;
+        case '15':
+            const hace15Dias = new Date(hoy.getTime() - 15 * 24 * 60 * 60 * 1000);
+            desde.value = hace15Dias.toISOString().split('T')[0];
+            hasta.value = hoy.toISOString().split('T')[0];
+            break;
+        case '30':
+            const hace30Dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+            desde.value = hace30Dias.toISOString().split('T')[0];
+            hasta.value = hoy.toISOString().split('T')[0];
+            break;
+        case 'mes':
+            const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            desde.value = primerDiaMes.toISOString().split('T')[0];
+            hasta.value = hoy.toISOString().split('T')[0];
+            break;
+        case 'mes_pasado':
+            const primerDiaMesPasado = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+            const ultimoDiaMesPasado = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+            desde.value = primerDiaMesPasado.toISOString().split('T')[0];
+            hasta.value = ultimoDiaMesPasado.toISOString().split('T')[0];
+            break;
     }
+    
+    // Auto-enviar el formulario
+    this.form.submit();
 });
 </script>
 @stop

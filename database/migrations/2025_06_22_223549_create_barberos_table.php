@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('cargo');
             $table->string('imagen')->nullable();
             $table->boolean('estado')->default(true); // activo por defecto
-            $table->timestamps();
+            $table->timestamp('creado_en')->nullable();
+            $table->timestamp('actualizado_en')->nullable();
         });
     }
 

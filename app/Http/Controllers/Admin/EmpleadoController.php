@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail; // 👈 Faltaba esto
@@ -15,7 +15,7 @@ class EmpleadoController extends Controller
 
     public function index()
     {
-        $empleados = User::where('rol', 'empleado')->get();
+        $empleados = Usuario::where('rol', 'empleado')->get();
         return view('admin.empleados.index', compact('empleados'));
     }
 
@@ -36,7 +36,7 @@ class EmpleadoController extends Controller
             'fecha_nacimiento'  => 'nullable|date',
         ]);
         $contraseniaGenerada = Str::random(10);
-        $empleado = User::create([
+        $empleado = Usuario::create([
             'nombre'            => $request->nombre,
             'apellido_paterno'  => $request->apellido_paterno,
             'apellido_materno'  => $request->apellido_materno,
@@ -59,7 +59,7 @@ class EmpleadoController extends Controller
      */
     public function edit(string $id)
     {
-        $empleado = User::findOrFail($id);
+        $empleado = Usuario::findOrFail($id);
         return view('admin.empleados.edit', compact('empleado'));
     }
 
@@ -68,7 +68,7 @@ class EmpleadoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $empleado = User::findOrFail($id);
+        $empleado = Usuario::findOrFail($id);
 
         $request->validate([
             'nombre'            => 'required|string|max:255',
@@ -93,7 +93,7 @@ class EmpleadoController extends Controller
 
     public function destroy(string $id)
     {
-        $empleado = User::findOrFail($id);
+        $empleado = Usuario::findOrFail($id);
         $empleado->delete();
 
         return redirect()->route('admin.empleados.index')->with('success', 'Empleado eliminado correctamente');

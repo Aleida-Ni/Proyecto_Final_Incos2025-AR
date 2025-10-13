@@ -5,7 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
+use App\Models\Usuario;
 
 class EmpleadoCreadoMail extends Mailable
 {
@@ -14,7 +14,7 @@ class EmpleadoCreadoMail extends Mailable
     public $empleado;
     public $contrasenia;
 
-    public function __construct($empleado, $contrasenia)
+    public function __construct(Usuario $empleado, $contrasenia)
     {
         $this->empleado = $empleado;
         $this->contrasenia = $contrasenia;

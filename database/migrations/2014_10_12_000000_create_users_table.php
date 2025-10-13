@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
             $table->string('apellido_paterno')->nullable();
@@ -21,11 +21,12 @@ return new class extends Migration
             $table->date('fecha_nacimiento')->nullable();
             $table->timestamp('correo_verificado_en')->nullable();
             $table->string('contrasenia');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->string('rol')->default('cliente');
+            $table->boolean('estado')->default(true);
+            $table->string('remember_token')->nullable();
+            $table->timestamp('creado_en')->nullable();
+            $table->timestamp('actualizado_en')->nullable();
         });
-
-        
     }
 
     /**
@@ -33,9 +34,7 @@ return new class extends Migration
      */
      public function down(): void
     {
-        Schema::table('usuarios', function (Blueprint $table) {
-            $table->dropColumn(['telefono', 'fecha_nacimiento']);
-        });
+        Schema::dropIfExists('usuarios');
     }
 
 };

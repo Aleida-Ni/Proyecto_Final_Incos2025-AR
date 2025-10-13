@@ -82,6 +82,36 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->attributes['nombre'];
     }
 
+    /**
+     * Obtener la descripción del usuario para AdminLTE.
+     *
+     * @return string
+     */
+    public function adminlte_desc()
+    {
+        return ucfirst($this->rol);
+    }
+
+    /**
+     * Obtener la imagen del usuario para AdminLTE.
+     *
+     * @return string
+     */
+    public function adminlte_image()
+    {
+        return 'vendor/adminlte/dist/img/user2-160x160.jpg';
+    }
+
+    /**
+     * Obtener el perfil URL para AdminLTE.
+     *
+     * @return string|false
+     */
+    public function adminlte_profile_url()
+    {
+        return route('admin.settings');
+    }
+
     // Método para verificar roles
     public function can($ability, $arguments = [])
     {

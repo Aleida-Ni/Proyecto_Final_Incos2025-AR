@@ -8,6 +8,7 @@ use App\Models\Producto;
 use App\Models\Categoria;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
@@ -50,27 +51,62 @@ class ProductoController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $request->validate([
             'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric',
+            'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'categoria_id' => 'required|exists:categorias,id',
-            'imagen' => 'nullable|image|max:2048',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'nombre.required' => 'El nombre del producto es obligatorio.',
+            'nombre.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'precio.required' => 'El precio es obligatorio.',
+            'precio.numeric' => 'El precio debe ser un número.',
+            'precio.min' => 'El precio no puede ser negativo.',
+            'stock.required' => 'El stock es obligatorio.',
+            'stock.integer' => 'El stock debe ser un número entero.',
+            'stock.min' => 'El stock no puede ser negativo.',
+            'categoria_id.required' => 'La categoría es obligatoria.',
+            'categoria_id.exists' => 'La categoría seleccionada no es válida.',
+            'imagen.image' => 'El archivo debe ser una imagen.',
+            'imagen.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg.',
+            'imagen.max' => 'La imagen no debe pesar más de 2MB.',
         ]);
 
         try {
+            DB::beginTransaction();
+            
+            $data = $request->only(['nombre', 'precio', 'stock', 'categoria_id']);
+            
             if ($request->hasFile('imagen') && $request->file('imagen')->isValid()) {
                 $data['imagen'] = $request->file('imagen')->store('productos', 'public');
             }
 
-            Producto::create($data);
+            $producto = Producto::create($data);
+            
+            DB::commit();
 
-            return redirect()->route('admin.productos.index')->with('success', 'Producto creado exitosamente.');
-        } catch (\Throwable $e) {
-            Log::error('Error al crear producto: '.$e->getMessage());
-            return back()->withInput()->withErrors(['error' => 'Ocurrió un error al guardar el producto. Revisa los logs.']);
-        }
+            return redirect()
+                ->route('admin.productos.index')
+                ->with('success', "¡Producto '{$producto->nombre}' creado exitosamente!");
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error al crear producto: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // En desarrollo, mostrar el error real
+            if (config('app.debug')) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['error' => 'Error: ' . $e->getMessage()]);
+            }
+            
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Hubo un error al guardar el producto. Por favor, inténtalo de nuevo.']);
+    }
     }
 
     public function edit($id)
@@ -113,4 +149,5 @@ class ProductoController extends Controller
         $producto->delete();
         return redirect()->route('admin.productos.index')->with('success', 'Producto eliminado.');
     }
+
 }

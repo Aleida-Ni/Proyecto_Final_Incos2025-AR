@@ -10,15 +10,16 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
+        DB::table('usuarios')->insert([
             'nombre' => 'Rck',
             'apellido_paterno' => 'Oz',
             'apellido_materno' => 'Melodian',
             'correo' => 'admin@gmail.com',
-            'contraseña' => Hash::make('12345678'),
+            'contrasenia' => Hash::make('12345678'),
             'rol' => 'admin',
-            'created_at' => now(),
-            'updated_at' => now(),
+            'estado' => 1,
+            'creado_en' => now(),
+            'actualizado_en' => now(),
         ]);
     }
 }

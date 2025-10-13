@@ -48,6 +48,8 @@ return [
 
     'expiration' => null,
 
+    'model' => App\Models\PersonalAccessToken::class,
+
     /*
     |--------------------------------------------------------------------------
     | Token Prefix

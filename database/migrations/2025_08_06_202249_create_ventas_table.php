@@ -10,11 +10,17 @@ return new class extends Migration
     {
         Schema::create('ventas', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('cliente_id');
             $table->unsignedBigInteger('empleado_id');
-            $table->timestamps();
-
-            $table->foreign('cliente_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('empleado_id')->references('id')->on('users')->onDelete('cascade');
+            $table->decimal('total', 10, 2);
+            $table->string('metodo_pago');
+            $table->string('referencia_pago')->nullable();
+            $table->string('estado')->default('pendiente');
+            $table->timestamp('creado_en')->nullable();
+            $table->timestamp('actualizado_en')->nullable();
+            
+            $table->foreign('cliente_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('empleado_id')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }
 

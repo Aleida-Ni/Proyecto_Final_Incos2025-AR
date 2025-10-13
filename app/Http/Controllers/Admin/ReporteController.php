@@ -7,13 +7,118 @@ use Illuminate\Http\Request;
 use App\Models\Reserva;
 use App\Models\Venta;
 use App\Models\Barbero;
-use App\Models\User;
+use App\Models\Usuario;
 use App\Models\DetalleVenta;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReporteController extends Controller
 {
+    public function exportarReservasPDF(Request $request)
+    {
+        $query = Reserva::with(['cliente', 'barbero', 'servicios', 'venta']);
+
+        // Aplicar filtros de fecha
+        if ($request->filled('from')) {
+            $query->whereDate('fecha', '>=', $request->from);
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('fecha', '<=', $request->to);
+        }
+
+        // Filtro por periodo rápido
+        if ($request->filled('periodo')) {
+            $this->aplicarFiltroPeriodo($query, $request->periodo);
+        }
+
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Filtro por barbero
+        if ($request->filled('barbero_id')) {
+            $query->where('barbero_id', $request->barbero_id);
+        }
+
+        $reservas = $query->orderBy('fecha', 'desc')
+                         ->orderBy('hora', 'desc')
+                         ->get();
+
+        // Calcular estadísticas
+        $stats = [
+            'total_reservas' => $reservas->count(),
+            'pendientes' => $reservas->where('estado', 'pendiente')->count(),
+            'realizadas' => $reservas->where('estado', 'realizada')->count(),
+            'ingreso_realizado' => $reservas->where('estado', 'realizada')
+                ->sum(function($reserva) {
+                    return $reserva->servicios->sum('precio');
+                }),
+            'ingreso_pendiente' => $reservas->where('estado', 'pendiente')
+                ->sum(function($reserva) {
+                    return $reserva->servicios->sum('precio');
+                }),
+            'barberos_activos' => Barbero::where('estado', 1)->count()
+        ];
+
+        // Obtener fechas para el título del reporte
+        $fechaInicio = $request->from ? Carbon::parse($request->from)->format('d/m/Y') : 'Inicio';
+        $fechaFin = $request->to ? Carbon::parse($request->to)->format('d/m/Y') : Carbon::now()->format('d/m/Y');
+
+        $pdf = PDF::loadView('admin.reportes.pdf.reservas', [
+            'reservas' => $reservas,
+            'stats' => $stats,
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin
+        ]);
+
+        return $pdf->download('reporte-reservas-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function exportarVentasPDF(Request $request)
+    {
+        $query = Venta::with(['cliente', 'detalles.producto', 'empleado']);
+
+        // Aplicar los mismos filtros que en la vista normal
+        $this->aplicarFiltrosFecha($query, $request, 'creado_en');
+        
+        if ($request->filled('empleado_id')) {
+            $query->where('empleado_id', $request->empleado_id);
+        }
+
+        if ($request->filled('metodo_pago')) {
+            $query->where('metodo_pago', $request->metodo_pago);
+        }
+
+        $ventas = $query->latest()->get();
+        
+        // Calcular métricas
+        $stats = [
+            'total_ventas' => $ventas->count(),
+            'ingreso_total' => $ventas->sum('total'),
+            'promedio_venta' => $ventas->avg('total') ?? 0,
+            'ticket_promedio' => $ventas->avg('total') ?? 0,
+            'total_productos' => $ventas->sum(function($venta) {
+                return $venta->detalles->sum('cantidad');
+            })
+        ];
+
+        // Obtener fechas para el título del reporte
+        $fechaInicio = $request->from ? Carbon::parse($request->from)->format('d/m/Y') : 'Inicio';
+        $fechaFin = $request->to ? Carbon::parse($request->to)->format('d/m/Y') : Carbon::now()->format('d/m/Y');
+
+        $pdf = PDF::loadView('admin.reportes.pdf.ventas', [
+            'ventas' => $ventas,
+            'stats' => $stats,
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin
+        ]);
+
+        return $pdf->download('reporte-ventas-' . Carbon::now()->format('Y-m-d') . '.pdf');
+    }
+
     public function __construct()
     {
         $this->middleware(['auth', 'role:admin|empleado']);
@@ -155,9 +260,62 @@ $barberos = Barbero::where('estado', 1)->get();
             'ingreso_total' => $ventasParaMetricas->sum('total'),
             'venta_promedio' => $ventasParaMetricas->avg('total') ?? 0,
             'venta_maxima' => $ventasParaMetricas->max('total') ?? 0,
+            'total_productos' => $ventasParaMetricas->sum(function($venta) {
+                return $venta->detalles->sum('cantidad');
+            }),
+            'ticket_promedio' => $ventasParaMetricas->avg('total') ?? 0,
         ];
 
-        $empleados = User::whereIn('rol', ['admin', 'empleado'])->get();
+        // Datos para gráficos
+        $ventasPorDia = $ventasParaMetricas
+            ->groupBy(function($venta) {
+                return $venta->creado_en->format('Y-m-d');
+            })
+            ->map(function($grupo) {
+                return [
+                    'fecha' => $grupo->first()->creado_en->format('d/m/Y'),
+                    'total' => $grupo->sum('total'),
+                    'cantidad' => $grupo->count()
+                ];
+            })
+            ->values();
+
+        $metodosPago = $ventasParaMetricas
+            ->groupBy('metodo_pago')
+            ->map(function($grupo, $metodo) {
+                return [
+                    'metodo' => ucfirst($metodo),
+                    'total' => $grupo->count(),
+                    'monto' => $grupo->sum('total')
+                ];
+            })
+            ->values();
+
+        // Top productos vendidos
+        $topProductos = collect();
+        foreach ($ventasParaMetricas as $venta) {
+            foreach ($venta->detalles as $detalle) {
+                $topProductos->push([
+                    'producto' => $detalle->producto->nombre,
+                    'cantidad' => $detalle->cantidad,
+                    'total' => $detalle->total
+                ]);
+            }
+        }
+        $topProductos = $topProductos
+            ->groupBy('producto')
+            ->map(function($grupo) {
+                return [
+                    'producto' => $grupo->first()['producto'],
+                    'cantidad' => $grupo->sum('cantidad'),
+                    'total' => $grupo->sum('total')
+                ];
+            })
+            ->sortByDesc('total')
+            ->take(5)
+            ->values();
+
+        $empleados = Usuario::whereIn('rol', ['admin', 'empleado'])->get();
 
         return view('admin.reportes.ventas', compact('ventas', 'metricas', 'empleados'))
             ->with($request->only(['from', 'to', 'periodo', 'empleado_id', 'metodo_pago']));

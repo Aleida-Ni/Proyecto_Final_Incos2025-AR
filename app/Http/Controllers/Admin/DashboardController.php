@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Venta;
 use App\Models\Reserva;
 use App\Models\Producto;
-use App\Models\User;
+use App\Models\Usuario;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -21,7 +21,7 @@ class DashboardController extends Controller
             'reservas_hoy' => Reserva::whereDate('fecha', $hoy)->count(),
             'reservas_pendientes' => Reserva::where('estado', 'pendiente')->count(),
             'total_productos' => Producto::count(),
-            'total_clientes' => User::where('rol', 'cliente')->count(),
+            'total_clientes' => Usuario::where('rol', 'cliente')->count(),
         ];
 
         // Ventas de la última semana para gráfico

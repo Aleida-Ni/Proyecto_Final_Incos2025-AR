@@ -97,6 +97,10 @@ Route::middleware(['auth', 'estado', 'role:admin'])
             ->name('reservas.marcar')
             ->whereNumber('id');
 
+        // Exportar Reportes PDF
+        Route::get('reportes/reservas/pdf', [ReporteController::class, 'exportarReservasPDF'])
+            ->name('reportes.reservas.pdf');
+
         // Ventas (admin)
         Route::prefix('ventas')->name('ventas.')->group(function () {
             Route::get('/', [VentaController::class, 'index'])->name('index');
@@ -116,6 +120,7 @@ Route::middleware(['auth', 'estado', 'role:admin'])
         Route::prefix('reportes')->name('reportes.')->group(function () {
             Route::get('/reservas', [ReporteController::class, 'reservas'])->name('reservas');
             Route::get('/ventas',   [ReporteController::class, 'ventas'])->name('ventas');
+            Route::get('/ventas/pdf', [ReporteController::class, 'exportarVentasPDF'])->name('ventas.pdf');
         });
     });
 

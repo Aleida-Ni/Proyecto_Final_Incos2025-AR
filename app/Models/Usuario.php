@@ -40,21 +40,7 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         'correo_verificado_en' => 'datetime',
         'contrasenia' => 'hashed',
     ];
-    public function adminlte_desc()
-    {
-        // Retorna el rol o alguna descripción
-        return ucfirst($this->rol); // Ej: "Admin", "Cliente", etc.
-    }
-        public function adminlte_image()
-    {
-        // Si tienes campo de imagen, retorna la URL
-        // Si no, retorna una imagen por defecto
-        return asset('images/user-default.png');
-    }
-        public function adminlte_profile_url()
-    {
-        return route('profile.show');
-    }
+
     // Verificación de correo
     public function hasVerifiedEmail()
     {
@@ -68,9 +54,35 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         ])->save();
     }
 
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\VerifyEmailCustom);
+    }
+
     public function getEmailForVerification()
     {
         return $this->correo;
+    }
+
+    // Para usar "correo" en lugar de "email"
+    public function routeNotificationForMail($notification)
+    {
+        return $this->correo;
+    }
+
+    public function adminlte_desc()
+    {
+        return ucfirst($this->rol);
+    }
+
+    public function adminlte_image()
+    {
+        return asset('images/user-default.png');
+    }
+
+    public function adminlte_profile_url()
+    {
+        return route('profile.show');
     }
 
     // Relaciones

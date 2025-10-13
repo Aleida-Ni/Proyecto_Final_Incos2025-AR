@@ -46,25 +46,29 @@ Route::get('/email/verify', function () {
 })->middleware('auth')->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $user = $request->user();
-
-    if (!$user->correo_verificado_en) {
-        $user->correo_verificado_en = now();
-        $user->estado = 1;
-        $user->save();
+    $request->fulfill();
+    
+    // Si es un cliente, actualizar su estado a 1
+    if($request->user()->rol === 'cliente') {
+        $request->user()->update(['estado' => 1]);
     }
-    if ($user->rol === 'admin') {
-        return redirect()->route('admin');
-    } elseif ($user->rol === 'empleado') {
-        return redirect()->route('empleado.dashboard');
-    } else {
-        return redirect()->route('cliente.home')->with('status', '¡Correo verificado correctamente!');
+    
+    // Si el usuario es cliente
+    if($request->user()->rol === 'cliente') {
+        return redirect()->route('cliente.home')->with('verified', true);
     }
+    
+    // Si el usuario es admin
+    if($request->user()->rol === 'admin') {
+        return redirect()->route('admin.home')->with('verified', true);
+    }
+    
+    return redirect('/')->with('verified', true);
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
-    return back()->with('message', 'Se ha enviado un nuevo enlace de verificación a tu correo.');
+    return back()->with('message', 'Link de verificación enviado!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
@@ -163,7 +167,7 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
     });
 
 /* PANEL CLIENTE */
-Route::middleware(['auth', 'verified', 'estado', 'can:is-cliente'])
+Route::middleware(['auth', 'verified'])
     ->prefix('cliente')
     ->name('cliente.')
     ->group(function () {

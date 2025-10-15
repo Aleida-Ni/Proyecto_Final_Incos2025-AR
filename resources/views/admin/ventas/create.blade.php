@@ -100,8 +100,7 @@
                     <label class="form-label">Método de Pago</label>
                     <select id="metodo-pago" class="form-select">
                         <option value="efectivo">Efectivo</option>
-                        <option value="tarjeta">Tarjeta</option>
-                        <option value="transferencia">Transferencia</option>
+                        <option value="qr">QR</option>
                     </select>
                 </div>
 
@@ -158,16 +157,13 @@
 document.addEventListener('DOMContentLoaded', function(){
     const items = [];
     
-    // Inicializar pestañas de Bootstrap
     var categoriasTab = new bootstrap.Tab(document.getElementById('categoriasTab').querySelector('.nav-link'));
     
-    // Toggle referencia de pago
     document.getElementById('metodo-pago').addEventListener('change', function() {
         const referenciaGroup = document.getElementById('referencia-group');
-        referenciaGroup.style.display = this.value === 'efectivo' ? 'none' : 'block';
+        referenciaGroup.style.display = (this.value === 'efectivo' || this.value === 'qr') ? 'none' : 'block';
     });
 
-    // Función para buscar productos
     document.getElementById('search-product').addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase().trim();
         const activeTab = document.querySelector('#categoriasTabContent .tab-pane.active');

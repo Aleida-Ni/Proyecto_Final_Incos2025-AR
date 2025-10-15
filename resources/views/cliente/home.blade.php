@@ -206,7 +206,7 @@
     <div class="hero-content text-center">
         <h1>Transforma tu Estilo</h1>
         <p>Reserva con los mejores barberos y explora nuestros productos exclusivos.</p>
-        <a href="{{ route('cliente.barberos.index') }}" class="btn-blue">Reservar</a>
+    {{-- Botón eliminado por petición: Reservar --}}
     </div>
 </div>
 
@@ -220,7 +220,7 @@
             <div class="card product-card h-100 shadow-sm">
                 <img src="{{ asset('imagenes/homeCliente/productoLogin1.jpeg') }}" class="card-img-top" alt="Producto 1">
                 <div class="card-body text-center">
-                    <h5 class="card-title">Producto 1</h5>
+                    <h5 class="card-title">La Texture Clay Legioners Sansson es una arcilla mate texturizadora perfecta para crear estilos naturales con volumen y definición.</h5>
                 </div>
             </div>
         </div>
@@ -230,7 +230,7 @@
             <div class="card product-card h-100 shadow-sm">
                 <img src="{{ asset('imagenes/homeCliente/productoLogin2.jpeg') }}" class="card-img-top" alt="Producto 2">
                 <div class="card-body text-center">
-                    <h5 class="card-title">Producto 2</h5>
+                    <h5 class="card-title">El Gel Wax Legioners Sansson combina lo mejor del gel y la cera, ofreciendo una fijación ultra fuerte con un acabado brillante</h5>
                 </div>
             </div>
         </div>

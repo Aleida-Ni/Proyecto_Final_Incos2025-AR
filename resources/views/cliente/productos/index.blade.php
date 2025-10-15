@@ -3,140 +3,178 @@
 @section('title', 'Productos')
 
 @section('content')
-<h1 class="text-center mb-3 d-flex justify-content-center align-items-center">
-    Nuestros Productos
-</h1>
+<div class="container my-5">
 
-{{-- Botón de Categorías --}}
-<div class="categorias-wrapper text-center mb-4">
-    <div class="dropdown-categorias d-inline-block">
-        <a href="#" class="btn btn-link categorias-trigger">Categorías ▾</a>
-        <div class="categorias-menu">
-            <a href="{{ route('cliente.productos.index') }}">Todas</a>
-            <a href="{{ route('cliente.productos.index', ['categoria' => 'CERAS Y GELES']) }}">Ceras y Geles</a>
-            <a href="{{ route('cliente.productos.index', ['categoria' => 'CUIDADOS DE BARBA']) }}">Cuidados de Barba</a>
-            <a href="{{ route('cliente.productos.index', ['categoria' => 'CAPAS PERSONALIZADAS']) }}">Capas Personalizadas</a>
-        </div>
-    </div>
-</div>
+    <h1 class="text-center mb-5 fw-bold text-dark">Nuestros Productos</h1>
 
-@php
-$productosPorCategoria = $productos->groupBy(function($p){
-    return optional($p->categoria)->nombre ?? 'Sin categoría';
-});
-@endphp
-
-@foreach($productosPorCategoria as $categoriaNombre => $items)
-    <h3 class="text-white mt-4 mb-3" style="text-shadow: 0 0 8px #00cfff;">
-        {{ $categoriaNombre }}
-    </h3>
-    <div class="row">
-        @foreach($items as $producto)
-        <div class="col-md-3 mb-4">
-            <div class="producto-card">
-                @if($producto->imagen)
-                    <img src="{{ asset('storage/' . $producto->imagen) }}" alt="Imagen de {{ $producto->nombre }}" class="producto-img">
-                @else
-                    <div class="no-img">Sin Imagen</div>
-                @endif
-                <div class="info p-3 text-center">
-                    <h5>{{ $producto->nombre }}</h5>
-                    <p>Precio: Bs. {{ number_format($producto->precio, 2) }}</p>
-                </div>
+    {{-- Botón de Categorías --}}
+    <div class="text-center mb-4">
+        <div class="dropdown-categorias d-inline-block position-relative">
+            <button class="btn btn-outline-dark fw-semibold dropdown-toggle categorias-trigger" type="button">
+                Categorías
+            </button>
+            <div class="categorias-menu shadow-sm">
+                <a href="{{ route('cliente.productos.index') }}">Todas</a>
+                <a href="{{ route('cliente.productos.index', ['categoria' => 'CERAS Y GELES']) }}">Ceras y Geles</a>
+                <a href="{{ route('cliente.productos.index', ['categoria' => 'CUIDADOS DE BARBA']) }}">Cuidados de Barba</a>
+                <a href="{{ route('cliente.productos.index', ['categoria' => 'CAPAS PERSONALIZADAS']) }}">Capas Personalizadas</a>
             </div>
         </div>
-        @endforeach
     </div>
-@endforeach
 
-{{-- Estilos --}}
+    @php
+    $productosPorCategoria = $productos->groupBy(function($p){
+        return optional($p->categoria)->nombre ?? 'Sin categoría';
+    });
+    @endphp
+
+    @foreach($productosPorCategoria as $categoriaNombre => $items)
+        <h3 class="text-dark mt-5 mb-4 fw-bold border-start border-4 border-dark ps-3">
+            {{ strtoupper($categoriaNombre) }}
+        </h3>
+        <div class="row">
+            @foreach($items as $producto)
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card producto-card border-0 shadow-sm h-100">
+                        @if($producto->imagen)
+                            <div class="producto-img-container">
+                                <img src="{{ asset('storage/' . $producto->imagen) }}" 
+                                     alt="Imagen de {{ $producto->nombre }}" 
+                                     class="producto-img">
+                                <div class="overlay">
+                                    <span class="price-tag">Bs. {{ number_format($producto->precio, 2) }}</span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="no-img">Sin Imagen</div>
+                        @endif
+
+                        <div class="card-body text-center">
+                            <h5 class="fw-semibold text-dark mb-2">{{ $producto->nombre }}</h5>
+                            <p class="text-muted small mb-0">Categoría: {{ $categoriaNombre }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endforeach
+
+</div>
+
 <style>
     body {
-        background-color: #000;
+        background-color: #fff !important;
+        font-family: 'Poppins', sans-serif;
     }
 
+    /* Encabezado */
     h1 {
-        color: white;
-        text-shadow: 0 0 10px #00cfff, 0 0 20px #0077cc;
+        text-shadow: 0 0 8px rgba(0,0,0,0.1);
+        letter-spacing: 1px;
     }
 
+    /* Dropdown de categorías */
     .categorias-trigger {
-        background: transparent;
-        border: none;
-        color: #fff;
-        font-weight: 600;
-        padding: .25rem .5rem;
+        border-radius: 25px;
+        transition: 0.3s ease;
     }
-
     .categorias-trigger:hover {
-        color: #00cfff;
-        text-decoration: none;
-    }
-
-    .dropdown-categorias {
-        position: relative;
+        background-color: #000;
+        color: #fff;
     }
 
     .categorias-menu {
         display: none;
         position: absolute;
+        top: 105%;
         left: 50%;
         transform: translateX(-50%);
-        background: #0b0b0b;
-        border: 1px solid #222;
+        background: #fff;
         border-radius: 12px;
         padding: 8px 0;
-        min-width: 260px;
+        min-width: 240px;
         z-index: 1000;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
+        border: 1px solid #e0e0e0;
     }
-
     .dropdown-categorias:hover .categorias-menu {
         display: block;
     }
-
     .categorias-menu a {
         display: block;
         padding: 10px 16px;
-        color: #e5e5e5;
+        color: #212529;
         font-weight: 500;
-        white-space: nowrap;
-    }
-
-    .categorias-menu a:hover {
-        background: #111827;
-        color: #00cfff;
+        text-align: left;
         text-decoration: none;
     }
-
-    .producto-card {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: 0.3s ease-in-out;
+    .categorias-menu a:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd;
     }
 
+    /* Tarjetas de producto */
+    .producto-card {
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    .producto-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .producto-img-container {
+        position: relative;
+        overflow: hidden;
+    }
     .producto-img {
         width: 100%;
-        height: 200px;
+        height: 230px;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
-
     .producto-card:hover .producto-img {
-        transform: scale(1.05);
+        transform: scale(1.07);
+    }
+
+    /* Overlay con precio */
+    .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        padding-bottom: 10px;
+    }
+    .producto-card:hover .overlay {
+        opacity: 1;
+    }
+    .price-tag {
+        background: #0d6efd;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 30px;
+        padding: 6px 14px;
+        font-size: 0.9rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.3);
     }
 
     .no-img {
-        height: 200px;
-        background-color: #6c757d;
-        color: white;
+        height: 230px;
+        background-color: #ccc;
+        color: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        border-radius: .375rem .375rem 0 0;
+        font-size: 1rem;
     }
 </style>
 @endsection

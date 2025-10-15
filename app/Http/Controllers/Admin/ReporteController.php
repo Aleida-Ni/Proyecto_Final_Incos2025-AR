@@ -12,6 +12,7 @@ use App\Models\DetalleVenta;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class ReporteController extends Controller
 {
@@ -47,20 +48,36 @@ class ReporteController extends Controller
                          ->orderBy('hora', 'desc')
                          ->get();
 
-        // Calcular estadísticas
-        $stats = [
-            'total_reservas' => $reservas->count(),
-            'pendientes' => $reservas->where('estado', 'pendiente')->count(),
-            'realizadas' => $reservas->where('estado', 'realizada')->count(),
-            'ingreso_realizado' => $reservas->where('estado', 'realizada')
-                ->sum(function($reserva) {
-                    return $reserva->servicios->sum('precio');
-                }),
-            'ingreso_pendiente' => $reservas->where('estado', 'pendiente')
-                ->sum(function($reserva) {
-                    return $reserva->servicios->sum('precio');
-                }),
-            'barberos_activos' => Barbero::where('estado', 1)->count()
+        $total = $reservas->count();
+        $pendientes = $reservas->where('estado', 'pendiente')->count();
+        $realizadas = $reservas->where('estado', 'realizada')->count();
+        $canceladas = $reservas->where('estado', 'cancelada')->count();
+        $noAsistio = $reservas->where('estado', 'no_asistio')->count();
+
+        $ingresoTotal = $reservas->where('estado', 'realizada')
+            ->sum(function($reserva) {
+                return $reserva->venta ? $reserva->venta->total : 0;
+            });
+
+        $ingresoPendiente = $reservas->where('estado', 'pendiente')
+            ->sum(function($reserva) {
+                return $reserva->servicios->sum('precio');
+            });
+
+        $promedioReserva = $realizadas > 0 ? ($ingresoTotal / $realizadas) : 0;
+        $tasaAsistencia = $total > 0 ? round(($realizadas / $total) * 100, 1) : 0;
+
+        $estadisticas = [
+            'total' => $total,
+            'pendientes' => $pendientes,
+            'realizadas' => $realizadas,
+            'canceladas' => $canceladas,
+            'no_asistio' => $noAsistio,
+            'ingreso_total' => $ingresoTotal,
+            'ingreso_pendiente' => $ingresoPendiente,
+            'ingreso_realizado' => $ingresoTotal,
+            'promedio_reserva' => $promedioReserva,
+            'tasa_asistencia' => $tasaAsistencia,
         ];
 
         // Obtener fechas para el título del reporte
@@ -69,7 +86,9 @@ class ReporteController extends Controller
 
         $pdf = PDF::loadView('admin.reportes.pdf.reservas', [
             'reservas' => $reservas,
-            'stats' => $stats,
+            // Mantener compatibilidad: pasar también 'stats' por si otras vistas la usan
+            'stats' => $estadisticas,
+            'estadisticas' => $estadisticas,
             'fechaInicio' => $fechaInicio,
             'fechaFin' => $fechaFin
         ]);
@@ -109,14 +128,39 @@ class ReporteController extends Controller
         $fechaInicio = $request->from ? Carbon::parse($request->from)->format('d/m/Y') : 'Inicio';
         $fechaFin = $request->to ? Carbon::parse($request->to)->format('d/m/Y') : Carbon::now()->format('d/m/Y');
 
-        $pdf = PDF::loadView('admin.reportes.pdf.ventas', [
-            'ventas' => $ventas,
-            'stats' => $stats,
-            'fechaInicio' => $fechaInicio,
-            'fechaFin' => $fechaFin
-        ]);
+        try {
+            Log::info('Generando PDF de ventas', ['ventas_count' => $ventas->count(), 'user_id' => optional($request->user())->id]);
+            $pdf = PDF::loadView('admin.reportes.pdf.ventas', [
+                'ventas' => $ventas,
+                'stats' => $stats,
+                'fechaInicio' => $fechaInicio,
+                'fechaFin' => $fechaFin
+            ]);
+        } catch (\Throwable $e) {
+            // Log detallado y devolver respuesta clara
+            Log::error('Error al cargar la vista para PDF de ventas', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            if (app()->runningInConsole()) {
+                // Para ejecución en CLI (comando de test) relanzamos para que la prueba muestre la excepción
+                throw $e;
+            }
+            abort(500, 'Error al generar el PDF (vista): ' . $e->getMessage());
+        }
 
-        return $pdf->download('reporte-ventas-' . Carbon::now()->format('Y-m-d') . '.pdf');
+        try {
+            return $pdf->download('reporte-ventas-' . Carbon::now()->format('Y-m-d') . '.pdf');
+        } catch (\Throwable $e) {
+            Log::error('Error al descargar/convertir a PDF de ventas', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            if (app()->runningInConsole()) {
+                throw $e;
+            }
+            abort(500, 'Error al generar el PDF (descarga): ' . $e->getMessage());
+        }
     }
 
     public function __construct()
@@ -347,6 +391,23 @@ $barberos = Barbero::where('estado', 1)->get();
 
         // CAMBIO: Usar paginate en lugar de get
         $productos = $query->orderByDesc('total_vendido')->paginate(15);
+
+        // Log temporal para depuración: registrar los primeros elementos y verificar 'precio'
+        try {
+            $muestra = [];
+            foreach ($productos->items() as $idx => $p) {
+                if ($idx >= 5) break;
+                // Convertir stdClass a array si es necesario
+                if (is_object($p)) {
+                    $muestra[] = (array) $p;
+                } else {
+                    $muestra[] = $p;
+                }
+            }
+            \Illuminate\Support\Facades\Log::info('Reporte productos - muestra', ['muestra' => $muestra]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error logueando productos para depuración', ['error' => $e->getMessage()]);
+        }
 
         return view('admin.reportes.productos', compact('productos'))
             ->with($request->only(['from', 'to']));

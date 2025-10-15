@@ -89,12 +89,11 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Método de Pago:</label>
-                                <select name="metodo_pago" class="form-select" required>
-                                    <option value="">Seleccionar método...</option>
-                                    <option value="efectivo">Efectivo</option>
-                                    <option value="qr">QR</option>
-                                    <option value="transferencia">Transferencia</option>
-                                </select>
+                                    <select name="metodo_pago" class="form-select" required>
+                                        <option value="">Seleccionar método...</option>
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="qr">QR</option>
+                                    </select>
                             </div>
                         </div>
                         <div class="col-md-6">

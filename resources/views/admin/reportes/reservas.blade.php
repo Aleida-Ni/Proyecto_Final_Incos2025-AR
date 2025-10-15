@@ -6,15 +6,9 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1>Reporte de Reservas</h1>
         <div>
-            <button class="btn btn-success btn-sm" onclick="exportToExcel()">
-                <i class="fas fa-file-excel"></i> Exportar Excel
-            </button>
             <a href="{{ route('admin.reportes.reservas.pdf', request()->query()) }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-file-pdf"></i> Exportar PDF
             </a>
-            <button class="btn btn-danger btn-sm" onclick="window.print()">
-                <i class="fas fa-print"></i> Imprimir
-            </button>
         </div>
     </div>
 @stop

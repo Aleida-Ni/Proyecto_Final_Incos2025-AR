@@ -12,8 +12,12 @@ return new class extends Migration
 public function up(): void
 {
     Schema::table('ventas', function (Blueprint $table) {
-        $table->string('codigo')->unique()->after('empleado_id');
-        $table->decimal('total', 8, 2)->default(0)->after('codigo');
+        if (!Schema::hasColumn('ventas', 'codigo')) {
+            $table->string('codigo')->unique()->after('empleado_id');
+        }
+        if (!Schema::hasColumn('ventas', 'total')) {
+            $table->decimal('total', 8, 2)->default(0)->after('codigo');
+        }
     });
 }
 

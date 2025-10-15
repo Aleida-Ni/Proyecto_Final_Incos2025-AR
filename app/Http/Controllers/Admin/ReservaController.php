@@ -42,12 +42,12 @@ class ReservaController extends Controller
     }
 
     /** Completar reserva y generar venta */
-public function completar(Request $request, Reserva $reserva)
+    public function completar(Request $request, Reserva $reserva)
 {
     $request->validate([
         'servicios' => 'required|array|min:1',
         'servicios.*' => 'exists:servicios,id',
-        'metodo_pago' => 'required|in:efectivo,qr,transferencia',
+        'metodo_pago' => 'required|in:efectivo,qr',
         'monto_total' => 'required|numeric|min:0',
         'observaciones' => 'nullable|string|max:500'
     ]);
@@ -65,7 +65,7 @@ public function completar(Request $request, Reserva $reserva)
 
         $venta = Venta::create([
             'reserva_id' => $reserva->id,
-            'usuario_id' => $reserva->usuario_id,
+            'cliente_id' => $reserva->usuario_id,
             'empleado_id' => auth()->id(),
             'codigo' => 'VENTA-' . strtoupper(uniqid()),
             'total' => $request->monto_total,
@@ -131,7 +131,7 @@ public function store(Request $request)
     $request->validate([
         'servicios' => 'required|array',
         'servicios.*' => 'exists:servicios,id',
-        'metodo_pago' => 'required|in:efectivo,qr,transferencia',
+        'metodo_pago' => 'required|in:efectivo,qr',
         'monto_total' => 'required|numeric|min:0',
         'observaciones' => 'nullable|string'
     ]);
@@ -154,7 +154,8 @@ public function store(Request $request)
 
         $venta = Venta::create([
             'reserva_id' => $reserva->id,
-            'usuario_id' => $reserva->usuario_id,  
+            'cliente_id' => $reserva->usuario_id,  
+            'codigo' => 'V-' . date('Ymd') . '-' . strtoupper(uniqid()),
             'total' => $request->monto_total,
             'metodo_pago' => $request->metodo_pago,
             'estado' => 'completada'

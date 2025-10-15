@@ -4,150 +4,99 @@
     <meta charset="utf-8">
     <title>Reporte de Ventas</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            color: #2563eb;
-            margin: 0;
-        }
-        .header p {
-            color: #64748b;
-            margin: 5px 0;
-        }
-        .metrics {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 20px;
-        }
-        .metric {
-            text-align: center;
-        }
-        .metric h3 {
-            color: #1e40af;
-            margin: 0;
-        }
-        .metric p {
-            color: #64748b;
-            margin: 5px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 8px;
-            text-align: left;
-            font-size: 10px;
-            vertical-align: top;
-        }
-        th {
-            background-color: #f1f5f9;
-            color: #1e293b;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-        td strong {
-            color: #1e293b;
-            display: block;
-            margin-bottom: 2px;
-        }
-        td small {
-            color: #64748b;
-            font-size: 9px;
-        }
-        .productos-lista {
-            margin: 0;
-            padding: 0;
-        }
-        .producto-item {
-            margin-bottom: 4px;
-            padding-bottom: 4px;
-            border-bottom: 1px dotted #e2e8f0;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #64748b;
-            font-size: 12px;
-        }
+        /* Estilos compatibles con DomPDF */
+        @page { margin: 20mm }
+        body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #222; font-size: 12px; }
+        .container { width: 100%; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand img { height: 48px; }
+        .brand h2 { margin: 0; font-size: 18px; color: #0b5ed7; }
+        .meta { text-align: right; font-size: 11px; color: #555; }
+        .metrics { display: flex; gap: 12px; margin-top: 12px; margin-bottom: 14px; }
+        .metric { background: #f8fafc; padding: 8px 12px; border-radius: 6px; flex: 1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #e6e9ef; padding: 8px; vertical-align: top; }
+        th { background: #f1f5f9; font-weight: 600; font-size: 11px; }
+        td { font-size: 11px; }
+        .right { text-align: right; }
+        .small { font-size: 10px; color: #666; }
+        .footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 10px; color: #666; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Reporte de Ventas</h1>
-        <p>Período: {{ $fechaInicio }} - {{ $fechaFin }}</p>
-        <p>Generado el: {{ now()->format('d/m/Y H:i:s') }}</p>
-    </div>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="brand">
+                @if(file_exists(public_path('images/logo.png')))
+                    <img src="{{ public_path('images/logo.png') }}" alt="Logo">
+                @endif
+                <h2>BarberShop — Reporte de Ventas</h2>
+            </div>
+            <div class="meta">
+                <div>Período: <strong>{{ $fechaInicio }} - {{ $fechaFin }}</strong></div>
+                <div>Generado: {{ now()->format('d/m/Y H:i:s') }}</div>
+            </div>
+        </div>
 
-    <div class="metrics">
-        <div class="metric">
-            <h3>{{ $stats['total_ventas'] }}</h3>
-            <p>Total Ventas</p>
+        <div class="metrics">
+            <div class="metric">
+                <div class="small">Total Ventas</div>
+                <div><strong>{{ $stats['total_ventas'] }}</strong></div>
+            </div>
+            <div class="metric">
+                <div class="small">Ingresos Totales</div>
+                <div><strong>Bs. {{ number_format($stats['ingreso_total'], 2) }}</strong></div>
+            </div>
+            <div class="metric">
+                <div class="small">Promedio por Venta</div>
+                <div><strong>Bs. {{ number_format($stats['promedio_venta'], 2) }}</strong></div>
+            </div>
         </div>
-        <div class="metric">
-            <h3>Bs. {{ number_format($stats['ingreso_total'], 2) }}</h3>
-            <p>Ingresos Totales</p>
-        </div>
-        <div class="metric">
-            <h3>Bs. {{ number_format($stats['promedio_venta'], 2) }}</h3>
-            <p>Promedio por Venta</p>
-        </div>
-    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Fecha</th>
-                <th>Cliente/Empleado</th>
-                <th>Productos</th>
-                <th>Método Pago</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($ventas as $venta)
-            <tr>
-                <td>{{ $venta->codigo }}</td>
-                <td>{{ $venta->creado_en->format('d/m/Y H:i') }}</td>
-                <td>
-                    <strong>{{ $venta->cliente->nombre ?? 'Cliente no registrado' }}</strong><br>
-                    <small>Atendido por: {{ $venta->empleado->nombre ?? 'N/A' }}</small>
-                </td>
-                <td>
-                    @foreach($venta->detalles as $detalle)
-                    - {{ $detalle->producto->nombre }}<br>
-                    <small>({{ $detalle->cantidad }} x Bs. {{ number_format($detalle->precio_unitario, 2) }})</small><br>
-                    @endforeach
-                </td>
-                <td>{{ ucfirst($venta->metodo_pago) }}</td>
-                <td>Bs. {{ number_format($venta->total, 2) }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-        <tfoot>
-            <tr>
-                <th colspan="5" style="text-align: right">TOTAL:</th>
-                <th>Bs. {{ number_format($stats['ingreso_total'], 2) }}</th>
-            </tr>
-        </tfoot>
-    </table>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:80px">Código</th>
+                    <th style="width:90px">Fecha</th>
+                    <th>Cliente / Empleado</th>
+                    <th>Productos</th>
+                    <th style="width:80px">Pago</th>
+                    <th style="width:90px" class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($ventas as $venta)
+                <tr>
+                    <td>{{ $venta->codigo }}</td>
+                    <td>{{ $venta->creado_en->format('d/m/Y H:i') }}</td>
+                    <td>
+                        <strong>{{ $venta->cliente->nombre ?? 'Cliente no registrado' }}</strong>
+                        <div class="small">Atendido por: {{ $venta->empleado->nombre ?? 'N/A' }}</div>
+                    </td>
+                    <td>
+                        @foreach($venta->detalles as $detalle)
+                            <div style="margin-bottom:6px;">
+                                <strong>{{ $detalle->producto->nombre }}</strong>
+                                <div class="small">{{ $detalle->cantidad }} x Bs. {{ number_format($detalle->precio_unitario, 2) }}</div>
+                            </div>
+                        @endforeach
+                    </td>
+                    <td class="small">{{ ucfirst($venta->metodo_pago) }}</td>
+                    <td class="right"><strong>Bs. {{ number_format($venta->total, 2) }}</strong></td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="5" class="right">TOTAL</th>
+                    <th class="right">Bs. {{ number_format($stats['ingreso_total'], 2) }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 
     <div class="footer">
-        <p>© {{ date('Y') }} BarberShop - Todos los derechos reservados</p>
+        <div>© {{ date('Y') }} BarberShop — Todos los derechos reservados</div>
     </div>
 </body>
 </html>

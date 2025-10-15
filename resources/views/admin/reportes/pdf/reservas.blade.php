@@ -4,74 +4,23 @@
     <meta charset="utf-8">
     <title>Reporte de Reservas</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            color: #2563eb;
-            margin: 0;
-        }
-        .header p {
-            color: #64748b;
-            margin: 5px 0;
-        }
-        .stats {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 20px;
-        }
-        .stat {
-            text-align: center;
-            width: 25%;
-            margin-bottom: 15px;
-        }
-        .stat h3 {
-            color: #1e40af;
-            margin: 0;
-        }
-        .stat p {
-            color: #64748b;
-            margin: 5px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 8px;
-            text-align: left;
-            font-size: 12px;
-        }
-        th {
-            background-color: #f1f5f9;
-            color: #1e293b;
-        }
-        tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #64748b;
-            font-size: 12px;
-        }
-        .estado {
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-        }
+        @page { margin: 20mm }
+        body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #222; font-size: 12px; }
+        .container { width: 100%; margin: 0 auto; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand img { height: 48px; }
+        .brand h2 { margin: 0; font-size: 18px; color: #0b5ed7; }
+        .meta { text-align: right; font-size: 11px; color: #555; }
+        .stats { display: flex; gap: 12px; margin-top: 12px; margin-bottom: 14px; }
+        .stat { background: #f8fafc; padding: 8px 12px; border-radius: 6px; flex: 1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #e6e9ef; padding: 8px; vertical-align: top; }
+        th { background: #f1f5f9; font-weight: 600; font-size: 11px; }
+        td { font-size: 11px; }
+        .right { text-align: right; }
+        .small { font-size: 10px; color: #666; }
+        .footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 10px; color: #666; }
+        .estado { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 10px; }
         .pendiente { background: #fef3c7; color: #92400e; }
         .realizada { background: #dcfce7; color: #166534; }
         .cancelada { background: #fee2e2; color: #991b1b; }
@@ -79,89 +28,71 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Reporte de Reservas</h1>
-        <p>Período: {{ $fechaInicio }} - {{ $fechaFin }}</p>
-        <p>Generado el: {{ now()->format('d/m/Y H:i:s') }}</p>
-    </div>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="brand">
+                @if(file_exists(public_path('images/logo.png')))
+                    <img src="{{ public_path('images/logo.png') }}" alt="Logo">
+                @endif
+                <h2>BarberShop — Reporte de Reservas</h2>
+            </div>
+            <div class="meta">
+                <div>Período: <strong>{{ $fechaInicio }} - {{ $fechaFin }}</strong></div>
+                <div>Generado: {{ now()->format('d/m/Y H:i:s') }}</div>
+            </div>
+        </div>
 
-    <div class="stats">
-        <div class="stat">
-            <h3>{{ $estadisticas['total'] }}</h3>
-            <p>Total Reservas</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="small">Total Reservas</div>
+                <div><strong>{{ $estadisticas['total'] }}</strong></div>
+            </div>
+            <div class="stat">
+                <div class="small">Pendientes</div>
+                <div><strong>{{ $estadisticas['pendientes'] }}</strong></div>
+            </div>
+            <div class="stat">
+                <div class="small">Realizadas</div>
+                <div><strong>{{ $estadisticas['realizadas'] }}</strong></div>
+            </div>
+            <div class="stat">
+                <div class="small">Ingreso Total</div>
+                <div><strong>Bs. {{ number_format($estadisticas['ingreso_total'], 2) }}</strong></div>
+            </div>
         </div>
-        <div class="stat">
-            <h3>{{ $estadisticas['pendientes'] }}</h3>
-            <p>Pendientes</p>
-        </div>
-        <div class="stat">
-            <h3>{{ $estadisticas['realizadas'] }}</h3>
-            <p>Realizadas</p>
-        </div>
-        <div class="stat">
-            <h3>{{ $estadisticas['canceladas'] }}</h3>
-            <p>Canceladas</p>
-        </div>
-        <div class="stat">
-            <h3>{{ $estadisticas['no_asistio'] }}</h3>
-            <p>No Asistió</p>
-        </div>
-        <div class="stat">
-            <h3>{{ $estadisticas['tasa_asistencia'] }}%</h3>
-            <p>Tasa Asistencia</p>
-        </div>
-        <div class="stat">
-            <h3>Bs. {{ number_format($estadisticas['ingreso_total'], 2) }}</h3>
-            <p>Ingreso Total</p>
-        </div>
-        <div class="stat">
-            <h3>Bs. {{ number_format($estadisticas['promedio_reserva'], 2) }}</h3>
-            <p>Promedio por Reserva</p>
-        </div>
-    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Barbero</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Estado</th>
-                <th>Servicios</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($reservas as $r)
-            <tr>
-                <td>#{{ $r->id }}</td>
-                <td>{{ optional($r->cliente)->nombre ?? 'Cliente' }}</td>
-                <td>{{ optional($r->barbero)->nombre ?? '—' }}</td>
-                <td>{{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}</td>
-                <td>{{ $r->hora }}</td>
-                <td>
-                    <span class="estado {{ $r->estado }}">
-                        {{ ucfirst($r->estado) }}
-                    </span>
-                </td>
-                <td>
-                    {{ $r->servicios->pluck('nombre')->join(', ') }}
-                </td>
-                <td>
-                    @php
-                        $total = $r->venta ? $r->venta->total : $r->servicios->sum('pivot.precio');
-                    @endphp
-                    Bs. {{ number_format($total, 2) }}
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:60px">ID</th>
+                    <th>Cliente</th>
+                    <th style="width:120px">Barbero</th>
+                    <th style="width:90px">Fecha</th>
+                    <th style="width:60px">Hora</th>
+                    <th style="width:90px">Estado</th>
+                    <th>Servicios</th>
+                    <th style="width:90px" class="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($reservas as $r)
+                <tr>
+                    <td>#{{ $r->id }}</td>
+                    <td>{{ optional($r->cliente)->nombre ?? 'Cliente' }}</td>
+                    <td>{{ optional($r->barbero)->nombre ?? '—' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}</td>
+                    <td>{{ $r->hora }}</td>
+                    <td><span class="estado {{ $r->estado }}">{{ ucfirst($r->estado) }}</span></td>
+                    <td>{{ $r->servicios->pluck('nombre')->join(', ') }}</td>
+                    <td class="right">Bs. {{ number_format($r->venta ? $r->venta->total : ($r->servicios->sum('pivot.precio') ?? 0), 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 
     <div class="footer">
-        <p>© {{ date('Y') }} BarberShop - Todos los derechos reservados</p>
+        <div>© {{ date('Y') }} BarberShop — Todos los derechos reservados</div>
     </div>
 </body>
 </html>

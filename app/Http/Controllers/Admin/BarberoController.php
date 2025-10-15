@@ -28,8 +28,8 @@ class BarberoController extends Controller
             'apellido_materno' => 'required|string|max:255',
             'correo' => 'required|email|unique:barberos,correo',
             'telefono' => 'nullable|string|max:20',
-            'cargo' => 'nullable|string|max:255',
             'imagen' => 'nullable|image|max:2048',
+            'cargo' => 'nullable|string|max:255',
             'estado' => 'nullable|boolean',
         ]);
 
@@ -55,7 +55,7 @@ class BarberoController extends Controller
             'apellido_materno' => 'required|string|max:255',
             'correo' => 'nullable|email|max:255|unique:barberos,correo,' . $barbero->id,
             'telefono' => 'nullable|string|max:20',
-            'cargo' => 'required|string|max:255',
+            'cargo' => 'nullable|string|max:255',
             'imagen' => 'nullable|image|max:2048',
             'estado' => 'nullable|boolean',
         ]);

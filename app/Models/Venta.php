@@ -5,12 +5,29 @@ use Illuminate\Database\Eloquent\Model;
 
 class Venta extends Model
 {
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->codigo)) {
+                $model->codigo = 'V-' . date('Ymd') . '-' . strtoupper(substr(sha1(uniqid('', true)), 0, 8));
+            }
+            // asegurar que total exista
+            if (!isset($model->total)) {
+                $model->total = 0;
+            }
+        });
+    }
+
     protected $table = 'ventas';
 
     const CREATED_AT = 'creado_en';
     const UPDATED_AT = 'actualizado_en';
 
     protected $fillable = [
+        'codigo',
+        'reserva_id',
         'cliente_id',
         'empleado_id',
         'total',

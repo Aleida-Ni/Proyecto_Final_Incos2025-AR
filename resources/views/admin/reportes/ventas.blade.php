@@ -2,7 +2,6 @@
 
 @section('title', 'Reportes - Ventas')
 
-
 @section('content_header')
     <h1>Reporte de Ventas</h1>
 @stop
@@ -51,8 +50,7 @@
                 <select name="metodo_pago" class="form-select">
                     <option value="">Todos</option>
                     <option value="efectivo" {{ request('metodo_pago') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
-                    <option value="tarjeta" {{ request('metodo_pago') == 'tarjeta' ? 'selected' : '' }}>Tarjeta</option>
-                    <option value="transferencia" {{ request('metodo_pago') == 'transferencia' ? 'selected' : '' }}>Transferencia</option>
+                    <option value="qr" {{ request('metodo_pago') == 'qr' ? 'selected' : '' }}>QR</option>
                 </select>
             </div>
 
@@ -104,49 +102,14 @@
         </div>
         @endif
 
-        <!-- GRÁFICOS ESTADÍSTICOS -->
-        @if($ventas->count() > 0)
-        <div class="row mb-4">
-            <!-- Gráfico de Ventas por Día -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Tendencia de Ventas</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="ventasPorDia" style="min-height: 250px;"></canvas>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Gráfico de Métodos de Pago -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Distribución por Método de Pago</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="metodosPago" style="min-height: 250px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
-
-        <!-- BOTONES DE EXPORTACIÓN -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Detalle de Ventas</h5>
-            <div class="btn-group">
+            <div>
                 <a href="{{ route('admin.reportes.ventas.pdf') }}{{ Request::getQueryString() ? '?' . Request::getQueryString() : '' }}" 
                    class="btn btn-danger btn-sm">
                     <i class="fas fa-file-pdf"></i> PDF
                 </a>
-                <button class="btn btn-success btn-sm" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> Excel
-                </button>
-                <button class="btn btn-info btn-sm" onclick="window.print()">
-                    <i class="fas fa-print"></i> Imprimir
-                </button>
             </div>
         </div>
 
@@ -157,7 +120,7 @@
                     <tr>
                         <th style="width: 80px">Código</th>
                         <th style="width: 120px">Fecha</th>
-                        <th style="width: 150px">Cliente/Empleado</th>
+                        <th style="width: 150px">Empleado</th>
                         <th>Productos</th>
                         <th style="width: 100px">Método Pago</th>
                         <th style="width: 120px" class="text-end">Total</th>
@@ -172,25 +135,47 @@
                             </td>
                             <td>{{ $venta->creado_en->format('d/m/Y H:i') }}</td>
                             <td>
-                                <div class="mb-1">
-                                    <small class="text-muted">Cliente:</small><br>
-                                    <strong>{{ $venta->cliente->nombre ?? 'Cliente no registrado' }}</strong>
-                                </div>
                                 <div>
-                                    <small class="text-muted">Atendido por:</small><br>
-                                    {{ $venta->empleado->nombre ?? 'N/A' }}
+                                    <strong>{{ $venta->empleado->nombre ?? 'N/A' }}</strong>
                                 </div>
+                                <small class="text-muted">
+                                    {{ $venta->cliente->nombre ?? 'Cliente no registrado' }}
+                                </small>
                             </td>
                             <td>
                                 <div class="productos-lista">
                                     @foreach($venta->detalles as $detalle)
-                                        <div class="producto-item mb-1">
-                                            <span class="producto-nombre">{{ $detalle->producto->nombre }}</span>
-                                            <small class="text-muted">
-                                                ({{ $detalle->cantidad }} x Bs. {{ number_format($detalle->precio_unitario, 2) }})
-                                            </small>
-                                            <div class="producto-subtotal text-success">
-                                                Bs. {{ number_format($detalle->total, 2) }}
+                                        <div class="producto-item mb-2 p-2 border rounded">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <span class="producto-nombre fw-bold">{{ $detalle->producto->nombre }}</span>
+                                                    <div class="text-muted small">
+                                                        Cantidad: {{ $detalle->cantidad }}
+                                                    </div>
+                                                </div>
+                                                <div class="text-end ms-3">
+                                                        <div class="text-success fw-bold">
+                                                            {{-- Mostrar subtotal/total del detalle (fallback a subtotal si existe) --}}
+                                                            Bs. {{ number_format($detalle->subtotal ?? $detalle->total ?? 0, 2) }}
+                                                        </div>
+                                                        <div class="text-muted small">
+                                                            {{-- Preferir el precio registrado en la tabla productos, si existe. Si no, usar el precio del detalle o calcularlo desde subtotal/cantidad --}}
+                                                            @php
+                                                                $precioProducto = optional($detalle->producto)->precio ?? null;
+                                                                $precioDetalle = $detalle->precio ?? null;
+                                                                $precioCalculado = null;
+                                                                if (empty($precioProducto)) {
+                                                                    if ($precioDetalle) {
+                                                                        $precioCalculado = $precioDetalle;
+                                                                    } elseif (!empty($detalle->subtotal) && !empty($detalle->cantidad)) {
+                                                                        $precioCalculado = $detalle->subtotal / max(1, $detalle->cantidad);
+                                                                    }
+                                                                }
+                                                                $precioMostrar = $precioProducto ?? $precioCalculado ?? 0;
+                                                            @endphp
+                                                            Bs. {{ number_format($precioMostrar, 2) }} c/u
+                                                        </div>
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
@@ -245,106 +230,22 @@
 </div>
 @stop
 
-@section('js')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Datos para el gráfico de ventas por día
-    const ventasDiarias = @json($ventasPorDia ?? []);
-    new Chart(document.getElementById('ventasPorDia'), {
-        type: 'line',
-        data: {
-            labels: ventasDiarias.map(v => v.fecha),
-            datasets: [{
-                label: 'Monto de Ventas',
-                data: ventasDiarias.map(v => v.total),
-                borderColor: '#2563eb',
-                tension: 0.1,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Tendencia de Ventas Diarias'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Bs. ' + value.toFixed(2);
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Datos para el gráfico de métodos de pago
-    const metodosPago = @json($metodosPago ?? []);
-    new Chart(document.getElementById('metodosPago'), {
-        type: 'doughnut',
-        data: {
-            labels: metodosPago.map(m => m.metodo.toUpperCase()),
-            datasets: [{
-                data: metodosPago.map(m => m.total),
-                backgroundColor: [
-                    '#2563eb',  // Azul
-                    '#16a34a',  // Verde
-                    '#ca8a04'   // Amarillo
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'right'
-                },
-                title: {
-                    display: true,
-                    text: 'Distribución por Método de Pago'
-                }
-            }
-        }
-    });
-});
-
-function exportToExcel() {
-    const tabla = document.getElementById('tabla-ventas');
-    let csv = [];
-    const rows = tabla.querySelectorAll('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        let row = [], cols = rows[i].querySelectorAll('td, th');
-        
-        for (let j = 0; j < cols.length - 1; j++) { // Excluir columna acciones
-            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s)/gm, " ");
-            row.push('"' + data + '"');
-        }
-        
-        csv.push(row.join(","));        
-    }
-
-    // Descargar archivo
-    let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
-    let downloadLink = document.createElement("a");
-    downloadLink.download = "reporte_ventas_{{ date('Y-m-d') }}.csv";
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+@section('css')
+<style>
+.productos-lista {
+    max-height: 200px;
+    overflow-y: auto;
 }
+.producto-item {
+    border-left: 3px solid #0d6efd;
+    background-color: #f8f9fa;
+}
+</style>
+@stop
 
-// Auto-selección de fechas para filtros rápidos
+@section('js')
+<script>
+// Auto-selección de fechas para filtros rápidos (mantener esta funcionalidad)
 document.querySelector('select[name="periodo"]').addEventListener('change', function() {
     const hoy = new Date();
     const desde = document.querySelector('input[name="from"]');

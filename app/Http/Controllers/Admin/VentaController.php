@@ -60,7 +60,7 @@ public function store(Request $request)
 
         // Crear la venta
         $venta = Venta::create([
-            'usuario_id' => null,
+            'cliente_id' => $data['cliente_id'] ?? null,
             'empleado_id' => auth()->id(),
             'estado' => 'completada',
             'metodo_pago' => $data['metodo_pago'] ?? 'efectivo',

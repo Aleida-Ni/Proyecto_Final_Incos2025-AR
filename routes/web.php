@@ -195,6 +195,10 @@ Route::middleware(['auth', 'verified'])
         Route::get('/reservar/{barbero}', [ClienteReservaController::class, 'create'])->name('reservar');
         Route::post('/reservar', [ClienteReservaController::class, 'store'])->name('reservar.store');
         Route::get('/reservas', [ClienteReservaController::class, 'misReservas'])->name('reservas');
+        // Cancelar reserva por cliente
+        Route::post('/reservas/{reserva}/cancelar', [ClienteReservaController::class, 'cancelar'])
+            ->name('reservas.cancelar')
+            ->whereNumber('reserva');
 
 });
 

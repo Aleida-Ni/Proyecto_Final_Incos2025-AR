@@ -196,6 +196,23 @@
         background-color: #111;
         color: #fff;
     }
+
+    /* Botón Ver Todo personalizado */
+    .btn-ver-todo {
+        background-color: #ffffff;
+        color: #000000 !important;
+        border: 2px solid #000000;
+        border-radius: 4px; /* forma rectangular con esquinas discretas */
+        padding: 8px 18px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-ver-todo:hover {
+        background-color: #f5f5f5;
+        color: #000000 !important;
+        text-decoration: none;
+    }
 </style>
 @endpush
 
@@ -220,7 +237,7 @@
             <div class="card product-card h-100 shadow-sm">
                 <img src="{{ asset('imagenes/homeCliente/productoLogin1.jpeg') }}" class="card-img-top" alt="Producto 1">
                 <div class="card-body text-center">
-                    <h5 class="card-title">La Texture Clay Legioners Sansson es una arcilla mate texturizadora perfecta para crear estilos naturales con volumen y definición.</h5>
+                    <h5 class="card-title"></h5>
                 </div>
             </div>
         </div>
@@ -230,7 +247,7 @@
             <div class="card product-card h-100 shadow-sm">
                 <img src="{{ asset('imagenes/homeCliente/productoLogin2.jpeg') }}" class="card-img-top" alt="Producto 2">
                 <div class="card-body text-center">
-                    <h5 class="card-title">El Gel Wax Legioners Sansson combina lo mejor del gel y la cera, ofreciendo una fijación ultra fuerte con un acabado brillante</h5>
+                    <h5 class="card-title"></h5>
                 </div>
             </div>
         </div>
@@ -240,7 +257,7 @@
             <div class="card product-card h-100 shadow-sm">
                 <img src="{{ asset('imagenes/homeCliente/productoLogin3.jpeg') }}" class="card-img-top" alt="Producto 3">
                 <div class="card-body text-center">
-                    <h5 class="card-title">Producto 3</h5>
+                    <h5 class="card-title"></h5>
                 </div>
             </div>
         </div>
@@ -248,7 +265,7 @@
 
     <!-- BOTÓN VER TODO -->
     <div class="text-center mt-4">
-        <a href="{{ route('cliente.productos.index') }}" class="btn btn-outline-light px-4 py-2">
+        <a href="{{ route('cliente.productos.index') }}" class="btn-ver-todo">
             VER TODO
         </a>
     </div>

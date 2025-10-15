@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Reserva;
 use App\Models\Barbero;
+use Illuminate\Support\Facades\Log;
+use App\Notifications\ReservaCanceladaToStaff;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
 
 class ReservaController extends Controller
 {
@@ -28,6 +32,8 @@ class ReservaController extends Controller
 
         $reservadas = Reserva::where('barbero_id', $barbero->id)
             ->where('fecha', $fecha)
+            // Excluir reservas canceladas para que las horas canceladas queden libres
+            ->where('estado', '!=', 'cancelada')
             ->pluck('hora')
             ->toArray();
 
@@ -52,6 +58,7 @@ class ReservaController extends Controller
     $yaReservado = Reserva::where('barbero_id', $request->barbero_id)
         ->where('fecha', $request->fecha)
         ->where('hora', $request->hora)
+        ->where('estado', '!=', 'cancelada')
         ->exists();
 
     if ($yaReservado) {
@@ -81,6 +88,51 @@ class ReservaController extends Controller
             ->get();
 
         return view('cliente.reservas.index', compact('reservas'));
+    }
+
+    /**
+     * Cancelar una reserva por el usuario dueño.
+     */
+    public function cancelar(Reserva $reserva)
+    {
+        // ownership check
+        if ($reserva->usuario_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Only allow cancel if not already completed/cancelled
+        if (in_array($reserva->estado, ['realizada', 'cancelada', 'no_asistio'])) {
+            return back()->with('error', 'No puedes cancelar esta reserva.');
+        }
+
+        // Optional: prevent cancellations within X hours (not applied by default)
+        // $limiteHoras = 2; // example
+        // if ($reserva->fecha->isToday() && now()->diffInHours($reserva->fecha) < $limiteHoras) { ... }
+
+        $reserva->estado = 'cancelada';
+        $reserva->actualizado_en = now();
+        $reserva->save();
+
+        // Log for debugging
+        Log::info('Reserva cancelada por cliente', ['reserva_id' => $reserva->id, 'usuario_id' => auth()->id()]);
+
+        // Notify admin(s) and the barbero assigned if exists
+        try {
+            $adminUsers = User::where('rol', 'admin')->get();
+            $notifiables = $adminUsers;
+            if ($reserva->barbero && $reserva->barbero->usuario_id) {
+                $empleado = User::find($reserva->barbero->usuario_id);
+                if ($empleado) {
+                    $notifiables->push($empleado);
+                }
+            }
+
+            Notification::send($notifiables, new ReservaCanceladaToStaff($reserva));
+        } catch (\Exception $e) {
+            Log::error('Error al notificar cancelacion de reserva: '.$e->getMessage());
+        }
+
+        return redirect()->route('cliente.reservas')->with('success', 'Reserva cancelada correctamente.');
     }
 
     public function ticket($id)

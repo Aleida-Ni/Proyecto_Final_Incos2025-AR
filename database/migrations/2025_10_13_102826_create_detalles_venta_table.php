@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('detalles_venta', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('venta_id');
-            $table->unsignedBigInteger('producto_id')->nullable();
-            $table->unsignedBigInteger('servicio_id')->nullable();
-            $table->integer('cantidad');
-            $table->decimal('precio_unitario', 10, 2);
-            $table->decimal('subtotal', 10, 2);
-            $table->timestamps();
-            
-            $table->foreign('venta_id')->references('id')->on('ventas')->onDelete('cascade');
-            $table->foreign('producto_id')->references('id')->on('productos')->onDelete('set null');
-            $table->foreign('servicio_id')->references('id')->on('servicios')->onDelete('set null');
-        });
+        if (! Schema::hasTable('detalles_venta')) {
+            Schema::create('detalles_venta', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('venta_id');
+                $table->unsignedBigInteger('producto_id')->nullable();
+                $table->unsignedBigInteger('servicio_id')->nullable();
+                $table->integer('cantidad');
+                $table->decimal('precio_unitario', 10, 2);
+                $table->decimal('subtotal', 10, 2);
+                $table->timestamps();
+                
+                $table->foreign('venta_id')->references('id')->on('ventas')->onDelete('cascade');
+                $table->foreign('producto_id')->references('id')->on('productos')->onDelete('set null');
+                $table->foreign('servicio_id')->references('id')->on('servicios')->onDelete('set null');
+            });
+        }
     }
 
     /**

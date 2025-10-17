@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('detalles_venta', function (Blueprint $table) {
-            $table->decimal('subtotal', 10, 2)->after('precio');
-        });
+        if (Schema::hasTable('detalles_venta') && ! Schema::hasColumn('detalles_venta', 'subtotal')) {
+            Schema::table('detalles_venta', function (Blueprint $table) {
+                $table->decimal('subtotal', 10, 2)->after('precio');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('detalles_venta', function (Blueprint $table) {
-            $table->dropColumn('subtotal');
-        });
+        if (Schema::hasTable('detalles_venta') && Schema::hasColumn('detalles_venta', 'subtotal')) {
+            Schema::table('detalles_venta', function (Blueprint $table) {
+                $table->dropColumn('subtotal');
+            });
+        }
     }
 };

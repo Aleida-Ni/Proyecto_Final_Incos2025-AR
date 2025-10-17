@@ -149,6 +149,8 @@
         </div>
     </div>
 </div>
+<!-- Contenedor oculto para pasar datos antiguos al script de forma segura -->
+<div id="old-servicios" style="display:none;" data-servicios='@json(old("servicios", []))'></div>
 @stop
 
 @section('js')
@@ -246,15 +248,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    @if(old('servicios'))
-        const serviciosViejos = {!! json_encode(old('servicios')) !!};
-        checkboxes.forEach(checkbox => {
-            if (serviciosViejos.includes(checkbox.value)) {
-                checkbox.checked = true;
+    // Cargar servicios previamente seleccionados (si los hay) usando un atributo data en el DOM
+    // (evita insertar Blade directamente dentro del script)
+    const oldServiciosEl = document.getElementById('old-servicios');
+    if (oldServiciosEl) {
+        try {
+            const serviciosViejos = JSON.parse(oldServiciosEl.dataset.servicios || '[]');
+            if (Array.isArray(serviciosViejos) && serviciosViejos.length > 0) {
+                const serviciosViejosStr = serviciosViejos.map(String);
+                checkboxes.forEach(checkbox => {
+                    if (serviciosViejosStr.includes(checkbox.value)) {
+                        checkbox.checked = true;
+                    }
+                });
+                actualizarResumen();
             }
-        });
-        actualizarResumen();
-    @endif
+        } catch (e) {
+            console.warn('No se pudo parsear servicios antiguos:', e);
+        }
+    }
 });
 </script>
 

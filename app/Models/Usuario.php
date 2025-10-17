@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Log;
 
 class Usuario extends Authenticatable implements MustVerifyEmail
 {
@@ -56,7 +57,12 @@ class Usuario extends Authenticatable implements MustVerifyEmail
 
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new \App\Notifications\VerifyEmailCustom);
+        try {
+            $this->notify(new \App\Notifications\VerifyEmailCustom);
+        } catch (\Exception $e) {
+            // Registrar el error y continuar para no bloquear el registro del usuario
+            Log::error('Error enviando email de verificación: '.$e->getMessage(), ['user_id' => $this->id ?? null]);
+        }
     }
 
     public function getEmailForVerification()

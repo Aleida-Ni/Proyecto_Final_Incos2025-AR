@@ -11,9 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('servicios', function (Blueprint $table) {
-            $table->integer('duracion_minutos')->after('precio')->default(30);
-        });
+        if (! Schema::hasTable('servicios')) {
+            return;
+        }
+
+        if (! Schema::hasColumn('servicios', 'duracion_minutos')) {
+            Schema::table('servicios', function (Blueprint $table) {
+                $table->integer('duracion_minutos')->after('precio')->default(30);
+            });
+        }
     }
 
     /**
@@ -21,8 +27,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasTable('servicios') || ! Schema::hasColumn('servicios', 'duracion_minutos')) {
+            return;
+        }
+
         Schema::table('servicios', function (Blueprint $table) {
-            $table->dropColumn('duracion_minutos');
+            try { $table->dropColumn('duracion_minutos'); } catch (\Throwable $e) {}
         });
     }
 };

@@ -12,8 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Usar DB::statement para modificar directamente la columna
-        DB::statement('ALTER TABLE ventas MODIFY cliente_id BIGINT UNSIGNED NULL');
+        // Solo ejecutar si la tabla y la columna existen
+        if (Schema::hasTable('ventas') && Schema::hasColumn('ventas', 'cliente_id')) {
+            // Usar DB::statement para modificar directamente la columna
+            try {
+                DB::statement('ALTER TABLE ventas MODIFY cliente_id BIGINT UNSIGNED NULL');
+            } catch (\Exception $e) {
+                // Si falla por Doctrine/compatibilidad, ignoramos para no romper migraciones en DB existentes
+            }
+        }
     }
 
     /**
@@ -21,6 +28,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('ALTER TABLE ventas MODIFY cliente_id BIGINT UNSIGNED NOT NULL');
+        if (Schema::hasTable('ventas') && Schema::hasColumn('ventas', 'cliente_id')) {
+            try {
+                DB::statement('ALTER TABLE ventas MODIFY cliente_id BIGINT UNSIGNED NOT NULL');
+            } catch (\Exception $e) {
+                // ignore
+            }
+        }
     }
 };

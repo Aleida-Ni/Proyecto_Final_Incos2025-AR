@@ -53,6 +53,36 @@ class Reserva extends Model
         return $this->hasMany(ServicioReserva::class);
     }
 
+    /**
+     * Relación directa a los modelos Servicio a través de la tabla pivot `servicio_reserva`.
+     * Conveniencia para obtener los modelos Servicio asociados a esta reserva.
+     */
+    public function serviciosModelos()
+    {
+        return $this->belongsToMany(Servicio::class, 'servicio_reserva', 'reserva_id', 'servicio_id')
+                    ->withPivot('precio')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Helper no destructivo para asociar (o actualizar) un servicio a la reserva.
+     * No elimina nada; solo attach/updateExistingPivot.
+     *
+     * @param  Servicio  $servicio
+     * @param  float|null  $precio
+     * @return void
+     */
+    public function attachServicio(Servicio $servicio, $precio = null)
+    {
+        $precioAUsar = $precio ?? $servicio->precio;
+
+        if ($this->serviciosModelos()->where('servicio_id', $servicio->id)->exists()) {
+            $this->serviciosModelos()->updateExistingPivot($servicio->id, ['precio' => $precioAUsar]);
+        } else {
+            $this->serviciosModelos()->attach($servicio->id, ['precio' => $precioAUsar]);
+        }
+    }
+
     // Relación directa con servicios a través de la tabla pivot
     public function serviciosDirectos()
     {

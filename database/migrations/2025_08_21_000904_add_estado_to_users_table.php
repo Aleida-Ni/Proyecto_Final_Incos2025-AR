@@ -11,16 +11,41 @@ return new class extends Migration
      */
 public function up()
 {
-    Schema::table('users', function (Blueprint $table) {
-        $table->boolean('estado')->default(0)->after('rol');
-    });
+    // Añadir la columna 'estado' de forma segura:
+    if (Schema::hasTable('users')) {
+        if (! Schema::hasColumn('users', 'estado')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('estado')->default(0)->after('rol');
+            });
+        }
+        return;
+    }
+
+    // Si la app usa 'usuarios' como tabla principal, aplicar ahí
+    if (Schema::hasTable('usuarios')) {
+        if (! Schema::hasColumn('usuarios', 'estado')) {
+            Schema::table('usuarios', function (Blueprint $table) {
+                $table->boolean('estado')->default(0)->after('rol');
+            });
+        }
+        return;
+    }
 }
 
 public function down()
 {
-    Schema::table('users', function (Blueprint $table) {
-        $table->dropColumn('estado');
-    });
+    if (Schema::hasTable('users') && Schema::hasColumn('users', 'estado')) {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('estado');
+        });
+        return;
+    }
+
+    if (Schema::hasTable('usuarios') && Schema::hasColumn('usuarios', 'estado')) {
+        Schema::table('usuarios', function (Blueprint $table) {
+            $table->dropColumn('estado');
+        });
+    }
 }
 
 };

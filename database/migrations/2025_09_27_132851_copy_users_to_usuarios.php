@@ -13,11 +13,17 @@ return new class extends Migration
      */
 public function up()
 {
-    DB::statement("
-        INSERT INTO usuarios (id, nombre, apellido_paterno, apellido_materno, correo, correo_verificado_en, contraseña, token_recordar, telefono, fecha_nacimiento, rol, estado, creado_en, actualizado_en)
-        SELECT id, nombre, apellido_paterno, apellido_materno, correo, correo_verificado_en, contrasenia, token_recordar, telefono, fecha_nacimiento, rol, estado, creado_en, actualizado_en
-        FROM users
-    ");
+    // Ejecutar la copia solo si existe la tabla 'users' y 'usuarios' está vacía
+    if (Schema::hasTable('users') && Schema::hasTable('usuarios')) {
+        $countUsuarios = DB::table('usuarios')->count();
+        if ($countUsuarios === 0) {
+            DB::statement(
+                "INSERT INTO usuarios (id, nombre, apellido_paterno, apellido_materno, correo, correo_verificado_en, contrasenia, token_recordar, telefono, fecha_nacimiento, rol, estado, creado_en, actualizado_en)
+                 SELECT id, nombre, apellido_paterno, apellido_materno, correo, correo_verificado_en, contrasenia, token_recordar, telefono, fecha_nacimiento, rol, estado, creado_en, actualizado_en
+                 FROM users"
+            );
+        }
+    }
 }
 
     /**

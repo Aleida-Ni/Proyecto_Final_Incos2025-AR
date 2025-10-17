@@ -33,4 +33,23 @@ public function serviciosReserva()
 {
     return $this->hasMany(ServicioReserva::class);
 }
+
+        /**
+         * Helper no destructivo para asociar este servicio a una reserva.
+         * Si ya existe la fila, actualiza el precio, si no, la crea.
+         *
+         * @param  Reserva  $reserva
+         * @param  float|null  $precio
+         * @return void
+         */
+        public function attachToReserva(Reserva $reserva, $precio = null)
+        {
+            $precioAUsar = $precio ?? $this->precio;
+
+            if ($reserva->serviciosModelos()->where('servicio_id', $this->id)->exists()) {
+                $reserva->serviciosModelos()->updateExistingPivot($this->id, ['precio' => $precioAUsar]);
+            } else {
+                $reserva->serviciosModelos()->attach($this->id, ['precio' => $precioAUsar]);
+            }
+        }
 }

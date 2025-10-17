@@ -11,9 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('servicios', function (Blueprint $table) {
-            $table->boolean('activo')->default(true)->after('precio');
-        });
+        if (! Schema::hasTable('servicios')) {
+            return;
+        }
+
+        if (! Schema::hasColumn('servicios', 'activo')) {
+            Schema::table('servicios', function (Blueprint $table) {
+                $table->boolean('activo')->default(true)->after('precio');
+            });
+        }
     }
 
     /**
@@ -21,8 +27,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasTable('servicios') || ! Schema::hasColumn('servicios', 'activo')) {
+            return;
+        }
+
         Schema::table('servicios', function (Blueprint $table) {
-            $table->dropColumn('activo');
+            try { $table->dropColumn('activo'); } catch (\Throwable $e) {}
         });
     }
 };

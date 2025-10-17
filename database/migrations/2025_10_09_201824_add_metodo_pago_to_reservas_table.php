@@ -8,17 +8,21 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('reservas', function (Blueprint $table) {
-            $table->enum('metodo_pago', ['efectivo', 'qr', 'transferencia'])
-                  ->nullable()
-                  ->after('estado');
-        });
+        if (Schema::hasTable('reservas') && ! Schema::hasColumn('reservas', 'metodo_pago')) {
+            Schema::table('reservas', function (Blueprint $table) {
+                $table->enum('metodo_pago', ['efectivo', 'qr', 'transferencia'])
+                      ->nullable()
+                      ->after('estado');
+            });
+        }
     }
 
     public function down()
     {
-        Schema::table('reservas', function (Blueprint $table) {
-            $table->dropColumn('metodo_pago');
-        });
+        if (Schema::hasTable('reservas') && Schema::hasColumn('reservas', 'metodo_pago')) {
+            Schema::table('reservas', function (Blueprint $table) {
+                $table->dropColumn('metodo_pago');
+            });
+        }
     }
 };

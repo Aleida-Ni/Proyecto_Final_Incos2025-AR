@@ -2,199 +2,160 @@
 
 @section('title', 'Lista de Barberos')
 
-@section('content')
-    <h1 class="text-center mb-4 text-dark">Lista de Barberos</h1>
-
-    <div class="table-container mx-auto">
-        <a href="{{ route('admin.barberos.create') }}" class="btn btn-custom mb-3">Agregar Barbero</a>
-
-        <table class="table custom-table">
-            <thead>
-                <tr>
-                    <th>Nombre Completo</th> 
-                    <th>Correo</th>
-                    <th>Teléfono</th>
-                    <th>Imagen</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($barberos as $barbero)
-                    <tr>
-                        <td>{{ $barbero->nombre_completo }}</td> 
-                        <td>{{ $barbero->correo }}</td>
-                        <td>{{ $barbero->telefono }}</td>
-                        <td>
-                            @if($barbero->imagen)
-                                <img src="{{ asset('storage/' . $barbero->imagen) }}" width="80" alt="Imagen del barbero">
-                            @else
-                                Sin imagen
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.barberos.edit', $barbero->id) }}" class="btn btn-sm btn-editar">Editar</a>
-
-                            <form action="{{ route('admin.barberos.destroy', $barbero->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-eliminar" onclick="return confirm('¿Seguro?')">Eliminar</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-0"><i class="fas fa-user-scissors text-gold"></i> Lista de Barberos</h1>
+        <a href="{{ route('admin.barberos.create') }}" class="btn btn-custom">
+            <i class="fas fa-plus"></i> Agregar Barbero
+        </a>
     </div>
-@endsection
+@stop
 
-@push('css')
-<style>
-.table-container {
-    background-color: #ffffff; 
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    border: 1px solid #e0e0e0;
-}
+@section('content')
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table custom-table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="70px">Imagen</th>
+                            <th>Nombre Completo</th> 
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th width="150px">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($barberos as $barbero)
+                            <tr>
+                                <td>
+                                    @if($barbero->imagen)
+                                        <img src="{{ asset('storage/' . $barbero->imagen) }}" 
+                                             class="img-square"
+                                             alt="Imagen de {{ $barbero->nombre_completo }}"
+                                             title="{{ $barbero->nombre_completo }}">
+                                    @else
+                                        <div class="img-placeholder" title="Sin imagen">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="font-weight-bold text-gris-oscuro">{{ $barbero->nombre_completo }}</td> 
+                                <td class="text-gris-medio">{{ $barbero->correo }}</td>
+                                <td class="text-gris-medio">{{ $barbero->telefono }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ route('admin.barberos.edit', $barbero->id) }}" 
+                                           class="btn btn-sm btn-editar" 
+                                           title="Editar barbero">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        <form action="{{ route('admin.barberos.destroy', $barbero->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-eliminar"
+                                                    onclick="return confirm('¿Estás seguro de eliminar este barbero?')"
+                                                    title="Eliminar barbero">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            
+            @if($barberos->isEmpty())
+                <div class="text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-beige-oscuro mb-3"></i>
+                    <h4 class="text-gris-medio">No hay barberos registrados</h4>
+                    <p class="text-muted">Comienza agregando tu primer barbero al equipo.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+@stop
 
-h1.text-dark {
-    color: #2c3e50; 
-    font-weight: 600;
-    letter-spacing: -0.5px;
-}
+@section('css')
+    <link rel="stylesheet" href="{{ asset('css/custom-adminlte.css') }}">
+    <style>
+        /* Estilos adicionales para imágenes cuadradas */
+        .img-square {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e8e4d5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
 
-.btn-custom {
-    background-color: #2c3e50; 
-    color: #fff;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+        .img-square:hover {
+            transform: scale(1.1);
+            border-color: #D4AF37;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
 
-.btn-custom:hover {
-    background-color: #34495e; 
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
+        .img-placeholder {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #F5F5DC 0%, #E8E4D5 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #F4E4A8;
+            color: #4A4A4A;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
 
-.custom-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
+        .img-placeholder:hover {
+            background: linear-gradient(135deg, #F4E4A8 0%, #F5F5DC 100%);
+            border-color: #D4AF37;
+            color: #D4AF37;
+            transform: scale(1.05);
+        }
 
-.custom-table thead {
-    background-color: #f8f9fa; 
-    border-bottom: 2px solid #e9ecef;
-}
+        /* Ajustes responsivos */
+        @media (max-width: 768px) {
+            .img-square, .img-placeholder {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .custom-table th:nth-child(1),
+            .custom-table td:nth-child(1) {
+                width: 60px;
+            }
+        }
+    </style>
+@stop
 
-.custom-table th {
-    font-weight: 600;
-    color: #495057;
-    padding: 14px 15px;
-    text-align: center;
-    vertical-align: middle;
-    border-bottom: 2px solid #e9ecef;
-}
+@section('js')
+    <script>
+        $(document).ready(function() {
+            // Efecto hover para las filas
+            $('.custom-table tbody tr').hover(
+                function() {
+                    $(this).addClass('shadow-sm');
+                    $(this).find('.img-square').css('transform', 'scale(1.05)');
+                },
+                function() {
+                    $(this).removeClass('shadow-sm');
+                    $(this).find('.img-square').css('transform', 'scale(1)');
+                }
+            );
 
-.custom-table td {
-    padding: 12px 15px;
-    text-align: center;
-    vertical-align: middle;
-    color: #6c757d;
-    border-bottom: 1px solid #f1f3f4;
-}
-
-.custom-table tbody tr {
-    transition: all 0.2s ease;
-}
-
-.custom-table tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.custom-table img {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    object-fit: cover;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.custom-table img:hover {
-    transform: scale(1.3);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-}
-
-.btn-editar, .btn-eliminar {
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.85rem;
-    margin: 2px;
-}
-
-.btn-editar {
-    background-color: #3498db;
-    color: white;
-    box-shadow: 0 1px 3px rgba(52, 152, 219, 0.3);
-}
-
-.btn-editar:hover {
-    background-color: #2980b9;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(52, 152, 219, 0.4);
-}
-
-.btn-eliminar {
-    background-color: #e74c3c;
-    color: white;
-    box-shadow: 0 1px 3px rgba(231, 76, 60, 0.3);
-}
-
-.btn-eliminar:hover {
-    background-color: #c0392b;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(231, 76, 60, 0.4);
-}
-
-@media (max-width: 768px) {
-    .table-container {
-        padding: 15px;
-    }
-    
-    .custom-table th, .custom-table td {
-        padding: 8px 10px;
-        font-size: 0.9rem;
-    }
-
-    .btn-custom {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-    }
-
-    .btn-editar, .btn-eliminar {
-        padding: 4px 8px;
-        font-size: 0.8rem;
-    }
-
-    .custom-table img {
-        width: 50px;
-        height: 50px;
-    }
-}
-</style>
-@endpush
+            // Tooltips para las imágenes
+            $('.img-square, .img-placeholder').tooltip({
+                trigger: 'hover',
+                placement: 'top'
+            });
+        });
+    </script>
+@stop

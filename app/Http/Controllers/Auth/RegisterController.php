@@ -31,10 +31,13 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        // Validación: cada palabra debe tener al menos 2 letras y longitud total 2..30
+        $nameRegex = '/^(?=.{2,30}$)(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,}(?:\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]{2,})*)$/u';
+
         return Validator::make($data, [
-            'nombre' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
-            'apellido_paterno' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
-            'apellido_materno' => ['required', 'regex:/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,30}$/'],
+            'nombre' => ['required', "regex:$nameRegex"],
+            'apellido_paterno' => ['required', "regex:$nameRegex"],
+            'apellido_materno' => ['required', "regex:$nameRegex"],
             'correo'            => ['required', 'string', 'email', 'max:255', 'unique:usuarios,correo'],
             'telefono'          => ['required', 'string', 'min:7', 'max:15'],
             'fecha_nacimiento'  => ['required', 'date'],
@@ -66,16 +69,36 @@ class RegisterController extends Controller
      */
 public function register(Request $request)
 {
-    $this->validator($request->all())->validate();
+        // Sanear entradas: trim y colapsar espacios en campos de nombre
+        $input = $request->all();
+        $nameFields = ['nombre', 'apellido_paterno', 'apellido_materno'];
+        foreach ($nameFields as $f) {
+            if (isset($input[$f]) && is_string($input[$f])) {
+                // trim y reemplazar múltiples espacios por uno
+                $clean = preg_replace('/\s+/u', ' ', trim($input[$f]));
+                $input[$f] = $clean;
+            }
+        }
 
-    $usuario = $this->create($request->all());
+        // También sanear correo y teléfono básicos
+        if (isset($input['correo']) && is_string($input['correo'])) {
+            $input['correo'] = trim(mb_strtolower($input['correo']));
+        }
+        if (isset($input['telefono']) && is_string($input['telefono'])) {
+            $input['telefono'] = trim($input['telefono']);
+        }
 
-    $usuario->sendEmailVerificationNotification();
+        // Validar sobre los datos saneados
+        $this->validator($input)->validate();
 
-    $this->guard()->login($usuario);
+        $usuario = $this->create($input);
 
-    return $this->registered($request, $usuario)
-        ?: redirect($this->redirectPath());
+        $usuario->sendEmailVerificationNotification();
+
+        $this->guard()->login($usuario);
+
+        return $this->registered($request, $usuario)
+            ?: redirect($this->redirectPath());
 }
 
 

@@ -1,245 +1,438 @@
 @extends('cliente.layout')
 
-@section('title', 'Reservar con ' . $barbero->nombre)
+@section('title', 'Reservar con ' . $barbero->nombre . ' - Barbería Elite')
 
 @push('css')
 <style>
-  body, .wrapper, .content-wrapper, .main-header, .main-sidebar, .content, .main-footer {
-    background-color: #000 !important;
-    color: #fff !important;
-  }
+    :root {
+        --color-blanco: #FFFFFF;
+        --color-negro: #000000;
+        --color-dorado: #D4AF37;
+        --color-dorado-claro: #F4E4A8;
+        --color-beige: #F5F5DC;
+        --color-beige-oscuro: #E8E4D5;
+        --color-gris-oscuro: #2C2C2C;
+        --color-gris-medio: #4A4A4A;
+    }
 
-  .card-custom {
-    background-color: #111;
-    border-radius: 12px;
-    padding: 20px;
-    color: #fff;
-  }
-  #selectorFecha {
-    background-color: #111 !important;
-    color: #fff !important;
-    border: 1px solid #dc3545;
-    border-radius: 5px;
-    padding: 6px 12px;
-}
+    body {
+        background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-blanco) 100%) !important;
+    }
 
-  .barbero-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 12px;
-    border: 2px solid #0d6efd; /* azul */
-  }
+    .card-custom {
+        background: linear-gradient(135deg, var(--color-blanco) 0%, var(--color-beige) 100%);
+        border-radius: 20px;
+        border: 2px solid var(--color-dorado);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    }
 
-  .hora-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 columnas para cuadrados */
-    gap: 10px;
-  }
+    .barbero-img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 15px;
+        border: 3px solid var(--color-dorado);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
 
-  .hora-disponible,
-  .hora-no-disponible {
-    width: 100%;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    border-radius: 6px;
-    font-size: 13px;
-    user-select: none;
-    text-align: center;
-  }
+    .hora-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 12px;
+        margin: 20px 0;
+    }
 
-  .hora-disponible {
-    border: 2px solid #0d6efd;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color .2s, transform .2s;
-  }
+    .hora-disponible,
+    .hora-no-disponible {
+        width: 100%;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        border-radius: 10px;
+        font-size: 14px;
+        user-select: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid;
+    }
 
-  .hora-disponible:hover,
-  .hora-disponible.selected {
-    background-color: #0d6efd;
-    transform: scale(1.05);
-  }
+    .hora-disponible {
+        border-color: var(--color-dorado);
+        color: var(--color-gris-oscuro);
+        background: var(--color-blanco);
+    }
 
-  .hora-no-disponible {
-    background-color: #330000;
-    border: 2px solid #ff0000;
-    color: #fff;
-    cursor: not-allowed;
-  }
+    .hora-disponible:hover,
+    .hora-disponible.selected {
+        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
+        color: var(--color-negro);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    }
 
-  .btn-confirmar {
-    background-color: #dc3545;
-    color: #fff;
-    padding: 10px 30px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-  }
+    .hora-no-disponible {
+        background: linear-gradient(135deg, var(--color-beige-oscuro) 0%, var(--color-beige) 100%);
+        border-color: var(--color-gris-medio);
+        color: var(--color-gris-medio);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 
-  .btn-elegir-dia {
-    border: 1px solid #dc3545;
-    color: #fff;
-    background-color: transparent;
-    border-radius: 5px;
-    padding: 6px 12px;
-  }
+    .btn-confirmar {
+        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
+        color: var(--color-negro);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        font-size: 18px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    }
 
-  .modal-content {
-    background-color: #111;
-    color: #fff;
-  }
+    .btn-confirmar:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+    }
 
-  label, .form-control {
-    color: #fff !important;
-  }
+    .btn-elegir-dia {
+        background: transparent;
+        border: 2px solid var(--color-dorado);
+        color: var(--color-gris-oscuro);
+        border-radius: 20px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-elegir-dia:hover {
+        background: var(--color-dorado);
+        color: var(--color-negro);
+    }
+
+    .fecha-seleccionada {
+        background: linear-gradient(135deg, var(--color-dorado-claro) 0%, var(--color-beige) 100%);
+        border-radius: 15px;
+        padding: 15px;
+        border: 2px solid var(--color-dorado);
+    }
+
+    #selectorFecha {
+        background: var(--color-blanco);
+        border: 2px solid var(--color-dorado);
+        border-radius: 10px;
+        padding: 12px;
+        color: var(--color-gris-oscuro);
+        font-weight: 600;
+    }
+
+    #selectorFecha:focus {
+        box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+        border-color: var(--color-dorado);
+    }
+
+    .modal-content {
+        background: linear-gradient(135deg, var(--color-blanco) 0%, var(--color-beige) 100%);
+        border-radius: 20px;
+        border: 2px solid var(--color-dorado);
+    }
+
+    .barbero-info {
+        text-align: center;
+    }
+
+    .barbero-nombre {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-gris-oscuro);
+        margin: 15px 0 5px;
+    }
+
+    .barbero-cargo {
+        color: var(--color-dorado);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid p-4">
-  <div class="card card-custom mx-auto" style="max-width:1000px;">
-    <h3 class="text-center mb-4">Reservar con {{ $barbero->nombre }}</h3>
+    <div class="card card-custom mx-auto" style="max-width: 1000px;">
+        <div class="card-body p-5">
+            <h2 class="text-center mb-4 fw-bold text-gris-oscuro">
+                <i class="fas fa-calendar-plus me-2"></i>Reservar con {{ $barbero->nombre }}
+            </h2>
 
-    <div class="row">
-      <div class="col-md-4 text-center">
-        <img src="{{ asset('storage/' . $barbero->imagen) }}" 
-             alt="Foto de {{ $barbero->nombre }}" 
-             class="barbero-img mb-3">
-        <h4 class="text-white mt-2">{{ $barbero->nombre }}</h4>
-        <p class="text-muted">{{ $barbero->cargo }}</p>
-      </div>
+            <div class="row align-items-stretch">
+                <!-- Información del Barbero -->
+                <div class="col-md-4 text-center">
+                    <div class="barbero-info">
+                        <img src="{{ asset('storage/' . $barbero->imagen) }}" 
+                             alt="Foto de {{ $barbero->nombre }}" 
+                             class="barbero-img mb-4">
+                        <h3 class="barbero-nombre">{{ $barbero->nombre }}</h3>
+                        <p class="barbero-cargo">{{ $barbero->cargo }}</p>
+                        @if($barbero->telefono)
+                        <p class="text-gris-medio">
+                            <i class="fas fa-phone me-2"></i>{{ $barbero->telefono }}
+                        </p>
+                        @endif
+                    </div>
+                </div>
 
-      <div class="col-md-8">
-        <form action="{{ route('cliente.reservar.store') }}" method="POST" id="formReserva">
-          @csrf
-          <input type="hidden" name="barbero_id" value="{{ $barbero->id }}">
-          <input type="hidden" name="fecha" id="fechaInput" value="{{ $fecha }}">
-          <input type="hidden" name="hora" id="horaInput">
+                <!-- Formulario de Reserva -->
+                <div class="col-md-8">
+                    <form action="{{ route('cliente.reservar.store') }}" method="POST" id="formReserva">
+                        @csrf
+                        <input type="hidden" name="barbero_id" value="{{ $barbero->id }}">
+                        <input type="hidden" name="fecha" id="fechaInput" value="{{ $fecha }}">
+                        <input type="hidden" name="hora" id="horaInput">
 
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <div><strong>Fecha seleccionada:</strong> <span id="fechaSeleccionada">{{ $fecha }}</span></div>
-            <button type="button" class="btn btn-elegir-dia" data-bs-toggle="modal" data-bs-target="#modalFecha">
-              Elegir Día
-            </button>
-          </div>
+                        <!-- Selector de Fecha -->
+                        <div class="fecha-seleccionada mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="text-gris-oscuro">Fecha seleccionada:</strong>
+                                    <div id="fechaSeleccionada" class="fw-bold text-dorado">{{ $fecha }}</div>
+                                </div>
+                                <button type="button" class="btn btn-elegir-dia" data-bs-toggle="modal" data-bs-target="#modalFecha">
+                                    <i class="fas fa-calendar-alt me-2"></i>Cambiar Día
+                                </button>
+                            </div>
+                        </div>
 
-          @if($errors->has('hora'))
-          <div class="text-danger text-center mb-3">{{ $errors->first('hora') }}</div>
-          @endif
+                        @if($errors->has('hora'))
+                        <div class="alert alert-danger text-center mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>{{ $errors->first('hora') }}
+                        </div>
+                        @endif
 
-          <div class="hora-grid mb-4">
-            @foreach($horas as $hora => $disponible)
-              @if($disponible)
-                <label class="hora-disponible">
-                  <input type="radio" name="horaRadio" value="{{ $hora }}" hidden>
-                  {{ $hora }}
-                </label>
-              @else
-                <div class="hora-no-disponible">Hora no disponible<br>{{ $hora }}</div>
-              @endif
-            @endforeach
-          </div>
+                        <!-- Selector de Horas -->
+                        <h5 class="text-gris-oscuro mb-3">
+                            <i class="fas fa-clock me-2"></i>Selecciona una hora disponible:
+                        </h5>
+                        <div class="hora-grid">
+                            @foreach($horas as $hora => $disponible)
+                                @if($disponible)
+                                    <label class="hora-disponible">
+                                        <input type="radio" name="horaRadio" value="{{ $hora }}" hidden>
+                                        {{ $hora }}
+                                    </label>
+                                @else
+                                    <div class="hora-no-disponible" title="Hora no disponible">
+                                        {{ $hora }}
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
 
-          <div class="text-center">
-            <button type="button" class="btn-confirmar" id="btnConfirmar">Confirmar Reserva</button>
-          </div>
-        </form>
-      </div>
+                        <!-- Botón de Confirmación -->
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn-confirmar" id="btnConfirmar">
+                                <i class="fas fa-calendar-check me-2"></i>Confirmar Reserva
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <!-- Modal Fecha -->
-  <div class="modal fade" id="modalFecha" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-      <div class="modal-content bg-dark text-white">
-        <div class="modal-header border-0">
-          <h5 class="modal-title">Seleccionar Fecha</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <input type="date" id="selectorFecha" class="form-control" min="{{ date('Y-m-d') }}" value="{{ $fecha }}">
-        </div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-danger" onclick="setFecha()">Confirmar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Ticket -->
-  <div class="modal fade" id="modalTicket" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content bg-dark text-white">
-        <div class="modal-header">
-          <h5 class="modal-title">Ticket de Reserva</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body" id="ticket-content">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" onclick="window.print()">Imprimir</button>
-          <button type="button" class="btn btn-primary" id="confirmarTicket">Confirmar</button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
-@endsection
 
-@push('js')
+<!-- Modal Fecha -->
+<div class="modal fade" id="modalFecha" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dorado">
+                <h5 class="modal-title text-negro fw-bold">
+                    <i class="fas fa-calendar me-2"></i>Seleccionar Fecha
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <label for="selectorFecha" class="form-label fw-semibold text-gris-oscuro mb-3">
+                    Elige la fecha para tu reserva:
+                </label>
+                <input type="date" id="selectorFecha" class="form-control" 
+                       min="{{ date('Y-m-d') }}" value="{{ $fecha }}">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-custom" onclick="setFecha()">
+                    <i class="fas fa-check me-1"></i>Confirmar Fecha
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ticket -->
+<div class="modal fade" id="modalTicket" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dorado">
+                <h5 class="modal-title text-negro fw-bold">
+                    <i class="fas fa-ticket-alt me-2"></i>Confirmar Reserva
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="ticket-content" class="ticket-confirmacion">
+                    <!-- Contenido dinámico del ticket -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-custom" data-bs-dismiss="modal">
+                    <i class="fas fa-arrow-left me-1"></i>Volver
+                </button>
+                <button type="button" class="btn btn-custom" id="confirmarTicket">
+                    <i class="fas fa-check-circle me-1"></i>Confirmar Reserva
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function setFecha() {
-  const valor = document.getElementById('selectorFecha').value;
-  if(valor) {
-    const barberoId = "{{ $barbero->id }}";
-    window.location.href = `/cliente/reservar/${barberoId}?fecha=${valor}`;
-  } else {
-    alert("Selecciona una fecha válida.");
-  }
+    const valor = document.getElementById('selectorFecha').value;
+    if(valor) {
+        const barberoId = "{{ $barbero->id }}";
+        window.location.href = `/cliente/reservar/${barberoId}?fecha=${valor}`;
+    } else {
+        alert("Por favor selecciona una fecha válida.");
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
-  const horaInputs = document.querySelectorAll('.hora-disponible input[type=radio]');
-  const horaInputHidden = document.getElementById('horaInput');
-
-  document.querySelectorAll('.hora-disponible').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.hora-disponible').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      btn.querySelector('input[type=radio]').checked = true;
+    // Selección de horas
+    document.querySelectorAll('.hora-disponible').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.hora-disponible').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            btn.querySelector('input[type=radio]').checked = true;
+        });
     });
-  });
 
-  document.getElementById('btnConfirmar').addEventListener('click', () => {
-    const selected = document.querySelector('input[name="horaRadio"]:checked');
-    if(!selected) return alert("Por favor selecciona una hora disponible.");
+    // Confirmación de reserva
+    document.getElementById('btnConfirmar').addEventListener('click', () => {
+        const selected = document.querySelector('input[name="horaRadio"]:checked');
+        if(!selected) {
+            alert("Por favor selecciona una hora disponible.");
+            return;
+        }
 
-    horaInputHidden.value = selected.value;
+        document.getElementById('horaInput').value = selected.value;
 
-    const ticketContent = document.getElementById('ticket-content');
-    ticketContent.innerHTML = `
-      <h3>Ticket de Reserva</h3>
-      <p><strong>Barbero:</strong> {{ $barbero->nombre }}</p>
-      <p><strong>Fecha:</strong> ${document.getElementById('fechaInput').value}</p>
-      <p><strong>Hora:</strong> ${selected.value}</p>
-      <p><strong>Cliente:</strong> {{ auth()->user()->nombre }} {{ auth()->user()->apellido_paterno }}</p>
-    `;
+        // Generar contenido del ticket
+        const ticketContent = document.getElementById('ticket-content');
+        ticketContent.innerHTML = `
+            <div class="text-center mb-4">
+                <h4 class="text-gris-oscuro fw-bold">BARBERÍA ELITE</h4>
+                <p class="text-gris-medio">Reserva de Cita</p>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong class="text-gris-oscuro">Barbero:</strong><br>
+                    {{ $barbero->nombre }}
+                </div>
+                <div class="col-md-6 text-end">
+                    <strong class="text-gris-oscuro">Especialidad:</strong><br>
+                    {{ $barbero->cargo ?? 'Barbería Premium' }}
+                </div>
+            </div>
 
-    const modalTicket = new bootstrap.Modal(document.getElementById('modalTicket'));
-    modalTicket.show();
-  });
+            <div class="reserva-detalle bg-beige p-3 rounded mb-3">
+                <div class="row text-center">
+                    <div class="col-md-6 mb-2">
+                        <strong class="text-gris-oscuro">Fecha</strong><br>
+                        <span class="fw-bold text-dorado">${document.getElementById('fechaInput').value}</span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <strong class="text-gris-oscuro">Hora</strong><br>
+                        <span class="fw-bold text-dorado">${selected.value}</span>
+                    </div>
+                </div>
+            </div>
 
-  document.getElementById('confirmarTicket').addEventListener('click', () => {
-    document.getElementById('formReserva').submit();
-  });
+            <div class="cliente-info">
+                <strong class="text-gris-oscuro">Cliente:</strong><br>
+                {{ auth()->user()->nombre }} {{ auth()->user()->apellido_paterno }}
+            </div>
 
-  document.querySelectorAll('.hora-no-disponible').forEach(btn => {
-    btn.addEventListener('click', () => { alert('Esta hora ya ha sido reservada. Por favor, elige otra.'); });
-  });
+            <div class="alert alert-info mt-3 mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Por favor llega 5 minutos antes de tu cita programada.
+            </div>
+        `;
+
+        // Mostrar modal de confirmación
+        const modalTicket = new bootstrap.Modal(document.getElementById('modalTicket'));
+        modalTicket.show();
+    });
+
+    // Confirmar reserva final
+    document.getElementById('confirmarTicket').addEventListener('click', () => {
+        document.getElementById('formReserva').submit();
+    });
+
+    // Efecto en horas no disponibles
+    document.querySelectorAll('.hora-no-disponible').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 150);
+        });
+    });
 });
 </script>
-@endpush
+
+<style>
+    .bg-dorado {
+        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%) !important;
+    }
+
+    .text-negro {
+        color: var(--color-negro) !important;
+    }
+
+    .btn-custom {
+        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
+        color: var(--color-negro);
+        border: none;
+        border-radius: 20px;
+        padding: 10px 25px;
+        font-weight: 600;
+    }
+
+    .btn-outline-custom {
+        border: 2px solid var(--color-dorado);
+        color: var(--color-dorado);
+        background: transparent;
+        border-radius: 20px;
+        padding: 10px 25px;
+        font-weight: 600;
+    }
+
+    .ticket-confirmacion {
+        background: var(--color-blanco);
+        border-radius: 15px;
+        padding: 20px;
+        border: 2px solid var(--color-dorado);
+    }
+
+    .reserva-detalle {
+        border-left: 4px solid var(--color-dorado);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@endsection

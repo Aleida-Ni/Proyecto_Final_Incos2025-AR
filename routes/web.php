@@ -199,6 +199,9 @@ Route::middleware(['auth', 'verified'])
         Route::post('/reservas/{reserva}/cancelar', [ClienteReservaController::class, 'cancelar'])
             ->name('reservas.cancelar')
             ->whereNumber('reserva');
-
+Route::post('/limpiar-sesion-ticket', function() {
+    session()->forget('reserva_creada');
+    return response()->json(['success' => true]);
+})->name('limpiar.sesion.ticket');
 });
 

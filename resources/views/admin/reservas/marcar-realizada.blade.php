@@ -3,155 +3,237 @@
 @section('title', 'Completar Reserva')
 
 @section('content_header')
-<div class="d-flex justify-content-between align-items-center">
-    <h1>Completar Reserva #{{ $reserva->id }}</h1>
-    <a href="{{ route('admin.reservas.index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-0"><i class="fas fa-check-circle text-gold"></i> Completar Reserva #{{ $reserva->id }}</h1>
+        <a href="{{ route('admin.reservas.index') }}" class="btn btn-outline-custom">
+            <i class="fas fa-arrow-left mr-2"></i> Volver
+        </a>
+    </div>
 @stop
 
 @section('content')
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Información de la Reserva</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong>Cliente:</strong> {{ $reserva->cliente->nombre ?? 'N/A' }}<br>
-                        <strong>Teléfono:</strong> {{ $reserva->cliente->telefono ?? 'N/A' }}<br>
-                        <strong>Barbero:</strong> {{ $reserva->barbero->nombre ?? 'N/A' }}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Fecha:</strong> {{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}<br>
-                        <strong>Hora:</strong> {{ $reserva->hora }}<br>
-                        <strong>Estado:</strong> <span class="badge bg-warning">Pendiente</span>
-                    </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-lg custom-card">
+                <div class="card-header custom-card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-info-circle mr-2"></i>Información de la Reserva</h5>
                 </div>
-            </div>
-        </div>
-
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="card-title">Servicios Realizados</h5>
-            </div>
-            <div class="card-body">
-                @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle"></i> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                @endif
-
-                @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-
-                <form action="{{ route('admin.reservas.completar', $reserva) }}" method="POST" id="completarForm">
-                    @csrf
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Seleccionar Servicios:</label>
-                        <div class="row">
-                            @foreach($servicios as $servicio)
-                            <div class="col-md-6 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input servicio-checkbox" 
-                                           type="checkbox" 
-                                           name="servicios[]" 
-                                           value="{{ $servicio->id }}"
-                                           data-precio="{{ $servicio->precio }}"
-                                           id="servicio{{ $servicio->id }}">
-                                    <label class="form-check-label" for="servicio{{ $servicio->id }}">
-                                        <strong>{{ $servicio->nombre }}</strong><br>
-                                        <small class="text-muted">
-                                            {{ $servicio->descripcion }} | 
-                                            ${{ number_format($servicio->precio, 2) }} | 
-                                            {{ $servicio->duracion_minutos }} min
-                                        </small>
-                                    </label>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Método de Pago:</label>
-                                    <select name="metodo_pago" class="form-select" required>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-user text-dorado mr-2"></i>Cliente:</strong> 
+                                {{ $reserva->cliente->nombre ?? 'N/A' }}
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-phone text-dorado mr-2"></i>Teléfono:</strong> 
+                                {{ $reserva->cliente->telefono ?? 'N/A' }}
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-user-shield text-dorado mr-2"></i>Barbero:</strong> 
+                                {{ $reserva->barbero->nombre ?? 'N/A' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-calendar text-dorado mr-2"></i>Fecha:</strong> 
+                                {{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-clock text-dorado mr-2"></i>Hora:</strong> 
+                                {{ $reserva->hora }}
+                            </div>
+                            <div class="info-item mb-3">
+                                <strong><i class="fas fa-tag text-dorado mr-2"></i>Estado:</strong> 
+                                <span class="badge bg-warning">Pendiente</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-lg custom-card mt-4">
+                <div class="card-header custom-card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-concierge-bell mr-2"></i>Servicios Realizados</h5>
+                </div>
+                <div class="card-body">
+                    @if(session('error'))
+                    <div class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    @endif
+
+                    @if($errors->any())
+                    <div class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Por favor corrige los siguientes errores:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('admin.reservas.completar', $reserva) }}" method="POST" id="completarForm">
+                        @csrf
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label custom-label">
+                                <i class="fas fa-list-check text-dorado mr-2"></i>Seleccionar Servicios:
+                            </label>
+                            <div class="row">
+                                @foreach($servicios as $servicio)
+                                <div class="col-md-6 mb-3">
+                                    <div class="service-card">
+                                        <div class="form-check">
+                                            <input class="form-check-input servicio-checkbox" 
+                                                   type="checkbox" 
+                                                   name="servicios[]" 
+                                                   value="{{ $servicio->id }}"
+                                                   data-precio="{{ $servicio->precio }}"
+                                                   id="servicio{{ $servicio->id }}">
+                                            <label class="form-check-label w-100" for="servicio{{ $servicio->id }}">
+                                                <div class="service-info">
+                                                    <strong class="text-gris-oscuro">{{ $servicio->nombre }}</strong>
+                                                    <div class="service-details text-gris-medio">
+                                                        <small>
+                                                            <i class="fas fa-clock"></i> {{ $servicio->duracion_minutos }} min • 
+                                                            <i class="fas fa-dollar-sign"></i> ${{ number_format($servicio->precio, 2) }}
+                                                        </small>
+                                                    </div>
+                                                    @if($servicio->descripcion)
+                                                    <div class="service-description">
+                                                        <small class="text-muted">{{ $servicio->descripcion }}</small>
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="form-label custom-label">
+                                        <i class="fas fa-credit-card text-dorado mr-2"></i>Método de Pago:
+                                    </label>
+                                    <select name="metodo_pago" class="form-control custom-input" required>
                                         <option value="">Seleccionar método...</option>
                                         <option value="efectivo">Efectivo</option>
                                         <option value="qr">QR</option>
                                     </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Monto Total:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" 
-                                           name="monto_total" 
-                                           class="form-control" 
-                                           id="montoTotal"
-                                           step="0.01" 
-                                           min="0" 
-                                           required
-                                           readonly>
                                 </div>
-                                <small class="text-muted">Monto calculado automáticamente</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="form-label custom-label">
+                                        <i class="fas fa-calculator text-dorado mr-2"></i>Monto Total:
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-beige text-gris-oscuro">$</span>
+                                        <input type="number" 
+                                               name="monto_total" 
+                                               class="form-control custom-input" 
+                                               id="montoTotal"
+                                               step="0.01" 
+                                               min="0" 
+                                               required
+                                               readonly>
+                                    </div>
+                                    <small class="text-muted">Monto calculado automáticamente</small>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Observaciones:</label>
-                        <textarea name="observaciones" class="form-control" rows="3" 
-                                  placeholder="Observaciones adicionales..."></textarea>
-                    </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-check-circle"></i> Confirmar y Completar Reserva
-                        </button>
-                    </div>
-                </form>
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-custom btn-lg px-5">
+                                <i class="fas fa-check-circle mr-2"></i> Confirmar y Completar Reserva
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Resumen</h5>
-            </div>
-            <div class="card-body">
-                <div id="resumenServicios">
-                    <p class="text-muted">Selecciona los servicios realizados</p>
+        <div class="col-lg-4">
+            <div class="card shadow-lg custom-card">
+                <div class="card-header custom-card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-receipt mr-2"></i>Resumen</h5>
                 </div>
-                <hr>
-                <div class="d-flex justify-content-between">
-                    <strong>Total:</strong>
-                    <strong id="totalResumen">$0.00</strong>
+                <div class="card-body">
+                    <div id="resumenServicios">
+                        <p class="text-muted text-center">Selecciona los servicios realizados</p>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="text-gris-oscuro">Total:</strong>
+                        <strong class="text-success h5" id="totalResumen">$0.00</strong>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Contenedor oculto para pasar datos antiguos al script de forma segura -->
 <div id="old-servicios" style="display:none;" data-servicios='@json(old("servicios", []))'></div>
-@stop
+@endsection
+
+@section('css')
+<style>
+/* Estilos específicos para completar reserva */
+.service-card {
+    border: 1px solid var(--color-beige-oscuro);
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    background: var(--color-blanco);
+}
+
+.service-card:hover {
+    border-color: var(--color-dorado);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+    transform: translateY(-2px);
+}
+
+.service-card .form-check-input:checked + .form-check-label .service-info {
+    color: var(--color-dorado);
+}
+
+.service-info {
+    cursor: pointer;
+}
+
+.service-details {
+    margin-top: 5px;
+}
+
+.service-description {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-beige);
+}
+
+.info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-beige);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+</style>
+@endsection
 
 @section('js')
 <script>
@@ -186,14 +268,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (serviciosSeleccionados.length > 0) {
             let html = '';
             serviciosSeleccionados.forEach(servicio => {
-                html += `<div class="d-flex justify-content-between mb-1">
-                    <span class="small">${servicio.nombre}</span>
-                    <span class="small">$${servicio.precio.toFixed(2)}</span>
+                html += `<div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-gris-oscuro">${servicio.nombre}</span>
+                    <span class="text-success">$${servicio.precio.toFixed(2)}</span>
                 </div>`;
             });
             resumenServicios.innerHTML = html;
         } else {
-            resumenServicios.innerHTML = '<p class="text-muted">Selecciona los servicios realizados</p>';
+            resumenServicios.innerHTML = '<p class="text-muted text-center">Selecciona los servicios realizados</p>';
         }
     }
 
@@ -225,21 +307,27 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Procesando...';
         submitBtn.disabled = true;
     });
 
     function mostrarAlerta(mensaje, tipo = 'danger') {
+        // Remover alertas existentes
+        const alertasExistentes = document.querySelectorAll('.alert.alert-custom');
+        alertasExistentes.forEach(alerta => alerta.remove());
+
         const alerta = document.createElement('div');
-        alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+        alerta.className = `alert alert-${tipo} alert-custom alert-dismissible`;
         alerta.innerHTML = `
-            <i class="fas fa-${tipo === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i> 
+            <i class="fas fa-${tipo === 'danger' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i> 
             ${mensaje}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
         `;
         
-        const content = document.querySelector('.content');
-        content.insertBefore(alerta, content.firstChild);
+        const cardBody = document.querySelector('.card-body');
+        cardBody.insertBefore(alerta, cardBody.firstChild);
         
         setTimeout(() => {
             if (alerta.parentNode) {
@@ -248,8 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    // Cargar servicios previamente seleccionados (si los hay) usando un atributo data en el DOM
-    // (evita insertar Blade directamente dentro del script)
+    // Cargar servicios previamente seleccionados
     const oldServiciosEl = document.getElementById('old-servicios');
     if (oldServiciosEl) {
         try {
@@ -269,6 +356,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-@stop
+@endsection

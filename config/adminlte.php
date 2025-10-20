@@ -301,146 +301,138 @@ return [
     |
     */
 
-    'menu' => [
+ 'menu' => [
+    // Navbar superior
+    [
+        'text' => '',
+        'icon' => 'fas fa-search',
+        'url' => '#',
+        'topnav_right' => true,
+    ],
 
-        // Navbar superior
-        [
-            'text' => '',
-            'icon' => 'fas fa-search',
-            'url' => '#',
-            'topnav_right' => true, // si quieres que aparezca en la barra superior
-            // puedes agregar un evento JavaScript para abrir un modal de búsqueda si deseas
-        ],
+    [
+        'type' => 'fullscreen-widget',
+        'topnav_right' => true,
+    ],
 
-        [
-            'type' => 'fullscreen-widget',
-            'topnav_right' => true,
-        ],
-
-        ['header' => 'ADMINISTRADOR', 'can' => 'menu-admin'],
-        [
-            'text' => 'Inicio',
-            'route'  => 'admin.dashboard',
-            'icon' => 'fas fa-home',
-            'can' => 'menu-admin',
-        ],
-        [
-            'text' => 'Barberos',
-            'route'  => 'admin.barberos.index',
-            'icon' => 'fas fa-user-scissors',
-            'can' => 'menu-admin',
-        ],
-        [
-            'text' => 'Productos',
-            'route'  => 'admin.productos.index',
-            'icon' => 'fas fa-boxes',
-            'can' => 'menu-admin',
-        ],
-        [
-            'text' => 'Empleados',
-            'route'  => 'admin.empleados.index',
-            'icon' => '',
-            'can' => 'menu-admin',
-        ],
-                [
-            'text' => 'Reservas',
-            'route'  => 'admin.reservas.index',
-            'icon' => '',
-            'can' => 'menu-admin',
-        ],
-                                        [
-            'text' => 'Registrar ventas',
-            'route'  => 'admin.ventas.index',
-            'icon' => '',
-            'can' => 'menu-admin',
-        ],
-        [
-            'text' => 'Reportes',
-            'icon' => 'fas fa-chart-line',
-            'can'  => 'menu-admin',
-            'submenu' => [
-                [
-                    'text'  => 'Reservas',
-                    'route' => 'admin.reportes.reservas',
-                    'icon'  => 'fas fa-calendar-check',
-                    'can'   => 'menu-admin',
-                ],
-                [
-                    'text'  => 'Ventas',
-                    'route' => 'admin.reportes.ventas',
-                    'icon'  => 'fas fa-cash-register',
-                    'can'   => 'menu-admin',
-                ],
+    ['header' => 'ADMINISTRADOR', 'can' => 'menu-admin'],
+    [
+        'text' => 'Inicio',
+        'route'  => 'admin.dashboard',
+        'icon' => 'fas fa-home',
+        'can' => 'menu-admin',
+    ],
+    [
+        'text' => 'Barberos',
+        'route'  => 'admin.barberos.index',
+        'icon' => 'fas fa-cut',
+        'can' => 'menu-admin',
+    ],
+    [
+        'text' => 'Productos',
+        'route'  => 'admin.productos.index',
+        'icon' => 'fas fa-boxes',
+        'can' => 'menu-admin',
+    ],
+    [
+        'text' => 'Empleados',
+        'route'  => 'admin.empleados.index',
+        'icon' => 'fas fa-users',
+        'can' => 'menu-admin',
+    ],
+    [
+        'text' => 'Reservas',
+        'route'  => 'admin.reservas.index',
+        'icon' => 'fas fa-calendar-check',
+        'can' => 'menu-admin',
+    ],
+    [
+        'text' => 'Registrar ventas',
+        'route'  => 'admin.ventas.index',
+        'icon' => 'fas fa-cash-register',
+        'can' => 'menu-admin',
+    ],
+    [
+        'text' => 'Reportes',
+        'icon' => 'fas fa-chart-line',
+        'can'  => 'menu-admin',
+        'submenu' => [
+            [
+                'text'  => 'Reservas',
+                'route' => 'admin.reportes.reservas',
+                'icon'  => 'fas fa-calendar-check',
+                'can'   => 'menu-admin',
             ],
-        ],
-
-
-
-        // ===================== EMPLEADO =====================
-        ['header' => 'EMPLEADO', 'can' => 'menu-empleado'],
-        [
-            'text' => 'Inicio',
-            'route'  => 'empleado.dashboard',
-            'icon' => 'fas fa-home',
-            'can' => 'menu-empleado',
-        ],
-        [
-            'text' => 'Barberos',
-            'route'  => 'empleado.barberos.index',
-            'icon' => 'fas fa-user-scissors',
-            'can' => 'menu-empleado',
-        ],
-        [
-            'text' => 'Productos',
-            'route'  => 'empleado.productos.index',
-            'icon' => 'fas fa-boxes',
-            'can' => 'menu-empleado',
-        ],
-                        [
-            'text' => 'Reservas',
-            'route'  => 'admin.reservas.index',
-            'icon' => '',
-            'can' => 'menu-empleado',
-        ],
-                                [
-            'text' => 'Registrar ventas',
-            'route'  => 'admin.ventas.index',
-            'icon' => '',
-            'can' => 'menu-empleado',
-        ],
-        [
-            'text' => 'Reportes',
-            'icon' => 'fas fa-chart-line',
-            'can'  => 'menu-empleado',
-            'submenu' => [
-                [
-                    'text'  => 'Reservas',
-                    'route' => 'admin.reportes.reservas',
-                    'icon'  => 'fas fa-calendar-check',
-                    'can'   => 'menu-empleado',
-                ],
-                [
-                    'text'  => 'Ventas',
-                    'route' => 'admin.reportes.ventas',
-                    'icon'  => 'fas fa-cash-register',
-                    'can'   => 'menu-empleado',
-                ],
+            [
+                'text'  => 'Ventas',
+                'route' => 'admin.reportes.ventas',
+                'icon'  => 'fas fa-cash-register',
+                'can'   => 'menu-admin',
             ],
-        ],
-
-
-
-
-
-        // ===================== OPCIONES COMUNES =====================
-        ['header' => 'AJUSTES DE CUENTA'],
-        [
-            'text' => 'Perfil',
-            'route'  => 'admin.settings',
-            'icon' => 'fas fa-fw fa-user',
-            'can' => fn() => auth()->check(), // Si quieres que todos vean perfil al menos que estén logueados
         ],
     ],
+
+    // ===================== EMPLEADO =====================
+    ['header' => 'EMPLEADO', 'can' => 'menu-empleado'],
+    [
+        'text' => 'Inicio',
+        'route'  => 'empleado.dashboard',
+        'icon' => 'fas fa-home',
+        'can' => 'menu-empleado',
+    ],
+    [
+        'text' => 'Barberos',
+        'route'  => 'empleado.barberos.index',
+        'icon' => 'fas fa-cut',
+        'can' => 'menu-empleado',
+    ],
+    [
+        'text' => 'Productos',
+        'route'  => 'empleado.productos.index',
+        'icon' => 'fas fa-boxes',
+        'can' => 'menu-empleado',
+    ],
+    [
+        'text' => 'Reservas',
+        'route'  => 'admin.reservas.index',
+        'icon' => 'fas fa-calendar-check',
+        'can' => 'menu-empleado',
+    ],
+    [
+        'text' => 'Registrar ventas',
+        'route'  => 'admin.ventas.index',
+        'icon' => 'fas fa-cash-register',
+        'can' => 'menu-empleado',
+    ],
+    [
+        'text' => 'Reportes',
+        'icon' => 'fas fa-chart-line',
+        'can'  => 'menu-empleado',
+        'submenu' => [
+            [
+                'text'  => 'Reservas',
+                'route' => 'admin.reportes.reservas',
+                'icon'  => 'fas fa-calendar-check',
+                'can'   => 'menu-empleado',
+            ],
+            [
+                'text'  => 'Ventas',
+                'route' => 'admin.reportes.ventas',
+                'icon'  => 'fas fa-cash-register',
+                'can'   => 'menu-empleado',
+            ],
+        ],
+    ],
+
+    // ===================== OPCIONES COMUNES =====================
+    ['header' => 'AJUSTES DE CUENTA'],
+    [
+        'text' => 'Perfil',
+        'route'  => 'admin.settings',
+        'icon' => 'fas fa-fw fa-user',
+        'can' => fn() => auth()->check(),
+    ],
+],
 
 
 

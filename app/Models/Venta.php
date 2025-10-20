@@ -28,7 +28,7 @@ class Venta extends Model
     protected $fillable = [
         'codigo',
         'reserva_id',
-        'cliente_id',
+        'usuario_id',
         'empleado_id',
         'total',
         'metodo_pago',
@@ -41,7 +41,7 @@ class Venta extends Model
     // Relaciones
     public function cliente()
     {
-        return $this->belongsTo(Usuario::class, 'cliente_id');
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
     public function empleado()

@@ -329,11 +329,10 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <button class="btn btn-info btn-sm" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#modalDetalle{{ $r->id }}"
-                                        title="Ver detalles">
-                                    <i class="fas fa-eye"></i>
+                                <button class="btn btn-info btn-sm view-ticket-btn" 
+                                        data-reserva-id="{{ $r->id }}"
+                                        title="Ver ticket">
+                                    <i class="fas fa-receipt"></i>
                                 </button>
                                 @if($r->estado == 'pendiente')
                                     <a href="{{ route('admin.reservas.completar', $r) }}" 
@@ -344,114 +343,6 @@
                                 @endif
                             </td>
                         </tr>
-
-                        <!-- Modal Detalles -->
-<!-- Modal Detalles -->
-<div class="modal fade" id="modalDetalle{{ $r->id }}" tabindex="-1" aria-labelledby="modalDetalleLabel{{ $r->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalDetalleLabel{{ $r->id }}">
-                    <i class="fas fa-calendar-alt me-2"></i>Detalles Reserva #{{ $r->id }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Cliente:</strong> {{ $r->cliente->nombre ?? 'Cliente no registrado' }}<br>
-                        <strong>Teléfono:</strong> {{ $r->cliente->telefono ?? 'N/A' }}<br>
-                        <strong>Email:</strong> {{ $r->cliente->correo ?? 'N/A' }}
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Barbero:</strong> {{ $r->barbero->nombre ?? 'No asignado' }}<br>
-                        <strong>Fecha:</strong> {{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}<br>
-                        <strong>Hora:</strong> {{ $r->hora }}
-                    </div>
-                </div>
-                <hr>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Estado:</strong>
-                        <span class="badge 
-                            @if($r->estado=='pendiente') bg-warning 
-                            @elseif($r->estado=='realizada') bg-success 
-                            @elseif($r->estado=='cancelada') bg-danger
-                            @elseif($r->estado=='no_asistio') bg-dark
-                            @endif">
-                            {{ ucfirst($r->estado) }}
-                        </span>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Monto:</strong>
-                        @php
-                            if ($r->venta) {
-                                $totalReserva = $r->venta->total;
-                            } else {
-                                $totalReserva = $r->servicios->sum(function($servicio) {
-                                    return $servicio->pivot->precio ?? 0;
-                                });
-                            }
-                        @endphp
-                        <span class="fw-bold text-success">${{ number_format($totalReserva, 2) }}</span>
-                        @if($r->venta && $r->venta->metodo_pago)
-                            <br><small class="text-muted">Pago: {{ ucfirst($r->venta->metodo_pago) }}</small>
-                        @elseif($r->estado == 'pendiente')
-                            <br><small class="text-warning">Pendiente</small>
-                        @endif
-                    </div>
-                </div>
-                <hr>
-                <div class="mb-3">
-                    <strong>Servicios Realizados:</strong>
-                    @if($r->servicios && $r->servicios->count() > 0)
-                        <ul class="list-group mb-2">
-                            @foreach($r->servicios as $servicioReserva)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ $servicioReserva->nombre ?? ($servicioReserva->servicio->nombre ?? 'Servicio') }}
-                                    <span class="badge bg-info">
-                                        ${{ number_format($servicioReserva->pivot->precio ?? $servicioReserva->precio, 2) }}
-                                    </span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> No se registraron servicios para esta reserva.
-                        </div>
-                    @endif
-                </div>
-                @if($r->observaciones)
-                <hr>
-                <div class="mb-3">
-                    <strong>Observaciones:</strong>
-                    <div class="card">
-                        <div class="card-body">
-                            {{ $r->observaciones }}
-                        </div>
-                    </div>
-                </div>
-                @endif
-                <hr>
-                <div class="row text-muted small">
-                    <div class="col-md-6">
-                        <strong>Creado:</strong> {{ $r->creado_en->format('d/m/Y H:i') }}
-                    </div>
-                    @if($r->actualizado_en)
-                    <div class="col-md-6 text-end">
-                        <strong>Actualizado:</strong> {{ $r->actualizado_en->format('d/m/Y H:i') }}
-                    </div>
-                    @endif
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
                     @empty
                         <tr>
                             <td colspan="9" class="text-center py-4">
@@ -476,10 +367,38 @@
         @endif
     </div>
 </div>
+
+<!-- MODAL PARA TICKETS -->
+<div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0" id="ticketModalLabel">
+                    <i class="fas fa-receipt me-1"></i>TICKET DE RESERVA
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="ticketContent">
+                    <!-- El contenido del ticket se cargará aquí dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cerrar
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="downloadTicketBtn">
+                    <i class="fas fa-download me-1"></i>Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // Función para filtrar por estado al hacer clic en las métricas
 function filterByStatus(status) {
@@ -498,36 +417,199 @@ function limpiarFiltros() {
     document.getElementById('filterForm').submit();
 }
 
-// Función para exportar a Excel
-function exportToExcel() {
-    const tabla = document.getElementById('tablaReservas');
-    let csv = [];
-    const rows = tabla.querySelectorAll('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        let row = [], cols = rows[i].querySelectorAll('td, th');
-        
-        for (let j = 0; j < cols.length - 1; j++) { // Excluir columna acciones
-            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s)/gm, " ");
-            row.push('"' + data + '"');
-        }
-        
-        csv.push(row.join(","));        
-    }
+// Variable global para almacenar el ticket actual
+let currentTicketHtml = '';
 
-    // Descargar archivo
-    let csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
-    let downloadLink = document.createElement("a");
-    downloadLink.download = "reporte_reservas_{{ date('Y-m-d') }}.csv";
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+// Función para mostrar el ticket
+function showTicket(reservaId) {
+    // Aquí deberías hacer una petición AJAX para obtener los datos de la reserva
+    // Por ahora, simularé los datos basados en la información disponible
+    
+    const reserva = getReservaData(reservaId); // Esta función debería obtener los datos reales
+    
+    const ticketHtml = generateTicketHtml(reserva);
+    document.getElementById('ticketContent').innerHTML = ticketHtml;
+    currentTicketHtml = ticketHtml;
+    
+    const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+    modal.show();
 }
 
-// Auto-completar fechas para filtros rápidos
+// Función para generar el HTML del ticket (simulada - deberías adaptarla a tus datos reales)
+function generateTicketHtml(reserva) {
+    const totalReserva = reserva.venta ? reserva.venta.total : 
+                        (reserva.servicios && reserva.servicios.length > 0 ? 
+                         reserva.servicios.reduce((sum, s) => sum + (s.pivot?.precio || s.precio || 0), 0) : 0);
+    
+    const metodoPago = reserva.metodo_pago || (reserva.venta ? reserva.venta.metodo_pago : null);
+    
+    return `
+        <div class="ticket-container-modal" id="ticketToDownload">
+            <div class="ticket-header-modal">
+                <h1>BARBERÍA ELITE</h1>
+                <p class="tagline-modal">Tu estilo, nuestra pasión</p>
+            </div>
+            
+            <div class="ticket-section-modal">
+                <div class="section-title-modal">RESERVA #${String(reserva.id).padStart(4, '0')}</div>
+                <div class="section-content-modal">
+                    <div class="ticket-row-modal">
+                        <span>CLIENTE</span>
+                        <span>${reserva.cliente?.nombre || 'N/A'}</span>
+                    </div>
+                    <div class="ticket-row-modal">
+                        <span>BARBERO</span>
+                        <span>${reserva.barbero?.nombre || 'N/A'}</span>
+                    </div>
+                    <div class="ticket-row-modal">
+                        <span>FECHA</span>
+                        <span>${new Date(reserva.fecha).toLocaleDateString('es-ES')}</span>
+                    </div>
+                    <div class="ticket-row-modal">
+                        <span>HORA</span>
+                        <span>${reserva.hora}</span>
+                    </div>
+                    <div class="ticket-row-modal">
+                        <span>ESTADO</span>
+                        <span class="status-${reserva.estado}">${reserva.estado.toUpperCase()}</span>
+                    </div>
+                </div>
+            </div>
+
+            ${reserva.servicios && reserva.servicios.length > 0 ? `
+            <div class="ticket-section-modal">
+                <div class="section-title-modal">SERVICIOS AGENDADOS</div>
+                <div class="items-table-modal">
+                    <div class="table-header-modal">
+                        <span>QTY</span>
+                        <span>SERVICIO</span>
+                        <span>PRECIO</span>
+                    </div>
+                    ${reserva.servicios.map(servicio => `
+                        <div class="table-row-modal">
+                            <span>1</span>
+                            <span>${servicio.nombre || servicio.servicio?.nombre}</span>
+                            <span>$${(servicio.pivot?.precio || servicio.precio || 0).toFixed(2)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="ticket-section-modal">
+                <div class="section-content-modal">
+                    <div class="ticket-row-modal total-row-modal">
+                        <span>SERVICIOS:</span>
+                        <span>${reserva.servicios.length}</span>
+                    </div>
+                    <div class="ticket-row-modal total-row-modal">
+                        <span>TOTAL:</span>
+                        <span>$${totalReserva.toFixed(2)}</span>
+                    </div>
+                    ${metodoPago ? `
+                    <div class="ticket-row-modal">
+                        <span>MÉTODO PAGO</span>
+                        <span>${metodoPago.toUpperCase()}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : `
+            <div class="ticket-section-modal">
+                <div class="section-content-modal text-center">
+                    <em>No se registraron servicios</em>
+                </div>
+            </div>
+            `}
+
+
+            <div class="ticket-section-modal">
+                <div class="section-content-modal">
+                    <div class="ticket-row-modal">
+                        <span>CREADO</span>
+                        <span>${new Date(reserva.creado_en).toLocaleString('es-ES')}</span>
+                    </div>
+                    ${reserva.actualizado_en ? `
+                    <div class="ticket-row-modal">
+                        <span>ACTUALIZADO</span>
+                        <span>${new Date(reserva.actualizado_en).toLocaleString('es-ES')}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <div class="ticket-footer-modal">
+                <p class="thank-you-modal">¡RESERVA CONFIRMADA EXITOSAMENTE!</p>
+                <p class="website-modal">barberiaelite.com</p>
+                <p class="timestamp-modal">${new Date(reserva.fecha).toLocaleDateString('es-ES')} ${reserva.hora}</p>
+            </div>
+        </div>
+    `;
+}
+
+// Función simulada para obtener datos de reserva (deberías reemplazar esto con una petición AJAX real)
+function getReservaData(reservaId) {
+    // Esta es una simulación - en producción, deberías hacer una petición AJAX al servidor
+    // para obtener los datos completos de la reserva
+    return {
+        id: reservaId,
+        cliente: { nombre: 'Cliente Ejemplo' },
+        barbero: { nombre: 'Barbero Ejemplo' },
+        fecha: '2024-01-15',
+        hora: '14:30',
+        estado: 'pendiente',
+        servicios: [
+            { nombre: 'Corte de Cabello', precio: 150.00 },
+            { nombre: 'Afeitado', precio: 80.00 }
+        ],
+        venta: null,
+        metodo_pago: null,
+        observaciones: 'Cliente prefiere corte clásico',
+        creado_en: '2024-01-10 10:00:00',
+        actualizado_en: '2024-01-10 10:00:00'
+    };
+}
+
+// Event listeners cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
+    // Configurar botones de ver ticket
+    document.querySelectorAll('.view-ticket-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reservaId = this.getAttribute('data-reserva-id');
+            showTicket(reservaId);
+        });
+    });
+
+    // Configurar botón de descargar ticket
+    document.getElementById('downloadTicketBtn').addEventListener('click', function() {
+        const ticketElement = document.getElementById('ticketToDownload');
+        if (ticketElement) {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generando...';
+            this.disabled = true;
+            
+            html2canvas(ticketElement, {
+                scale: 2,
+                backgroundColor: '#FFFFFF',
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `reserva-${String(getCurrentReservaId()).padStart(4, '0')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }).catch(error => {
+                console.error('Error al generar imagen:', error);
+                alert('Error al generar la imagen del ticket');
+                this.innerHTML = originalText;
+                this.disabled = false;
+            });
+        }
+    });
+
+    // Auto-completar fechas para filtros rápidos
     const periodoSelect = document.querySelector('select[name="periodo"]');
     if (periodoSelect) {
         periodoSelect.addEventListener('change', function() {
@@ -567,9 +649,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     hasta.value = ultimoDiaMesPasado.toISOString().split('T')[0];
                     break;
             }
-            
-            // Auto-enviar el formulario cuando se cambia el periodo
-            // document.getElementById('filterForm').submit();
         });
     }
 
@@ -585,20 +664,14 @@ document.addEventListener('DOMContentLoaded', function() {
         card.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0) scale(1)';
         });
-        
-        card.addEventListener('mousedown', function() {
-            this.style.transform = 'translateY(-2px) scale(0.98)';
-        });
-        
-        card.addEventListener('mouseup', function() {
-            this.style.transform = 'translateY(-5px) scale(1.02)';
-        });
     });
-
-    // Mostrar estado actual del filtro en consola para debug
-    const estadoActual = document.getElementById('estadoFilter').value;
-    console.log('Estado actual del filtro:', estadoActual);
 });
+
+// Función auxiliar para obtener el ID de la reserva actual (simulada)
+function getCurrentReservaId() {
+    // En una implementación real, esto debería obtenerse del contexto
+    return 1;
+}
 </script>
 @stop
 
@@ -629,6 +702,160 @@ document.addEventListener('DOMContentLoaded', function() {
     background-color: rgba(0, 123, 255, 0.075);
 }
 
+/* ESTILOS PARA EL TICKET EN MODAL */
+.ticket-container-modal {
+    background: #FFFFFF;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.ticket-header-modal {
+    text-align: center;
+    border-bottom: 2px dashed #000000;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.ticket-header-modal h1 {
+    font-weight: 900;
+    font-size: 1.4rem;
+    margin: 0;
+    color: #000000;
+    letter-spacing: 1px;
+}
+
+.tagline-modal {
+    font-size: 0.7rem;
+    color: #4A4A4A;
+    margin: 0.25rem 0 0 0;
+    font-style: italic;
+}
+
+.ticket-section-modal {
+    margin-bottom: 1rem;
+}
+
+.section-title-modal {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: #000000;
+    border-bottom: 1px solid #000000;
+    padding-bottom: 0.2rem;
+}
+
+.section-content-modal {
+    font-size: 0.7rem;
+}
+
+.ticket-row-modal {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+}
+
+.ticket-row-modal span:first-child {
+    font-weight: 600;
+}
+
+.ticket-row-modal span:last-child {
+    text-align: right;
+}
+
+.status-pendiente {
+    color: #ffc107;
+    font-weight: 700;
+}
+
+.status-realizada {
+    color: #28a745;
+    font-weight: 700;
+}
+
+.status-cancelada {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.status-no_asistio {
+    color: #6c757d;
+    font-weight: 700;
+}
+
+.items-table-modal {
+    font-size: 0.65rem;
+}
+
+.table-header-modal, .table-row-modal {
+    display: grid;
+    grid-template-columns: 0.5fr 2fr 1fr;
+    gap: 0.4rem;
+    padding: 0.2rem 0;
+}
+
+.table-header-modal {
+    font-weight: 700;
+    border-bottom: 1px solid #000000;
+    margin-bottom: 0.3rem;
+}
+
+.table-row-modal {
+    border-bottom: 1px dashed #ccc;
+}
+
+.table-row-modal:last-child {
+    border-bottom: none;
+}
+
+.total-row-modal {
+    font-weight: 700;
+    font-size: 0.75rem;
+    border-top: 1px solid #000000;
+    padding-top: 0.3rem;
+    margin-top: 0.3rem;
+}
+
+.observations-modal {
+    background: #F5F5DC;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border-left: 3px solid #D4AF37;
+    font-style: italic;
+    font-size: 0.65rem;
+}
+
+.ticket-footer-modal {
+    text-align: center;
+    border-top: 2px dashed #000000;
+    padding-top: 0.75rem;
+    margin-top: 1rem;
+}
+
+.thank-you-modal {
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin: 0 0 0.3rem 0;
+    color: #000000;
+}
+
+.website-modal {
+    font-size: 0.65rem;
+    color: #4A4A4A;
+    margin: 0 0 0.2rem 0;
+}
+
+.timestamp-modal {
+    font-size: 0.6rem;
+    color: #4A4A4A;
+    margin: 0;
+}
+
 /* Mejoras para el modal */
 .modal-content {
     border: none;
@@ -646,12 +873,6 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 8px;
 }
 
-.modal-body .card-header {
-    background-color: #f8f9fc !important;
-    border-bottom: 1px solid #e3e6f0;
-    font-weight: 600;
-}
-
 .btn-close:focus {
     box-shadow: none;
 }
@@ -661,5 +882,21 @@ document.addEventListener('DOMContentLoaded', function() {
 .badge.bg-success { color: #fff; }
 .badge.bg-danger { color: #fff; }
 .badge.bg-dark { color: #fff; }
+
+/* Responsive para el modal del ticket */
+@media (max-width: 576px) {
+    .ticket-container-modal {
+        padding: 1rem;
+    }
+    
+    .ticket-header-modal h1 {
+        font-size: 1.2rem;
+    }
+    
+    .table-header-modal, .table-row-modal {
+        grid-template-columns: 0.6fr 1.8fr 1fr;
+        gap: 0.2rem;
+    }
+}
 </style>
 @endsection

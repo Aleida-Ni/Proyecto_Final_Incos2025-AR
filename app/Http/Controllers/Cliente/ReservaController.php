@@ -47,7 +47,7 @@ class ReservaController extends Controller
         return view('cliente.reservas.create', compact('barbero', 'fecha', 'horas'));
     }
 
- public function store(Request $request)
+public function store(Request $request)
 {
     $request->validate([
         'barbero_id' => 'required|exists:barberos,id',
@@ -65,21 +65,24 @@ class ReservaController extends Controller
         return back()->withErrors(['hora' => 'Esta hora ya ha sido reservada.'])->withInput();
     }
 
-    Reserva::create([
+    $reserva = Reserva::create([
         'barbero_id' => $request->barbero_id,
-        'usuario_id' => auth()->id(),  // ← CAMBIADO
+        'usuario_id' => auth()->id(),
         'fecha'      => $request->fecha,
         'hora'       => $request->hora,
-        'estado'     => 'pendiente',  // ← Agregar estado por defecto
+        'estado'     => 'pendiente',
         'creado_en'  => now(),
         'actualizado_en' => now()
     ]);
 
+    // Cargar la relación del barbero para el ticket
+    $reserva->load('barbero');
+
     return redirect()
         ->route('cliente.barberos.index')
-        ->with('success', 'Reserva realizada con éxito.');
+        ->with('success', 'Reserva realizada con éxito.')
+        ->with('reserva_creada', $reserva->id); // ← CORREGIDO
 }
-
     public function misReservas()
     {
         $reservas = Reserva::where('usuario_id', auth()->user()->id)

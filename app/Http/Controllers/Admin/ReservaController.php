@@ -65,7 +65,7 @@ class ReservaController extends Controller
 
         $venta = Venta::create([
             'reserva_id' => $reserva->id,
-            'cliente_id' => $reserva->usuario_id,
+            'usuario_id' => $reserva->usuario_id,
             'empleado_id' => auth()->id(),
             'codigo' => 'VENTA-' . strtoupper(uniqid()),
             'total' => $request->monto_total,
@@ -154,7 +154,7 @@ public function store(Request $request)
 
         $venta = Venta::create([
             'reserva_id' => $reserva->id,
-            'cliente_id' => $reserva->usuario_id,  
+            'usuario_id' => $reserva->usuario_id,  
             'codigo' => 'V-' . date('Ymd') . '-' . strtoupper(uniqid()),
             'total' => $request->monto_total,
             'metodo_pago' => $request->metodo_pago,

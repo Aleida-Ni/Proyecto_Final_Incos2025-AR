@@ -1,12 +1,19 @@
 @extends('adminlte::auth.auth-page', ['auth_type' => 'register'])
-@section('title', 'Registrarse')
+@section('title', 'Registrarse - Barbería Elite')
 @section('auth_header', '')
 @section('auth_body')
 <div class="register-wrapper">
     <div class="register-glass">
-        <h2 class="mb-4 text-center">Registrarse</h2>
+        <!-- Logo -->
+        <div class="logo-container mb-4">
+            <img src="{{ asset('storage/imagenes/logoStars.png') }}" alt="Barbería Elite" class="register-logo">
+        </div>
+
+        <h2 class="mb-4 text-center">Crear Cuenta</h2>
+        
         <form action="{{ route('register') }}" method="post" autocomplete="off" id="registerForm">
             @csrf
+            
             <!-- Nombre -->
             <div class="mb-3 text-start">
                 <label class="form-label">Nombre</label>
@@ -18,7 +25,7 @@
             </div>
 
             <!-- Apellidos -->
-            <div class="mb-3 row">
+            <div class="mb-3 row g-3">
                 <div class="col text-start">
                     <label class="form-label">Primer Apellido</label>
                     <x-adminlte-input name="apellido_paterno" type="text" placeholder="Primer Apellido" 
@@ -38,9 +45,9 @@
             </div>
 
             <!-- Correo y Teléfono -->
-            <div class="mb-3 row">
+            <div class="mb-3 row g-3">
                 <div class="col text-start">
-                    <label class="form-label">Correo</label>
+                    <label class="form-label">Correo Electrónico</label>
                     <x-adminlte-input name="correo" type="email" placeholder="correo@ejemplo.com" 
                         required icon="fas fa-envelope" 
                         class="custom-input" />
@@ -64,7 +71,7 @@
             </div>
 
             <!-- Contraseña -->
-            <div class="mb-3 row">
+            <div class="mb-3 row g-3">
                 <div class="col text-start position-relative">
                     <label class="form-label">Contraseña</label>
                     <x-adminlte-input id="contrasenia" name="contrasenia" type="password" 
@@ -89,11 +96,15 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-block custom-btn mt-2 mb-3">Registrarse</button>
+            <button type="submit" class="btn btn-block custom-btn mt-3 mb-3">
+                <i class="fas fa-user-plus me-2"></i>Registrarse
+            </button>
         </form>
 
         <div class="text-center">
-            <a href="{{ route('login') }}" class="login-link">¿Ya tienes una cuenta? Inicia sesión</a>
+            <a href="{{ route('login') }}" class="login-link">
+                <i class="fas fa-sign-in-alt me-1"></i>¿Ya tienes una cuenta? Inicia sesión
+            </a>
         </div>
     </div>
 </div>
@@ -101,20 +112,38 @@
 
 @push('css')
 <style>
+:root {
+    --color-blanco: #FFFFFF;
+    --color-negro: #000000;
+    --color-dorado: #D4AF37;
+    --color-dorado-claro: #F4E4A8;
+    --color-beige: #F5F5DC;
+    --color-beige-oscuro: #E8E4D5;
+    --color-gris-oscuro: #2C2C2C;
+    --color-gris-medio: #4A4A4A;
+}
+
+* {
+    outline: none !important;
+}
+
+/* Fondo elegante */
 html, body, .auth-page {
     height: 100%;
     margin: 0;
     padding: 0;
-    background: #c8c6c68b !important;
+    background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-blanco) 100%) !important;
     background-size: cover !important;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
 
-/* Anula fondo blanco */
+/* Anula estilos por defecto de AdminLTE */
 .login-box, .login-box .card, .login-box .card-body, .login-box .card-header {
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
+    max-width: none !important;
+    width: auto !important;
 }
 
 .register-wrapper {
@@ -125,156 +154,186 @@ html, body, .auth-page {
     width: 100%;
     padding: 1rem;
 }
-.login-box {
-    width: 100% !important;
-    max-width: 100% !important;
-}
+
 .register-glass {
-    background: rgba(245, 245, 245, 0.7);
-    border-radius: 12px;
-    padding: 2rem;
-    width: 40%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 2px solid var(--color-dorado);
     text-align: initial;
-    transform: translateY(-80px);
+}
+
+/* Logo */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.register-logo {
+    max-width: 140px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(13, 13, 13, 0.3));
 }
 
 /* Título */
 .register-glass h2 {
-    font-weight: bold;
-    color: #111;
-}
-
-/* Inputs personalizados con bordes mejorados */
-.custom-input .form-control {
-    border: 1.5px solid #000 !important;
-    border-radius: 6px !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    color: #000 !important;
-    padding: 0.5rem 0.75rem !important;
-    transition: all 0.3s ease !important;
-}
-
-.custom-input .form-control:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
-    background: rgba(255, 255, 255, 1) !important;
-}
-
-.custom-input .input-group-text {
-    border: 1.5px solid #000 !important;
-    border-right: none !important;
-    background: rgba(0, 0, 0, 0.05) !important;
-    color: #000 !important;
-    border-radius: 6px 0 0 6px !important;
-}
-
-.custom-input .form-control:focus + .input-group-text,
-.custom-input:focus-within .input-group-text {
-    border-color: #2563eb !important;
-    background: rgba(37, 99, 235, 0.1) !important;
-}
-
-/* Botón mostrar/ocultar contraseña */
-.position-relative {
-    position: relative;
-}
-.password-toggle {
-    position: absolute;
-    top: 65%;
-    right: 12px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #666;
-    font-size: 1.1rem;
-    z-index: 5;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-.password-toggle:hover {
-    color: #000;
-    background: rgba(255, 255, 255, 1);
+    font-weight: 700;
+    color: var(--color-gris-oscuro);
+    font-family: 'Oswald', sans-serif;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
 }
 
 /* Labels */
 .form-label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #333;
-    margin-bottom: 0.4rem;
+    color: var(--color-gris-oscuro);
+    margin-bottom: 0.5rem;
 }
 
-/* Botón negro cuadrado */
-.custom-btn {
-    background: #000;
-    color: #fff;
-    border: none;
+/* Inputs personalizados */
+.custom-input .form-control {
+    border: 2px solid var(--color-gris-medio) !important;
+    border-radius: 8px !important;
+    background: var(--color-blanco) !important;
+    color: var(--color-gris-oscuro) !important;
+    padding: 0.75rem !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.95rem;
+}
+
+.custom-input .form-control:focus {
+    border-color: var(--color-dorado) !important;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+    background: var(--color-blanco) !important;
+}
+
+.custom-input .input-group-text {
+    border: 2px solid var(--color-gris-medio) !important;
+    border-right: none !important;
+    background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%) !important;
+    color: var(--color-negro) !important;
+    border-radius: 8px 0 0 8px !important;
+    font-weight: 600;
+}
+
+.custom-input .form-control:focus + .input-group-text,
+.custom-input:focus-within .input-group-text {
+    border-color: var(--color-dorado) !important;
+}
+
+/* Botón mostrar/ocultar contraseña */
+.position-relative {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 70%;
+    right: 15px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--color-gris-medio);
+    font-size: 1.1rem;
+    z-index: 5;
+    background: var(--color-blanco);
+    padding: 6px 10px;
     border-radius: 6px;
-    padding: 0.6rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    transition: 0.3s ease;
-    width: 100%;
-}
-.custom-btn:hover {
-    background: linear-gradient(135deg, #2563eb, #0891b2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--color-gris-medio);
+    transition: all 0.3s ease;
 }
 
-/* Links negros */
-.login-link {
-    color: black;
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-decoration: none;
+.password-toggle:hover {
+    color: var(--color-dorado);
+    border-color: var(--color-dorado);
+    background: var(--color-beige);
 }
+
+/* Botón principal */
+.custom-btn {
+    background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
+    color: var(--color-negro);
+    border: 2px solid var(--color-dorado);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.custom-btn:hover {
+    background: var(--color-negro);
+    color: var(--color-dorado);
+    border-color: var(--color-negro);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+/* Links */
+.login-link {
+    color: var(--color-gris-oscuro);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
 .login-link:hover {
-    color: #333;
+    color: var(--color-dorado);
     text-decoration: underline;
 }
 
 /* Input date personalizado */
 input[type="date"].form-control {
-    color: #000 !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    border: 1.5px solid #000 !important;
-    border-radius: 6px !important;
-    padding: 0.5rem 0.75rem !important;
+    color: var(--color-gris-oscuro) !important;
+    background: var(--color-blanco) !important;
+    border: 2px solid var(--color-gris-medio) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem !important;
 }
 
 input[type="date"].form-control:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
-    background: rgba(255, 255, 255, 1) !important;
+    border-color: var(--color-dorado) !important;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .register-glass {
         width: 90%;
-        padding: 1.5rem;
-        transform: translateY(-40px);
+        padding: 2rem;
+        margin: 1rem;
     }
     
     .password-toggle {
-        top: 62%;
-        right: 8px;
+        top: 65%;
+        right: 10px;
     }
     
     .mb-3.row .col {
         margin-bottom: 1rem;
+    }
+    
+    .register-glass h2 {
+        font-size: 1.75rem;
     }
 }
 
 @media (max-width: 576px) {
     .register-glass {
         width: 95%;
-        padding: 1rem;
+        padding: 1.5rem;
     }
     
     .mb-3.row {
@@ -284,6 +343,10 @@ input[type="date"].form-control:focus {
     .mb-3.row .col {
         width: 100%;
     }
+    
+    .register-logo {
+        max-width: 120px;
+    }
 }
 </style>
 @endpush
@@ -291,6 +354,7 @@ input[type="date"].form-control:focus {
 @push('js')
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // Validación de solo letras
     const soloLetras = document.querySelectorAll('input[name=nombre], input[name=apellido_paterno], input[name=apellido_materno]');
     soloLetras.forEach(input => {
         input.addEventListener("input", function() {
@@ -299,20 +363,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Mostrar / ocultar contraseña
-    function togglePassword(inputId, toggleId) {
-        const input = document.getElementById(inputId);
-        const toggle = document.getElementById(toggleId);
-        if (input && toggle) {
-            toggle.addEventListener("click", () => {
-                input.type = input.type === "password" ? "text" : "password";
-                toggle.classList.toggle("fa-eye");
-                toggle.classList.toggle("fa-eye-slash");
-            });
-        }
-    }
-
-    togglePassword("contrasenia", "toggleContrasenia");
-    togglePassword("contrasenia_confirmation", "toggleContraseniaConfirm");
+    // Robust password toggle: look up nearest input inside the same position-relative container
+    document.querySelectorAll('.password-toggle').forEach(toggle => {
+        toggle.setAttribute('role', 'button');
+        toggle.setAttribute('tabindex', '0');
+        const handler = () => {
+            const container = toggle.closest('.position-relative') || toggle.parentElement;
+            const input = container ? container.querySelector('input[type="password"], input[type="text"]') : null;
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.classList.remove('fa-eye');
+                toggle.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                toggle.classList.remove('fa-eye-slash');
+                toggle.classList.add('fa-eye');
+            }
+        };
+        toggle.addEventListener('click', handler);
+        toggle.addEventListener('keypress', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } });
+    });
 });
 </script>
 @endpush

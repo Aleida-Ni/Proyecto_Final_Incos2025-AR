@@ -105,6 +105,11 @@ Route::middleware(['auth', 'estado', 'role:admin'])
         Route::get('reportes/reservas/pdf', [ReporteController::class, 'exportarReservasPDF'])
             ->name('reportes.reservas.pdf');
 
+        // Endpoint JSON para obtener datos de una reserva (usado por modales/tickets JS)
+        Route::get('reservas/{reserva}/json', [AdminReservaController::class, 'json'])
+            ->name('reservas.json')
+            ->whereNumber('reserva');
+
         // Ventas (admin)
         Route::prefix('ventas')->name('ventas.')->group(function () {
             Route::get('/', [VentaController::class, 'index'])->name('index');

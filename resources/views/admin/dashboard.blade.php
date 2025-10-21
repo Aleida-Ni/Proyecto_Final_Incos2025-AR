@@ -217,7 +217,7 @@
                                                  class="img-circle img-size-32 mr-2" alt="User Image">
                                             <div>
                                                 <strong>{{ $reserva->cliente->nombre ?? 'Cliente' }}</strong>
-                                                <br><small class="text-muted">{{ $reserva->servicios->first()->nombre ?? 'Servicio' }}</small>
+                                                <br><small class="text-muted">{{ optional($reserva->servicios->first())->servicio->nombre ?? optional($reserva->servicios->first())->nombre ?? 'Servicio' }}</small>
                                             </div>
                                         </div>
                                     </td>

@@ -5,33 +5,33 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
-            <!-- Ticket estilo Receiptify -->
-            <div class="ticket-container" id="ticket-content">
-                <div class="ticket-header">
+            <!-- Ticket estilo Receiptify mejorado -->
+            <div class="receiptify-ticket" id="ticketToDownload">
+                <div class="receipt-header">
                     <h1>BARBERÍA ELITE</h1>
-                    <p class="tagline">Tu estilo, nuestra pasión</p>
+                    <div class="receipt-subtitle">Tu estilo, nuestra pasión</div>
                 </div>
                 
-                <div class="ticket-section">
-                    <div class="section-title">RESERVA #{{ str_pad($reserva->id, 4, '0', STR_PAD_LEFT) }}</div>
-                    <div class="section-content">
-                        <div class="ticket-row">
+                <div class="receipt-section">
+                    <div class="receipt-title">RESERVA #{{ str_pad($reserva->id, 4, '0', STR_PAD_LEFT) }}</div>
+                    <div class="receipt-info">
+                        <div class="info-row">
                             <span>CLIENTE</span>
                             <span>{{ $reserva->cliente ? $reserva->cliente->nombre . ' ' . ($reserva->cliente->apellido_paterno ?? '') : 'N/A' }}</span>
                         </div>
-                        <div class="ticket-row">
+                        <div class="info-row">
                             <span>BARBERO</span>
                             <span>{{ $reserva->barbero->nombre ?? 'N/A' }}</span>
                         </div>
-                        <div class="ticket-row">
+                        <div class="info-row">
                             <span>FECHA</span>
                             <span>{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}</span>
                         </div>
-                        <div class="ticket-row">
+                        <div class="info-row">
                             <span>HORA</span>
                             <span>{{ $reserva->hora }}</span>
                         </div>
-                        <div class="ticket-row">
+                        <div class="info-row">
                             <span>ESTADO</span>
                             <span class="status-{{ $reserva->estado }}">{{ strtoupper($reserva->estado) }}</span>
                         </div>
@@ -39,14 +39,16 @@
                 </div>
 
                 @php
-                    $totalReserva = $reserva->venta ? $reserva->venta->total : $reserva->servicios->sum('precio');
+                    $totalReserva = $reserva->venta ? $reserva->venta->total : $reserva->servicios->sum(function($servicio) {
+                        return $servicio->pivot->precio ?? $servicio->precio;
+                    });
                     $metodoPago = $reserva->metodo_pago ?? ($reserva->venta->metodo_pago ?? null);
                 @endphp
 
                 @if($reserva->servicios->count() > 0)
-                <div class="ticket-section">
-                    <div class="section-title">SERVICIOS AGENDADOS</div>
-                    <div class="items-table">
+                <div class="receipt-section">
+                    <div class="receipt-title">SERVICIOS CONTRATADOS</div>
+                    <div class="services-table">
                         <div class="table-header">
                             <span>QTY</span>
                             <span>SERVICIO</span>
@@ -54,76 +56,76 @@
                         </div>
                         @php
                             $total = 0;
+                            $counter = 0;
                         @endphp
-                        @foreach($reserva->servicios as $servicioReserva)
+                        @foreach($reserva->servicios as $servicio)
                         <div class="table-row">
-                            <span>1</span>
-                            <span>{{ $servicioReserva->servicio->nombre }}</span>
-                            <span>${{ number_format($servicioReserva->precio, 2) }}</span>
+                            <span>{{ str_pad($counter, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span>{{ strtoupper($servicio->nombre) }}</span>
+                            <span>${{ number_format($servicio->pivot->precio ?? $servicio->precio, 2) }}</span>
                         </div>
                         @php
-                            $total += $servicioReserva->precio;
+                            $total += $servicio->pivot->precio ?? $servicio->precio;
+                            $counter++;
                         @endphp
                         @endforeach
                     </div>
                 </div>
 
-                <div class="ticket-section">
-                    <div class="section-content">
-                        <div class="ticket-row total-row">
+                <div class="receipt-section">
+                    <div class="summary">
+                        <div class="summary-row">
                             <span>SERVICIOS:</span>
                             <span>{{ $reserva->servicios->count() }}</span>
                         </div>
-                        <div class="ticket-row total-row">
+                        <div class="summary-row total">
                             <span>TOTAL:</span>
                             <span>${{ number_format($total, 2) }}</span>
                         </div>
                         @if($metodoPago)
-                        <div class="ticket-row">
-                            <span>MÉTODO PAGO</span>
+                        <div class="summary-row">
+                            <span>MÉTODO PAGO:</span>
                             <span>{{ strtoupper($metodoPago) }}</span>
                         </div>
                         @endif
                     </div>
                 </div>
                 @else
-                <div class="ticket-section">
-                    <div class="section-content text-center">
-                        <em>No se registraron servicios</em>
+                <div class="receipt-section">
+                    <div class="no-services">
+                        <em>NO SE REGISTRARON SERVICIOS</em>
                     </div>
                 </div>
                 @endif
 
                 @if($reserva->observaciones)
-                <div class="ticket-section">
-                    <div class="section-title">OBSERVACIONES</div>
-                    <div class="section-content">
-                        <div class="observations">
-                            {{ $reserva->observaciones }}
-                        </div>
+                <div class="receipt-section">
+                    <div class="receipt-title">OBSERVACIONES</div>
+                    <div class="observations">
+                        {{ strtoupper($reserva->observaciones) }}
                     </div>
                 </div>
                 @endif
 
-                <div class="ticket-section">
-                    <div class="section-content">
-                        <div class="ticket-row">
-                            <span>CREADO</span>
+                <div class="receipt-section">
+                    <div class="timestamps">
+                        <div class="timestamp-row">
+                            <span>CREADO:</span>
                             <span>{{ $reserva->creado_en->format('d/m/Y H:i') }}</span>
                         </div>
                         @if($reserva->actualizado_en)
-                        <div class="ticket-row">
-                            <span>ACTUALIZADO</span>
+                        <div class="timestamp-row">
+                            <span>ACTUALIZADO:</span>
                             <span>{{ $reserva->actualizado_en->format('d/m/Y H:i') }}</span>
                         </div>
                         @endif
                     </div>
                 </div>
 
-                <div class="ticket-footer">
-                    <p class="thank-you">¡RESERVA CONFIRMADA EXITOSAMENTE!</p>
-                    <p class="website">barberiaelite.com</p>
-                    <p class="timestamp">{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }} {{ $reserva->hora }}</p>
+                <div class="receipt-footer">
+                    <div class="thank-you">¡GRACIAS POR SU VISITA!</div>
+                    <div class="website">barberiaelite.com</div>
+                    <div class="timestamp">{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }} {{ $reserva->hora }}</div>
                 </div>
             </div>
 
@@ -138,7 +140,7 @@
                     <div class="col-md-4">
                         <button id="download-ticket" class="btn btn-outline-primary w-100">
                             <i class="fas fa-download me-2"></i>Descargar
-                        </button>
+                        </a>
                     </div>
                     <div class="col-md-4">
                         <button id="share-ticket" class="btn btn-outline-success w-100">
@@ -170,48 +172,49 @@
     --color-gris-oscuro: #2C2C2C;
     --color-gris-medio: #4A4A4A;
     --color-dorado: #D4AF37;
-    --color-dorado-claro: #F4E4A8;
-    --color-beige: #F5F5DC;
 }
 
-.ticket-container {
+/* Estilo Receiptify mejorado */
+.receiptify-ticket {
     background: var(--color-blanco);
     border: 2px solid var(--color-negro);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 2rem;
-    font-family: 'Courier New', monospace;
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
     max-width: 400px;
     margin: 0 auto;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    line-height: 1.2;
 }
 
-.ticket-header {
+.receipt-header {
     text-align: center;
     border-bottom: 2px dashed var(--color-negro);
     padding-bottom: 1rem;
     margin-bottom: 1.5rem;
 }
 
-.ticket-header h1 {
+.receipt-header h1 {
     font-weight: 900;
     font-size: 1.8rem;
-    margin: 0;
+    margin: 0 0 0.5rem 0;
     color: var(--color-negro);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.receipt-subtitle {
+    font-size: 0.9rem;
+    color: var(--color-gris-medio);
+    font-style: italic;
     letter-spacing: 1px;
 }
 
-.tagline {
-    font-size: 0.9rem;
-    color: var(--color-gris-medio);
-    margin: 0.5rem 0 0 0;
-    font-style: italic;
-}
-
-.ticket-section {
+.receipt-section {
     margin-bottom: 1.5rem;
 }
 
-.section-title {
+.receipt-title {
     font-weight: 700;
     font-size: 0.9rem;
     text-transform: uppercase;
@@ -219,48 +222,53 @@
     color: var(--color-negro);
     border-bottom: 1px solid var(--color-negro);
     padding-bottom: 0.25rem;
+    letter-spacing: 1px;
 }
 
-.section-content {
+.receipt-info {
     font-size: 0.85rem;
 }
 
-.ticket-row {
+.info-row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 0.4rem;
+    letter-spacing: 0.5px;
 }
 
-.ticket-row span:first-child {
+.info-row span:first-child {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.info-row span:last-child {
+    text-align: right;
     font-weight: 600;
 }
 
-.ticket-row span:last-child {
-    text-align: right;
-}
-
 .status-pendiente {
-    color: #ffc107;
+    color: #ff6b00;
     font-weight: 700;
 }
 
 .status-realizada {
-    color: #28a745;
+    color: #00a650;
     font-weight: 700;
 }
 
 .status-cancelada {
-    color: #dc3545;
+    color: #ff0000;
     font-weight: 700;
 }
 
 .status-no_asistio {
-    color: #6c757d;
+    color: #666666;
     font-weight: 700;
 }
 
-.items-table {
+.services-table {
     font-size: 0.8rem;
+    letter-spacing: 0.5px;
 }
 
 .table-header, .table-row {
@@ -274,6 +282,7 @@
     font-weight: 700;
     border-bottom: 1px solid var(--color-negro);
     margin-bottom: 0.5rem;
+    text-transform: uppercase;
 }
 
 .table-row {
@@ -284,7 +293,28 @@
     border-bottom: none;
 }
 
-.total-row {
+.table-row span:nth-child(2) {
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.table-row span:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+.summary {
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+}
+
+.summary-row.total {
     font-weight: 700;
     font-size: 0.9rem;
     border-top: 1px solid var(--color-negro);
@@ -292,16 +322,51 @@
     margin-top: 0.5rem;
 }
 
+.summary-row span:first-child {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.summary-row span:last-child {
+    font-weight: 600;
+}
+
+.no-services {
+    text-align: center;
+    font-style: italic;
+    color: var(--color-gris-medio);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
 .observations {
-    background: var(--color-beige);
+    background: #f8f8f8;
     padding: 0.75rem;
-    border-radius: 4px;
+    border-radius: 2px;
     border-left: 3px solid var(--color-dorado);
     font-style: italic;
     font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.ticket-footer {
+.timestamps {
+    font-size: 0.75rem;
+    color: var(--color-gris-medio);
+}
+
+.timestamp-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+}
+
+.timestamp-row span:first-child {
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.receipt-footer {
     text-align: center;
     border-top: 2px dashed var(--color-negro);
     padding-top: 1rem;
@@ -313,18 +378,22 @@
     font-size: 0.9rem;
     margin: 0 0 0.5rem 0;
     color: var(--color-negro);
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .website {
     font-size: 0.8rem;
     color: var(--color-gris-medio);
     margin: 0 0 0.25rem 0;
+    letter-spacing: 0.5px;
 }
 
 .timestamp {
     font-size: 0.75rem;
     color: var(--color-gris-medio);
     margin: 0;
+    letter-spacing: 0.5px;
 }
 
 .action-buttons .btn {
@@ -363,12 +432,12 @@
 
 /* Responsive */
 @media (max-width: 576px) {
-    .ticket-container {
+    .receiptify-ticket {
         padding: 1.5rem;
         margin: 0 1rem;
     }
     
-    .ticket-header h1 {
+    .receipt-header h1 {
         font-size: 1.5rem;
     }
     
@@ -388,8 +457,41 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
-.ticket-container {
+.receiptify-ticket {
     animation: printAnimation 0.5s ease-out;
+}
+
+/* Efecto de papel de ticket */
+.receiptify-ticket::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 4px;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        var(--color-negro) 5px,
+        var(--color-negro) 10px
+    );
+}
+
+.receiptify-ticket::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 4px;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 5px,
+        var(--color-negro) 5px,
+        var(--color-negro) 10px
+    );
 }
 </style>
 @endpush
@@ -398,9 +500,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Preparar datos de reserva para JS
+    const reservaId = "{{ str_pad($reserva->id, 4, '0', STR_PAD_LEFT) }}";
+    const reservaFecha = "{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}";
+    const reservaHora = "{{ $reserva->hora }}";
+
     // Descargar ticket como imagen
     document.getElementById('download-ticket').addEventListener('click', function() {
-        const ticket = document.getElementById('ticket-content');
+        const ticket = document.getElementById('ticketToDownload');
         
         // Mostrar loading
         const originalText = this.innerHTML;
@@ -411,11 +518,18 @@ document.addEventListener('DOMContentLoaded', function() {
             scale: 2,
             backgroundColor: '#FFFFFF',
             useCORS: true,
-            logging: false
+            logging: false,
+            onclone: function(clonedDoc) {
+                const clonedTicket = clonedDoc.getElementById('ticketToDownload');
+                if (clonedTicket) {
+                    clonedTicket.style.boxShadow = 'none';
+                    clonedTicket.style.animation = 'none';
+                }
+            }
         }).then(canvas => {
             // Crear enlace de descarga
             const link = document.createElement('a');
-            link.download = `reserva-{{ str_pad($reserva->id, 4, '0', STR_PAD_LEFT) }}.png`;
+            link.download = `reserva-${reservaId}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
             
@@ -433,8 +547,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Compartir ticket
     document.getElementById('share-ticket').addEventListener('click', function() {
         const shareData = {
-            title: 'Reserva Barbería Elite #{{ str_pad($reserva->id, 4, '0', STR_PAD_LEFT) }}',
-            text: `Reserva confirmada para el {{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }} a las {{ $reserva->hora }} - Barbería Elite`,
+            title: `Reserva Barbería Elite #${reservaId}`,
+            text: `Reserva confirmada para el ${reservaFecha} a las ${reservaHora} - Barbería Elite`,
             url: window.location.href
         };
 
@@ -464,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Efecto de impresión al cargar
-    const ticket = document.getElementById('ticket-content');
+    const ticket = document.getElementById('ticketToDownload');
     ticket.style.animation = 'printAnimation 0.5s ease-out';
 });
 </script>

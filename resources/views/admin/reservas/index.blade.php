@@ -210,12 +210,9 @@
                                 
                                 <td class="align-middle text-center">
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-info" 
-                                                data-toggle="modal" 
-                                                data-target="#modalDetalle{{ $r->id }}"
-                                                title="Ver detalles">
+                                        <a href="{{ route('admin.reservas.show', $r) }}" class="btn btn-info" title="Ver detalles">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
                                         
                                         @if($r->estado == 'pendiente')
                                             <a href="{{ route('admin.reservas.completar', $r) }}" 

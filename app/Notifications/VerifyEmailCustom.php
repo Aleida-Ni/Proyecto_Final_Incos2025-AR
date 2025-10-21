@@ -20,6 +20,8 @@ class VerifyEmailCustom extends VerifyEmailNotification
             ->subject('Verifica tu dirección de correo')
             ->line('Haz clic en el botón para verificar tu cuenta.')
             ->action('Verificar correo', $verificationUrl)
+            // También incluimos la URL en texto plano (copiable/tapable en la mayoría de clientes móviles)
+            ->line($verificationUrl)
             ->line('Si no creaste esta cuenta, ignora este correo.');
     }
 
@@ -28,13 +30,20 @@ class VerifyEmailCustom extends VerifyEmailNotification
      */
     protected function verificationUrl($notifiable)
     {
-        return URL::temporarySignedRoute(
-            'verification.verify', // 👈 esta debe existir en tus rutas
+        $signed = URL::temporarySignedRoute(
+            'verification.verify', 
             Carbon::now()->addMinutes(60),
             [
                 'id'   => $notifiable->getKey(),
                 'hash' => sha1($notifiable->getEmailForVerification()),
             ]
         );
+
+        $appUrl = rtrim(config('app.url') ?: env('APP_URL', ''), '/');
+        if ($appUrl) {
+            $signed = preg_replace('#^https?://[^/]+#', $appUrl, $signed);
+        }
+
+        return $signed;
     }
 }

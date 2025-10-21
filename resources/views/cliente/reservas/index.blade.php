@@ -178,15 +178,15 @@
                             </span>
                         </div>
                         
-                        @if($reserva->servicios && count($reserva->servicios) > 0)
+                            @if($reserva->servicios && count($reserva->servicios) > 0)
                         <div class="ticket-divider-light my-2"></div>
                         
                         <div class="ticket-services">
                             <div class="ticket-label mb-1">SERVICIOS</div>
-                            @foreach($reserva->servicios as $servicio)
+                            @foreach($reserva->servicios as $servicioReserva)
                             <div class="ticket-service-item">
-                                <span class="service-name">{{ $servicio->nombre }}</span>
-                                <span class="service-price">${{ number_format($servicio->precio, 0, ',', '.') }}</span>
+                                <span class="service-name">{{ optional($servicioReserva->servicio)->nombre ?? 'Servicio' }}</span>
+                                <span class="service-price">${{ number_format($servicioReserva->precio ?? optional($servicioReserva->servicio)->precio ?? 0, 0, ',', '.') }}</span>
                             </div>
                             @endforeach
                             

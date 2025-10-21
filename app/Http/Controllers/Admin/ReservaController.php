@@ -186,6 +186,61 @@ public function store(Request $request)
         return view('admin.reservas.show', compact('reserva'));
     }
 
+    /**
+     * Devuelve JSON con los datos de la reserva (para uso en modales/tickets via JS)
+     */
+    public function json(Reserva $reserva)
+    {
+        $reserva->load(['cliente', 'barbero', 'servicios.servicio', 'venta']);
+
+        // Mapear servicios para exponer nombre y precio (usando pivot si existe)
+        $servicios = $reserva->servicios->map(function ($s) {
+            return [
+                'id' => $s->id,
+                'nombre' => optional($s->servicio)->nombre ?? $s->nombre ?? null,
+                'precio' => isset($s->precio) ? (float) $s->precio : (float) ($s->pivot->precio ?? 0),
+                'pivot' => [
+                    'precio' => isset($s->precio) ? (float) $s->precio : (float) ($s->pivot->precio ?? 0),
+                ]
+            ];
+        })->values();
+
+        $fmtDate = function ($val) {
+            if (! $val) return null;
+            try {
+                if ($val instanceof \Carbon\Carbon) return $val->toDateString();
+                return Carbon::parse($val)->toDateString();
+            } catch (\Throwable $e) {
+                return (string) $val;
+            }
+        };
+
+        $fmtDateTime = function ($val) {
+            if (! $val) return null;
+            try {
+                if ($val instanceof \Carbon\Carbon) return $val->toDateTimeString();
+                return Carbon::parse($val)->toDateTimeString();
+            } catch (\Throwable $e) {
+                return (string) $val;
+            }
+        };
+
+        return response()->json([
+            'id' => $reserva->id,
+            'cliente' => [ 'nombre' => optional($reserva->cliente)->nombre ],
+            'barbero' => [ 'nombre' => optional($reserva->barbero)->nombre ],
+            'fecha' => $fmtDate($reserva->fecha),
+            'hora' => $reserva->hora,
+            'estado' => $reserva->estado,
+            'servicios' => $servicios,
+            'venta' => $reserva->venta ? [ 'total' => (float) $reserva->venta->total, 'metodo_pago' => $reserva->venta->metodo_pago ] : null,
+            'metodo_pago' => $reserva->metodo_pago,
+            'observaciones' => $reserva->observaciones,
+            'creado_en' => $fmtDateTime($reserva->creado_en),
+            'actualizado_en' => $fmtDateTime($reserva->actualizado_en),
+        ]);
+    }
+
     /** Editar */
     public function edit(Reserva $reserva)
     {

@@ -83,8 +83,8 @@
                     <td>{{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}</td>
                     <td>{{ $r->hora }}</td>
                     <td><span class="estado {{ $r->estado }}">{{ ucfirst($r->estado) }}</span></td>
-                    <td>{{ $r->servicios->pluck('nombre')->join(', ') }}</td>
-                    <td class="right">Bs. {{ number_format($r->venta ? $r->venta->total : ($r->servicios->sum('pivot.precio') ?? 0), 2) }}</td>
+                    <td>{{ $r->servicios->map(fn($s) => optional($s->servicio)->nombre ?? $s->nombre)->join(', ') }}</td>
+                    <td class="right">Bs. {{ number_format($r->venta ? $r->venta->total : ($r->servicios->sum('precio') ?? 0), 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>

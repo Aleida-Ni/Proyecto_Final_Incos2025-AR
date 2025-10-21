@@ -34,9 +34,11 @@ class ReporteController extends Controller
             $this->aplicarFiltroPeriodo($query, $request->periodo);
         }
 
-        // Filtro por estado
+        // Filtro por estado (si no se pasa, por defecto mostramos realizadas — igual que en la vista)
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
+        } else {
+            $query->where('estado', 'realizada');
         }
 
         // Filtro por barbero
@@ -213,9 +215,10 @@ public function reservas(Request $request)
         }
     }
 
-    // ✅ FILTRO POR ESTADO - ESTA ES LA PARTE IMPORTANTE
     if ($request->filled('estado')) {
         $query->where('estado', $request->estado);
+    } else {
+        $query->where('estado', 'realizada');
     }
 
     // Filtro por barbero
@@ -226,35 +229,24 @@ public function reservas(Request $request)
     $reservas = $query->orderBy('fecha', 'desc')
                      ->orderBy('hora', 'desc')
                      ->paginate(20);
-    // Calcular estadísticas mejoradas
-    $totalReservas = Reserva::when($request->filled('from'), function($q) use ($request) {
-            // ... filtros de fecha
-        })->count();
 
-    $pendientes = Reserva::where('estado', 'pendiente')
-        ->when($request->filled('from'), function($q) use ($request) {
-            // ... filtros de fecha
-        })->count();
+    // Calcular estadísticas a partir del mismo query (para consistencia)
+    $queryForStats = clone $query;
+    $todos = $queryForStats->get();
 
-    $realizadas = Reserva::where('estado', 'realizada')
-        ->when($request->filled('from'), function($q) use ($request) {
-            // ... filtros de fecha
-        })->count();
+    $totalReservas = $todos->count();
+    $pendientes = $todos->where('estado', 'pendiente')->count();
+    $realizadas = $todos->where('estado', 'realizada')->count();
 
-    // Calcular ingresos
-    $ingresoRealizado = Reserva::where('estado', 'realizada')
-        ->with('venta')
-        ->get()
-        ->sum(function($reserva) {
-            return $reserva->venta ? $reserva->venta->total : 0;
-        });
+    // Calcular ingresos usando las reservas filtradas (por defecto serán las realizadas)
+    $ingresoRealizado = $todos->sum(function($reserva) {
+        return $reserva->venta ? $reserva->venta->total : 0;
+    });
 
-    $ingresoPendiente = Reserva::where('estado', 'pendiente')
-        ->with('servicios')
-        ->get()
-        ->sum(function($reserva) {
-            return $reserva->servicios->sum('precio');
-        });
+    // Ingreso pendiente (si el usuario solicita estado=pendiente explícitamente)
+    $ingresoPendiente = $todos->where('estado', 'pendiente')->sum(function($reserva) {
+        return $reserva->servicios->sum('precio');
+    });
 
     $estadisticas = [
         'total' => $totalReservas,

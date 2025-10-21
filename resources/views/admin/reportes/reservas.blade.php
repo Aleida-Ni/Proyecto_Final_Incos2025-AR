@@ -257,7 +257,7 @@
                             
                             // Calcular total de la reserva
                             if ($r->servicios && $r->servicios->count() > 0) {
-                                $totalReserva = $r->servicios->sum('pivot.precio');
+                                $totalReserva = $r->servicios->sum('precio');
                             }
                             
                             // Si tiene venta asociada, usar ese monto
@@ -312,8 +312,8 @@
                                     if ($r->venta) {
                                         $totalReserva = $r->venta->total;
                                     } else {
-                                        // Si no tiene venta, calcular de servicios
-                                        $totalReserva = $r->servicios->sum('pivot.precio');
+                                        // Si no tiene venta, calcular de servicios (precio en la fila servicio_reserva)
+                                        $totalReserva = $r->servicios->sum('precio');
                                     }
                                 @endphp
                                 
@@ -334,13 +334,7 @@
                                         title="Ver ticket">
                                     <i class="fas fa-receipt"></i>
                                 </button>
-                                @if($r->estado == 'pendiente')
-                                    <a href="{{ route('admin.reservas.completar', $r) }}" 
-                                       class="btn btn-success btn-sm" 
-                                       title="Completar reserva">
-                                        <i class="fas fa-check"></i>
-                                    </a>
-                                @endif
+                                {{-- En el reporte solo mostramos ticket; no permitir completar desde aquí --}}
                             </td>
                         </tr>
                     @empty
@@ -546,27 +540,15 @@ function generateTicketHtml(reserva) {
     `;
 }
 
-// Función simulada para obtener datos de reserva (deberías reemplazar esto con una petición AJAX real)
+// Obtener datos reales de la reserva desde el servidor
 function getReservaData(reservaId) {
-    // Esta es una simulación - en producción, deberías hacer una petición AJAX al servidor
-    // para obtener los datos completos de la reserva
-    return {
-        id: reservaId,
-        cliente: { nombre: 'Cliente Ejemplo' },
-        barbero: { nombre: 'Barbero Ejemplo' },
-        fecha: '2024-01-15',
-        hora: '14:30',
-        estado: 'pendiente',
-        servicios: [
-            { nombre: 'Corte de Cabello', precio: 150.00 },
-            { nombre: 'Afeitado', precio: 80.00 }
-        ],
-        venta: null,
-        metodo_pago: null,
-        observaciones: 'Cliente prefiere corte clásico',
-        creado_en: '2024-01-10 10:00:00',
-        actualizado_en: '2024-01-10 10:00:00'
-    };
+    const url = `{{ url('admin/reservas') }}/${reservaId}/json`;
+    return fetch(url, {
+        headers: { 'Accept': 'application/json' }
+    }).then(resp => {
+        if (!resp.ok) throw new Error('Error al obtener datos de la reserva');
+        return resp.json();
+    });
 }
 
 // Event listeners cuando el DOM está listo
@@ -575,7 +557,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.view-ticket-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const reservaId = this.getAttribute('data-reserva-id');
-            showTicket(reservaId);
+            // Obtener datos reales y luego mostrar ticket
+            getReservaData(reservaId).then(reserva => {
+                const ticketHtml = generateTicketHtml(reserva);
+                document.getElementById('ticketContent').innerHTML = ticketHtml;
+                currentTicketHtml = ticketHtml;
+                // Guardar el id actual para descarga
+                window.currentTicketId = reserva.id;
+                const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+                modal.show();
+            }).catch(err => {
+                console.error(err);
+                alert('No se pudieron cargar los datos del ticket');
+            });
         });
     });
 
@@ -669,8 +663,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función auxiliar para obtener el ID de la reserva actual (simulada)
 function getCurrentReservaId() {
-    // En una implementación real, esto debería obtenerse del contexto
-    return 1;
+    return window.currentTicketId || 1;
 }
 </script>
 @stop

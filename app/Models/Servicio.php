@@ -8,6 +8,10 @@ class Servicio extends Model
 {
     protected $table = 'servicios';
 
+    // Usar columnas de timestamps en español
+    const CREATED_AT = 'creado_en';
+    const UPDATED_AT = 'actualizado_en';
+
     protected $fillable = [
         'nombre',
         'descripcion',

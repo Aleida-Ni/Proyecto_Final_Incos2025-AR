@@ -64,7 +64,6 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:60px">ID</th>
                     <th>Cliente</th>
                     <th style="width:120px">Barbero</th>
                     <th style="width:90px">Fecha</th>
@@ -77,7 +76,6 @@
             <tbody>
                 @foreach($reservas as $r)
                 <tr>
-                    <td>#{{ $r->id }}</td>
                     <td>{{ optional($r->cliente)->nombre ?? 'Cliente' }}</td>
                     <td>{{ optional($r->barbero)->nombre ?? '—' }}</td>
                     <td>{{ \Carbon\Carbon::parse($r->fecha)->format('d/m/Y') }}</td>

@@ -20,7 +20,6 @@ class VerifyEmailCustom extends VerifyEmailNotification
             ->subject('Verifica tu dirección de correo')
             ->line('Haz clic en el botón para verificar tu cuenta.')
             ->action('Verificar correo', $verificationUrl)
-            // También incluimos la URL en texto plano (copiable/tapable en la mayoría de clientes móviles)
             ->line($verificationUrl)
             ->line('Si no creaste esta cuenta, ignora este correo.');
     }

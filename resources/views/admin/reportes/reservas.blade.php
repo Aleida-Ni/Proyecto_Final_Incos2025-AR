@@ -237,7 +237,6 @@
             <table class="table table-striped table-hover" id="tablaReservas">
                 <thead class="table-dark">
                     <tr>
-                        <th width="80">ID</th>
                         <th>Cliente</th>
                         <th>Contacto</th>
                         <th>Barbero</th>
@@ -266,9 +265,7 @@
                             }
                         @endphp
                         <tr class="{{ $esPasada && $r->estado == 'pendiente' ? 'table-warning' : '' }}">
-                            <td>
-                                <strong>#{{ $r->id }}</strong>
-                            </td>
+
                             <td>
                                 <div class="fw-bold">{{ optional($r->cliente)->nombre ?? 'Cliente' }}</div>
                                 <small class="text-muted">{{ optional($r->cliente)->correo ?? '' }}</small>

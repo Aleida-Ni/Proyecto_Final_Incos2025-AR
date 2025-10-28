@@ -36,9 +36,9 @@
         
         <!-- Ingresos del Mes -->
         <div class="col-lg-3 col-6">
-            <div class="small-box bg-success">
+        <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>${{ number_format($ingresosMes ?? 12540, 2) }}</h3>
+                <h3>Bs {{ number_format($ingresosMes ?? 12540, 2) }}</h3>
                     <p>Ingresos del Mes</p>
                     <div class="progress mb-2" style="height: 5px;">
                         <div class="progress-bar bg-white" style="width: {{ min((($ingresosMes ?? 12540) / 20000) * 100, 100) }}%"></div>
@@ -46,7 +46,7 @@
                     <small>+{{ $crecimientoIngresos ?? 12 }}% vs mes anterior</small>
                 </div>
                 <div class="icon">
-                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-coins"></i>
                 </div>
                 <a href="{{ route('admin.reportes.ventas') }}" class="small-box-footer">
                     Ver reportes <i class="fas fa-arrow-circle-right"></i>
@@ -107,12 +107,12 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-gradient-purple">
                 <div class="inner">
-                    <h3>${{ number_format($promedioTicket ?? 85.50, 2) }}</h3>
+                    <h3>Bs {{ number_format($promedioTicket ?? 85.50, 2) }}</h3>
                     <p>Ticket Promedio</p>
                     <div class="progress mb-2" style="height: 5px;">
                         <div class="progress-bar bg-white" style="width: {{ min((($promedioTicket ?? 85.50) / 120) * 100, 100) }}%"></div>
                     </div>
-                    <small>+${{ number_format($incrementoTicket ?? 5.20, 2) }} vs promedio</small>
+                    <small>+Bs {{ number_format($incrementoTicket ?? 5.20, 2) }} vs promedio</small>
                 </div>
                 <div class="icon">
                     <i class="fas fa-receipt"></i>
@@ -290,7 +290,7 @@
                                         <br><small class="text-muted">{{ $servicio->tasa_crecimiento }}%</small>
                                     </td>
                                     <td>
-                                        <strong>${{ number_format($servicio->ingresos, 2) }}</strong>
+                                        <strong>Bs {{ number_format($servicio->ingresos, 2) }}</strong>
                                     </td>
                                     <td>
                                         @if($servicio->tasa_crecimiento > 0)
@@ -312,7 +312,7 @@
                                         <strong>45</strong>
                                         <br><small class="text-muted">+12%</small>
                                     </td>
-                                    <td><strong>$3,375.00</strong></td>
+                                    <td><strong>Bs 3,375.00</strong></td>
                                     <td><span class="badge bg-success"><i class="fas fa-arrow-up"></i> ↑</span></td>
                                 </tr>
                                 <tr>
@@ -324,7 +324,7 @@
                                         <strong>32</strong>
                                         <br><small class="text-muted">+5%</small>
                                     </td>
-                                    <td><strong>$2,240.00</strong></td>
+                                    <td><strong>Bs 2,240.00</strong></td>
                                     <td><span class="badge bg-success"><i class="fas fa-arrow-up"></i> ↑</span></td>
                                 </tr>
                                 <tr>
@@ -336,7 +336,7 @@
                                         <strong>28</strong>
                                         <br><small class="text-muted">+8%</small>
                                     </td>
-                                    <td><strong>$2,520.00</strong></td>
+                                    <td><strong>Bs 2,520.00</strong></td>
                                     <td><span class="badge bg-success"><i class="fas fa-arrow-up"></i> ↑</span></td>
                                 </tr>
                                 @endif
@@ -504,8 +504,8 @@ document.addEventListener('DOMContentLoaded', function() {
         type: 'bar',
         data: {
             labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            datasets: [{
-                label: 'Ingresos ($)',
+                datasets: [{
+                label: 'Ingresos (Bs)',
                 data: [1800, 2200, 1900, 2500, 3000, 2800, 3200],
                 backgroundColor: [
                     'rgba(212, 175, 55, 0.8)',
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `$${context.parsed.y.toLocaleString()}`;
+                            return `Bs ${context.parsed.y.toLocaleString()}`;
                         }
                     }
                 }
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toLocaleString();
+                            return 'Bs ' + value.toLocaleString();
                         }
                     }
                 }

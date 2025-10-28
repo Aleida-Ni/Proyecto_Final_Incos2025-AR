@@ -74,6 +74,7 @@
                 </tr>
             </thead>
             <tbody>
+                @php $totalPdf = 0; @endphp
                 @foreach($reservas as $r)
                 <tr>
                     <td>{{ optional($r->cliente)->nombre ?? 'Cliente' }}</td>
@@ -82,9 +83,14 @@
                     <td>{{ $r->hora }}</td>
                     <td><span class="estado {{ $r->estado }}">{{ ucfirst($r->estado) }}</span></td>
                     <td>{{ $r->servicios->map(fn($s) => optional($s->servicio)->nombre ?? $s->nombre)->join(', ') }}</td>
-                    <td class="right">Bs. {{ number_format($r->venta ? $r->venta->total : ($r->servicios->sum('precio') ?? 0), 2) }}</td>
+                    @php $fila = $r->venta ? $r->venta->total : ($r->servicios->sum('precio') ?? 0); $totalPdf += $fila; @endphp
+                    <td class="right">Bs. {{ number_format($fila, 2) }}</td>
                 </tr>
                 @endforeach
+                <tr>
+                    <td colspan="6" style="text-align:right"><strong>Total listado:</strong></td>
+                    <td class="right"><strong>Bs. {{ number_format($totalPdf, 2) }}</strong></td>
+                </tr>
             </tbody>
         </table>
     </div>

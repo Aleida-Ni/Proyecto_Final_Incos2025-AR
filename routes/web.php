@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Admin\ReporteController as ReporteController;
 use App\Http\Controllers\Admin\EmpleadoController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ServicioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,17 +54,10 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
         $request->user()->update(['estado' => 1]);
     }
     
-    // Si el usuario es cliente
-    if($request->user()->rol === 'cliente') {
-        return redirect()->route('cliente.home')->with('verified', true);
-    }
-    
-    // Si el usuario es admin
-    if($request->user()->rol === 'admin') {
-        return redirect()->route('admin.home')->with('verified', true);
-    }
-    
-    return redirect('/')->with('verified', true);
+    // Después de verificar, cerrar sesión y enviar al login para que el usuario inicie sesión
+    // Esto evita que el usuario sea redirigido directamente al panel desde el enlace del correo.
+    Auth::logout();
+    return redirect()->route('login')->with('verified', true);
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {
@@ -122,6 +116,7 @@ Route::middleware(['auth', 'estado', 'role:admin'])
         // Configuración (admin)
         Route::prefix('config')->group(function () {
             Route::resource('empleados', EmpleadoController::class);
+            Route::resource('servicios', ServicioController::class);
             Route::view('settings', 'admin.settings')->name('settings');
         });
 
@@ -168,6 +163,11 @@ Route::middleware(['auth', 'estado', 'role:empleado'])
             Route::get('/crear', [VentaController::class, 'create'])->name('create');
             Route::post('/', [VentaController::class, 'store'])->name('store');
             Route::delete('/{venta}', [VentaController::class, 'destroy'])->name('destroy');
+        });
+        // Configuración (empleado)
+        Route::prefix('config')->group(function () {
+            Route::resource('servicios', ServicioController::class);
+            Route::view('settings', 'admin.settings')->name('settings');
         });
     });
 

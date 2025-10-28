@@ -103,7 +103,7 @@
                                                     <div class="service-details text-gris-medio">
                                                         <small>
                                                             <i class="fas fa-clock"></i> {{ $servicio->duracion_minutos }} min • 
-                                                            <i class="fas fa-dollar-sign"></i> ${{ number_format($servicio->precio, 2) }}
+                                                            Bs {{ number_format($servicio->precio, 2) }}
                                                         </small>
                                                     </div>
                                                     @if($servicio->descripcion)
@@ -139,7 +139,7 @@
                                         <i class="fas fa-calculator text-dorado mr-2"></i>Monto Total:
                                     </label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-beige text-gris-oscuro">$</span>
+                                        <span class="input-group-text bg-beige text-gris-oscuro">Bs</span>
                                         <input type="number" 
                                                name="monto_total" 
                                                class="form-control custom-input" 
@@ -177,7 +177,7 @@
                     <hr>
                     <div class="d-flex justify-content-between align-items-center">
                         <strong class="text-gris-oscuro">Total:</strong>
-                        <strong class="text-success h5" id="totalResumen">$0.00</strong>
+                        <strong class="text-success h5" id="totalResumen">Bs 0.00</strong>
                     </div>
                 </div>
             </div>

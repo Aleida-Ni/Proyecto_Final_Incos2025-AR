@@ -190,8 +190,8 @@
                                 </td>
                                 
                                 <td class="align-middle">
-                                    @if($totalReserva > 0)
-                                        <div class="fw-bold text-success">${{ number_format($totalReserva, 2) }}</div>
+                                        @if($totalReserva > 0)
+                                        <div class="fw-bold text-success">Bs {{ number_format($totalReserva, 2) }}</div>
                                         @if($metodoPago)
                                             <span class="badge metodo-pago-badge
                                                 @if($metodoPago == 'efectivo') bg-success
@@ -285,13 +285,13 @@
                                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                                 {{ $servicioReserva->servicio->nombre ?? 'Servicio no encontrado' }}
                                                                 <span class="badge bg-primary">
-                                                                    ${{ number_format($servicioReserva->precio, 2) }}
+                                                                    Bs {{ number_format($servicioReserva->precio, 2) }}
                                                                 </span>
                                                             </li>
                                                         @endforeach
                                                     </ul>
                                                     <div class="mt-2 text-end">
-                                                        <strong>Total: ${{ number_format($r->servicios->sum('precio'), 2) }}</strong>
+                                                        <strong>Total: Bs {{ number_format($r->servicios->sum('precio'), 2) }}</strong>
                                                     </div>
                                                 @else
                                                     <p class="text-muted mt-2">No hay servicios registrados</p>

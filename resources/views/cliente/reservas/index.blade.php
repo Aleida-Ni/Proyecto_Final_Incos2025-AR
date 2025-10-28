@@ -186,13 +186,13 @@
                             @foreach($reserva->servicios as $servicioReserva)
                             <div class="ticket-service-item">
                                 <span class="service-name">{{ optional($servicioReserva->servicio)->nombre ?? 'Servicio' }}</span>
-                                <span class="service-price">${{ number_format($servicioReserva->precio ?? optional($servicioReserva->servicio)->precio ?? 0, 0, ',', '.') }}</span>
+                                <span class="service-price">Bs {{ number_format($servicioReserva->precio ?? optional($servicioReserva->servicio)->precio ?? 0, 0, ',', '.') }}</span>
                             </div>
                             @endforeach
                             
                             <div class="ticket-total mt-2 pt-2">
                                 <span class="ticket-label">TOTAL</span>
-                                <span class="ticket-value">${{ number_format($reserva->servicios->sum('precio'), 0, ',', '.') }}</span>
+                                <span class="ticket-value">Bs {{ number_format($reserva->servicios->sum('precio'), 0, ',', '.') }}</span>
                             </div>
                         </div>
                         @endif

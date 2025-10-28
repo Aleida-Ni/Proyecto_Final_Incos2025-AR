@@ -45,7 +45,7 @@
                             <br>
                             <small class="text-muted">{{ $venta->empleado->rol ?? '' }}</small>
                         </td>
-                        <td>{{ $venta->total_formateado ?? '$ 0.00' }}</td>
+                        <td>{{ $venta->total_formateado ?? 'Bs 0.00' }}</td>
                         <td>{!! $venta->estado_badge ?? '<span class="badge badge-secondary">N/A</span>' !!}</td>
                         <td>{{ ucfirst($venta->metodo_pago ?? 'efectivo') }}</td>
                         <td>

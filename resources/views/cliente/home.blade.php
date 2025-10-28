@@ -368,6 +368,32 @@
             <i class="fas fa-calendar-plus"></i> RESERVAR CITA
         </a>
     </div>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const swiper = new Swiper('.mySwiper', {
+                loop: true,
+                centeredSlides: true,
+                slidesPerView: 'auto',
+                spaceBetween: 30,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    576: { slidesPerView: 1 },
+                    768: { slidesPerView: 1.2 },
+                    992: { slidesPerView: 2 },
+                    1200: { slidesPerView: 3 }
+                }
+            });
+        });
+    </script>
 </div>
 
 <!-- GALERÍA DE TRABAJOS -->
@@ -377,26 +403,17 @@
     <!-- Swiper -->
     <div class="swiper mySwiper">
         <div class="swiper-wrapper">
+            {{-- Carousel generado automáticamente desde public/imagenes/cliente --}}
+            @php
+                $clienteImgs = ['DSC05513.jpg','DSC05533.jpg','DSC05550.jpg','_DSC5342.jpg'];
+            @endphp
+            @foreach($clienteImgs as $idx => $img)
             <div class="swiper-slide">
-                <img src="{{ asset('imagenes/homeCliente/trabajo1.jpg') }}" class="slide-img" alt="Corte Clásico">
+                <img src="{{ asset('imagenes/cliente/' . $img) }}" class="slide-img" alt="Galería {{ $idx + 1 }}">
                 <div class="sparkle-overlay"></div>
-                <div class="slide-caption">Corte Clásico</div>
+                <div class="slide-caption">Galería {{ $idx + 1 }}</div>
             </div>
-            <div class="swiper-slide">
-                <img src="{{ asset('imagenes/homeCliente/trabajo2.jpg') }}" class="slide-img" alt="Barba Estilizada">
-                <div class="sparkle-overlay"></div>
-                <div class="slide-caption">Barba Estilizada</div>
-            </div>
-            <div class="swiper-slide">
-                <img src="{{ asset('imagenes/homeCliente/trabajo3.jpg') }}" class="slide-img" alt="Estilo Moderno">
-                <div class="sparkle-overlay"></div>
-                <div class="slide-caption">Estilo Moderno</div>
-            </div>
-            <div class="swiper-slide">
-                <img src="{{ asset('imagenes/homeCliente/trabajo4.jpg') }}" class="slide-img" alt="Tradicional">
-                <div class="sparkle-overlay"></div>
-                <div class="slide-caption">Tradicional</div>
-            </div>
+            @endforeach
         </div>
         <div class="swiper-pagination"></div>
         <div class="swiper-button-next"></div>
@@ -450,6 +467,11 @@
                 <i class="fas fa-store"></i> VER TODOS LOS PRODUCTOS
             </a>
         </div>
+        <!-- Add Pagination -->
+        <div class="swiper-pagination"></div>
+        <!-- Add Navigation -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
     </div>
 </div>
 

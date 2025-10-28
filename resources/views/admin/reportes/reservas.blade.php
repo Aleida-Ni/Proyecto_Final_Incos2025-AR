@@ -97,9 +97,9 @@
                         <p class="card-text mb-0">
                             <i class="fas fa-clock me-1"></i>Pendientes
                         </p>
-                        <small class="opacity-75">
+                            <small class="opacity-75">
                             @if($estadisticas['ingreso_pendiente'] > 0)
-                            ${{ number_format($estadisticas['ingreso_pendiente'], 2) }}
+                            Bs {{ number_format($estadisticas['ingreso_pendiente'], 2) }}
                             @else
                             Sin ingresos
                             @endif
@@ -119,7 +119,7 @@
                             <i class="fas fa-check-circle me-1"></i>Realizadas
                         </p>
                         <small class="opacity-75">
-                            ${{ number_format($estadisticas['ingreso_realizado'], 2) }}
+                            Bs {{ number_format($estadisticas['ingreso_realizado'], 2) }}
                         </small>
                     </div>
                 </div>
@@ -168,7 +168,7 @@
                             <i class="fas fa-chart-line me-1"></i>Tasa Asistencia
                         </p>
                         <small class="opacity-75">
-                            Total: ${{ number_format($estadisticas['ingreso_total'], 2) }}
+                            Total: Bs {{ number_format($estadisticas['ingreso_total'], 2) }}
                         </small>
                     </div>
                 </div>
@@ -180,18 +180,18 @@
             <div class="col-12">
                 <div class="card bg-light">
                     <div class="card-body py-2">
-                        <div class="row text-center">
+                                <div class="row text-center">
                             <div class="col-md-3 border-end">
                                 <small class="text-muted">Ingreso Total Realizado</small>
-                                <h5 class="mb-0 text-success">${{ number_format($estadisticas['ingreso_total'], 2) }}</h5>
+                                <h5 class="mb-0 text-success">Bs {{ number_format($estadisticas['ingreso_total'], 2) }}</h5>
                             </div>
                             <div class="col-md-3 border-end">
                                 <small class="text-muted">Ingreso Pendiente</small>
-                                <h5 class="mb-0 text-warning">${{ number_format($estadisticas['ingreso_pendiente'], 2) }}</h5>
+                                <h5 class="mb-0 text-warning">Bs {{ number_format($estadisticas['ingreso_pendiente'], 2) }}</h5>
                             </div>
                             <div class="col-md-3 border-end">
                                 <small class="text-muted">Promedio por Reserva</small>
-                                <h5 class="mb-0 text-primary">${{ number_format($estadisticas['promedio_reserva'], 2) }}</h5>
+                                <h5 class="mb-0 text-primary">Bs {{ number_format($estadisticas['promedio_reserva'], 2) }}</h5>
                             </div>
                             <div class="col-md-3">
                                 <small class="text-muted">Reservas por Día</small>
@@ -248,6 +248,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $sumListado = 0; @endphp
                     @forelse($reservas as $r)
                         @php
                             $fechaReserva = \Carbon\Carbon::parse($r->fecha);
@@ -263,6 +264,8 @@
                             if ($r->venta) {
                                 $totalReserva = $r->venta->total;
                             }
+
+                            $sumListado += $totalReserva;
                         @endphp
                         <tr class="{{ $esPasada && $r->estado == 'pendiente' ? 'table-warning' : '' }}">
 
@@ -315,7 +318,7 @@
                                 @endphp
                                 
                                 @if($totalReserva > 0)
-                                    <strong class="text-success">${{ number_format($totalReserva, 2) }}</strong>
+                                    <strong class="text-success">Bs {{ number_format($totalReserva, 2) }}</strong>
                                     @if($r->venta && $r->venta->metodo_pago)
                                     <br><small class="text-muted">{{ ucfirst($r->venta->metodo_pago) }}</small>
                                     @elseif($r->estado == 'pendiente')
@@ -344,6 +347,12 @@
                         </tr>
                     @endforelse
                 </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" class="text-end"><strong>Total mostrado:</strong></td>
+                            <td class="text-success"><strong>Bs {{ number_format($sumListado, 2) }}</strong></td>
+                        </tr>
+                    </tfoot>
             </table>
         </div>
 

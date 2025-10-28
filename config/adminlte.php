@@ -334,12 +334,7 @@ return [
         'icon' => 'fas fa-boxes',
         'can' => 'menu-admin',
     ],
-    [
-        'text' => 'Empleados',
-        'route'  => 'admin.empleados.index',
-        'icon' => 'fas fa-users',
-        'can' => 'menu-admin',
-    ],
+
     [
         'text' => 'Reservas',
         'route'  => 'admin.reservas.index',
@@ -421,6 +416,45 @@ return [
                 'icon'  => 'fas fa-cash-register',
                 'can'   => 'menu-empleado',
             ],
+        ],
+    ],
+
+    // ===================== CONFIGURACIÓN =====================
+    ['header' => 'CONFIGURACIÓN', 'can' => 'menu-admin'],
+    [
+        'text' => 'Configuración',
+        'icon' => 'fas fa-cog',
+        'can' => 'menu-admin',
+        'submenu' => [
+            [
+                'text' => 'Empleados',
+                'route' => 'admin.empleados.index',
+                'icon' => 'fas fa-users',
+                'can' => 'menu-admin',
+            ],
+            [
+                'text' => 'Servicios',
+                'route' => 'admin.servicios.index',
+                'icon' => 'fas fa-scissors',
+                'can' => 'menu-admin',
+            ],
+        ],
+    ],
+
+    // ===================== OPCIONES PARA EMPLEADO (CONFIG) =====================
+    ['header' => 'CONFIGURACIÓN', 'can' => 'menu-empleado'],
+    [
+        'text' => 'Configuración',
+        'icon' => 'fas fa-cog',
+        'can' => 'menu-empleado',
+        'submenu' => [
+            [
+                'text' => 'Servicios',
+                'route' => 'empleado.servicios.index',
+                'icon' => 'fas fa-scissors',
+                'can' => 'menu-empleado',
+            ],
+
         ],
     ],
 

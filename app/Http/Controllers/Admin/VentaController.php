@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Log;
 
 
@@ -47,7 +48,7 @@ public function store(Request $request)
 {
     DB::beginTransaction();
     
-    try {
+        try {
         $data = $request->all();
         $items = $data['items'] ?? [];
 
@@ -55,12 +56,39 @@ public function store(Request $request)
             return response()->json(['error' => 'No hay productos en la venta'], 400);
         }
 
+        // Si se pasó nombre/correo de cliente, intentar crear o encontrar usuario
+        $clienteId = $data['cliente_id'] ?? null;
+        if (!$clienteId && !empty($data['cliente_nombre'])) {
+            // buscar por correo si fue provisto
+            $user = null;
+            if (!empty($data['cliente_correo'])) {
+                $user = Usuario::where('correo', $data['cliente_correo'])->first();
+            }
+            if (!$user) {
+                // crear usuario mínimo
+                $parts = preg_split('/\s+/', trim($data['cliente_nombre']), 2);
+                $nombre = $parts[0] ?? trim($data['cliente_nombre']);
+                $apellido = $parts[1] ?? '';
+                $correo = $data['cliente_correo'] ?? ('cliente+' . time() . '@example.test');
+                $user = Usuario::create([
+                    'nombre' => $nombre,
+                    'apellido_paterno' => $apellido,
+                    'correo' => $correo,
+                    'contrasenia' => \Illuminate\Support\Str::random(12),
+                    'rol' => 'cliente',
+                    'estado' => 1,
+                    'creado_en' => now(),
+                ]);
+            }
+            $clienteId = $user->id ?? null;
+        }
+
         // Generar código único para la venta
         $codigo = 'V-' . date('Ymd') . '-' . strtoupper(Str::random(6));
 
         // Crear la venta
         $venta = Venta::create([
-            'usuario_id' => $data['cliente_id'] ?? null,
+            'usuario_id' => $clienteId,
             'empleado_id' => auth()->id(),
             'estado' => 'completada',
             'metodo_pago' => $data['metodo_pago'] ?? 'efectivo',

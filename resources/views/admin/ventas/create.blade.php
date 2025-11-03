@@ -97,7 +97,15 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label class="form-label">Método de Pago</label>
+                    <label class="form-label">Nombre del Cliente (opcional)</label>
+                    <input type="text" id="cliente-nombre" class="form-control" placeholder="Nombre del cliente para el ticket">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Correo del Cliente (opcional)</label>
+                    <input type="email" id="cliente-correo" class="form-control" placeholder="Correo del cliente (opcional)">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"></label>Método de Pago</label>
                     <select id="metodo-pago" class="form-select">
                         <option value="efectivo">Efectivo</option>
                         <option value="qr">QR</option>
@@ -289,6 +297,8 @@ document.addEventListener('DOMContentLoaded', function(){
         const payload = {
             metodo_pago: document.getElementById('metodo-pago').value,
             referencia_pago: document.getElementById('referencia-pago').value || null,
+            cliente_nombre: document.getElementById('cliente-nombre').value || null,
+            cliente_correo: document.getElementById('cliente-correo').value || null,
             items: items
         };
         

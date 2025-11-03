@@ -78,7 +78,7 @@ class Venta extends Model
     // Accesores
     public function getTotalFormateadoAttribute()
     {
-        return '$ ' . number_format($this->total, 2);
+        return 'Bs ' . number_format($this->total, 2);
     }
 
     public function getFechaFormateadaAttribute()

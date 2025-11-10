@@ -16,12 +16,13 @@ class VerifyEmailCustom extends VerifyEmailNotification
     {
         $verificationUrl = $this->verificationUrl($notifiable);
 
+        // Usar una vista HTML personalizada para dar estilo al correo
         return (new MailMessage)
-            ->subject('Verifica tu dirección de correo')
-            ->line('Haz clic en el botón para verificar tu cuenta.')
-            ->action('Verificar correo', $verificationUrl)
-            ->line($verificationUrl)
-            ->line('Si no creaste esta cuenta, ignora este correo.');
+            ->subject('Verifica tu correo en Barbe Shop')
+            ->view('emails.verify', [
+                'url' => $verificationUrl,
+                'notifiable' => $notifiable,
+            ]);
     }
 
     /**

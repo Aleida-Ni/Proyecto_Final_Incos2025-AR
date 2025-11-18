@@ -653,18 +653,41 @@
     });
 
 function cerrarTicket() {
-    const modal = document.getElementById('modalTicketRecienCreado');
-    if (modal) {
-        modal.style.display = 'none';
-        // Limpiar la sesión para que no se muestre al recargar
-        fetch('{{ route("cliente.limpiar.sesion.ticket") }}', { // ← Agregar "cliente."
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        });
+    const modalEl = document.getElementById('modalTicketRecienCreado');
+    if (!modalEl) return;
+
+    // Intentar cerrar con la API de Bootstrap
+    try {
+        const bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        bsModal.hide();
+    } catch (err) {
+        // Ignorar, proceder a quitar el modal manualmente
     }
+
+    // Remover el modal y backdrop del DOM para evitar problemas de z-index/scroll
+    setTimeout(() => {
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        if (modalEl.parentNode) modalEl.parentNode.removeChild(modalEl);
+        document.body.classList.remove('modal-open');
+    }, 200);
+
+    // Limpiar la sesión en el servidor para que el ticket no reaparezca al recargar
+    fetch('{{ route("cliente.limpiar.sesion.ticket") }}', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    }).then(response => {
+        if (!response.ok) {
+            console.warn('La petición para limpiar la sesión del ticket devolvió estado', response.status);
+        }
+    }).catch(err => {
+        console.error('No se pudo limpiar la sesión del ticket:', err);
+    });
 }
 
     async function descargarTicketRecienCreado() {
@@ -710,7 +733,6 @@ function cerrarTicket() {
         }
     }
 
-    // Cerrar modal al hacer click fuera
     document.addEventListener('click', function(e) {
         const modal = document.getElementById('modalTicketRecienCreado');
         if (modal && e.target === modal) {
@@ -718,7 +740,6 @@ function cerrarTicket() {
         }
     });
 
-    // Cerrar con ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             cerrarTicket();

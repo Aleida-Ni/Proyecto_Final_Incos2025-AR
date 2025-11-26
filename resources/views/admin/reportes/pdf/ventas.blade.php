@@ -6,21 +6,21 @@
     <style>
         /* Estilos compatibles con DomPDF */
         @page { margin: 20mm }
-        body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #222; font-size: 12px; }
+        body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; color: #000; font-size: 12px; }
         .container { width: 100%; margin: 0 auto; }
         .brand { display: flex; align-items: center; gap: 12px; }
-        .brand img { height: 48px; }
-        .brand h2 { margin: 0; font-size: 18px; color: #0b5ed7; }
-        .meta { text-align: right; font-size: 11px; color: #555; }
+        .brand img { height: 48px; filter: grayscale(100%); }
+        .brand h2 { margin: 0; font-size: 18px; color: #000; }
+        .meta { text-align: right; font-size: 11px; color: #222; }
         .metrics { display: flex; gap: 12px; margin-top: 12px; margin-bottom: 14px; }
-        .metric { background: #f8fafc; padding: 8px 12px; border-radius: 6px; flex: 1; }
+        .metric { background: #ffffff; padding: 8px 12px; border-radius: 6px; flex: 1; border: 1px solid #e6e9ee; }
         table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        th, td { border: 1px solid #e6e9ef; padding: 8px; vertical-align: top; }
-        th { background: #f1f5f9; font-weight: 600; font-size: 11px; }
-        td { font-size: 11px; }
+        th, td { border: 1px solid #d1d5db; padding: 8px; vertical-align: top; }
+        th { background: #f7fafc; font-weight: 600; font-size: 11px; color: #000; }
+        td { font-size: 11px; color: #111; }
         .right { text-align: right; }
-        .small { font-size: 10px; color: #666; }
-        .footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 10px; color: #666; }
+        .small { font-size: 10px; color: #444; }
+        .footer { position: fixed; bottom: 10mm; left: 0; right: 0; text-align: center; font-size: 10px; color: #444; }
     </style>
 </head>
 <body>

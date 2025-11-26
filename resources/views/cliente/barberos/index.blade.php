@@ -485,35 +485,36 @@
     }
     
     .ticket-container {
-        background: white;
-        font-family: 'Courier New', monospace, sans-serif;
-        max-width: 300px;
+        background: #ffffff;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        max-width: 320px;
         margin: 0 auto;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
     }
 
     .ticket-header {
-        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
-        color: var(--color-negro);
-        padding: 15px 10px;
+        background: transparent;
+        color: #111827;
+        padding: 12px 10px;
+        border-bottom: 1px solid #eef2f6;
     }
 
     .ticket-body {
-        background: white;
-        padding: 15px 10px;
+        background: #ffffff;
+        padding: 12px 10px;
     }
 
     .ticket-footer {
-        background: #f8f9fa;
-        border-top: 2px dashed #dee2e6;
-        padding: 15px 10px;
+        background: #fafafa;
+        border-top: 1px solid #eef2f6;
+        padding: 12px 10px;
     }
 
     .ticket-divider {
-        height: 3px;
-        background: var(--color-negro);
-        width: 85%;
-        margin: 12px auto;
+        height: 1px;
+        background: #e6e9ee;
+        width: 90%;
+        margin: 10px auto;
         border: none;
     }
 

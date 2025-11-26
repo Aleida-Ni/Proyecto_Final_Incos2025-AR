@@ -272,9 +272,9 @@
     </div>
 </div>
 
-<!-- Modal Ticket -->
+<!-- Modal Ticket (confirmación) -->
 <div class="modal fade" id="modalTicket" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-dorado">
                 <h5 class="modal-title text-negro fw-bold">
@@ -282,8 +282,8 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
-                <div id="ticket-content" class="ticket-confirmacion">
+            <div class="modal-body p-3">
+                <div id="ticket-content" class="ticket-confirmacion" style="padding:12px;">
                     <!-- Contenido dinámico del ticket -->
                 </div>
             </div>
@@ -396,41 +396,43 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
+    /* Versión profesional: quitar amarillo/dorado y usar paleta neutra */
     .bg-dorado {
-        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%) !important;
+        background: transparent !important;
     }
 
     .text-negro {
-        color: var(--color-negro) !important;
+        color: #111827 !important;
     }
 
     .btn-custom {
-        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
-        color: var(--color-negro);
+        background: #111827;
+        color: #ffffff;
         border: none;
-        border-radius: 20px;
-        padding: 10px 25px;
+        border-radius: 12px;
+        padding: 8px 18px;
         font-weight: 600;
     }
 
     .btn-outline-custom {
-        border: 2px solid var(--color-dorado);
-        color: var(--color-dorado);
+        border: 1px solid #d1d5db;
+        color: #374151;
         background: transparent;
-        border-radius: 20px;
-        padding: 10px 25px;
+        border-radius: 12px;
+        padding: 8px 18px;
         font-weight: 600;
     }
 
     .ticket-confirmacion {
-        background: var(--color-blanco);
-        border-radius: 15px;
-        padding: 20px;
-        border: 2px solid var(--color-dorado);
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid #e6e9ee;
     }
 
     .reserva-detalle {
-        border-left: 4px solid var(--color-dorado);
+        border-left: 3px solid #e6e9ee;
+        padding-left: 10px;
     }
 </style>
 

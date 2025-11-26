@@ -67,30 +67,29 @@
 <style>
     :root {
         --color-blanco: #FFFFFF;
-        --color-negro: #000000;
-        --color-dorado: #D4AF37;
-        --color-dorado-claro: #F4E4A8;
-        --color-beige: #F5F5DC;
-        --color-beige-oscuro: #E8E4D5;
-        --color-gris-oscuro: #2C2C2C;
-        --color-gris-medio: #4A4A4A;
+        --color-negro: #0b0b0b;
+        --color-primario: #111827; /* acento oscuro */
+        --color-fondo: #f8fafc;
+        --color-gris-claro: #e6e9ee;
+        --color-gris-medio: #6b7280;
     }
 
     body {
-        background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-blanco) 100%) !important;
+        background: var(--color-fondo) !important;
     }
 
     .ticket-card {
-        border-radius: 20px;
-        border: 2px solid var(--color-dorado);
+        border-radius: 12px;
+        border: 1px solid var(--color-gris-claro);
         overflow: hidden;
+        background: var(--color-blanco);
     }
 
     .ticket-header {
-        background: linear-gradient(135deg, var(--color-negro) 0%, var(--color-gris-oscuro) 100%);
-        color: var(--color-blanco);
-        border-bottom: 3px solid var(--color-dorado);
-        padding: 20px;
+        background: transparent;
+        color: var(--color-primario);
+        border-bottom: 1px solid var(--color-gris-claro);
+        padding: 16px;
     }
 
     .ticket-info {
@@ -120,38 +119,38 @@
     }
 
     .barbero-img-ticket {
-        max-height: 150px;
-        border: 3px solid var(--color-dorado);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        max-height: 140px;
+        border: 1px solid var(--color-gris-claro);
+        box-shadow: 0 6px 16px rgba(11,11,11,0.06);
     }
 
     .btn-custom {
-        background: linear-gradient(135deg, var(--color-dorado) 0%, var(--color-dorado-claro) 100%);
-        color: var(--color-negro);
+        background: var(--color-primario);
+        color: #ffffff;
         border: none;
-        border-radius: 10px;
-        padding: 12px 20px;
+        border-radius: 8px;
+        padding: 10px 18px;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: all 0.18s ease;
     }
 
     .btn-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(17,24,39,0.06);
     }
 
     .btn-outline-custom {
-        border: 2px solid var(--color-dorado);
-        color: var(--color-dorado);
+        border: 1px solid var(--color-gris-claro);
+        color: var(--color-gris-medio);
         background: transparent;
-        border-radius: 10px;
-        padding: 12px 20px;
+        border-radius: 8px;
+        padding: 10px 18px;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: all 0.18s ease;
     }
 
     .btn-outline-custom:hover {
-        background: var(--color-dorado);
+        background: var(--color-gris-claro);
         color: var(--color-negro);
     }
 

@@ -672,7 +672,6 @@ function cerrarTicket() {
         document.body.classList.remove('modal-open');
     }, 200);
 
-    // Limpiar la sesión en el servidor para que el ticket no reaparezca al recargar
     fetch('{{ route("cliente.limpiar.sesion.ticket") }}', {
         method: 'POST',
         credentials: 'same-origin',
